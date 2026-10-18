@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Hiệu Suất CSKH247 - Cảng Hải Phòng (Tích Hợp Ngày & Tuần)</title>
+    <title>Dashboard Hiệu Suất CSKH247 - Cảng Hải Phòng</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,8 +12,11 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0b0f19',
-                        slate: { 850: '#0f172a', 900: '#0b0f19', 950: '#05070e' }
+                        slate: {
+                            850: '#0f172a',
+                            900: '#0b0f19',
+                            950: '#05070e'
+                        }
                     }
                 }
             }
@@ -33,59 +36,46 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .glass-input {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .glass-input:focus { border-color: rgba(59, 130, 246, 0.6); outline: none; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #05070e; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- HEADER & SWITCH VIEW TOOLBAR -->
-    <header class="glass-card sticky top-0 z-50 px-6 py-3.5 border-b border-slate-800/80 backdrop-blur-md">
-        <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+    <!-- HEADER & TOOLBAR -->
+    <header class="bg-slate-900/90 border-b border-slate-800/80 sticky top-0 z-50 backdrop-blur-md px-4 py-3">
+        <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xl">
                     <i class="fa-solid fa-ship"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold tracking-tight text-white">TRUNG TÂM KHAI THÁC & DỊCH VỤ KHÁCH HÀNG</h1>
-                    <p class="text-xs text-slate-400">Hệ Thống Báo Cáo Hiệu Suất CSKH247 - Cloud Supabase</p>
+                    <h1 class="text-base font-bold tracking-tight text-white">TRUNG TÂM KHAI THÁC & DỊCH VỤ KHÁCH HÀNG </h1>
+                    <p class="text-xs text-slate-400">Báo cáo hiệu suất CSKH247 - Lưu trữ Cloud Supabase</p>
                 </div>
             </div>
 
-            <!-- TAB SWITCHER: CHUYỂN ĐỔI GIỮA XEM THEO NGÀY & XEM THEO TUẦN -->
-            <div class="flex items-center p-1 bg-slate-900/90 border border-slate-800 rounded-xl shadow-inner">
-                <button id="btn-tab-day" onclick="switchViewMode('day')" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 bg-blue-600 text-white shadow-md">
-                    <i class="fa-solid fa-calendar-day"></i> Xem Theo Ngày
+            <!-- Action Toolbar -->
+            <div class="flex flex-wrap items-center gap-2">
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
+                <button onclick="document.getElementById('excelFileInput').click()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                    <i class="fa-solid fa-file-excel"></i> Nạp File Excel Ngày Mới
                 </button>
-                <button id="btn-tab-week" onclick="switchViewMode('week')" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-calendar-week"></i> Xem Theo Tuần
-                </button>
-            </div>
+                
+                <!-- Xóa dữ liệu theo ngày chọn (có mật khẩu bảo vệ) -->
+                <div class="flex items-center gap-1 bg-slate-800/80 border border-slate-700/80 rounded-xl p-1">
+                    <select id="deleteDateSelect" class="bg-slate-900 text-slate-200 text-xs rounded-lg px-2 py-1 focus:outline-none border border-slate-700">
+                        <!-- Render các ngày hiện có -->
+                    </select>
+                    <button onclick="deleteSelectedDate()" class="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs font-semibold transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Xóa Ngày Này
+                    </button>
+                </div>
 
-            <!-- Toolbar phụ thuộc vào Mode -->
-            <div id="toolbar-day" class="flex flex-wrap items-center gap-2">
-                <input type="file" id="excelFileInputDay" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImportDay(event)">
-                <button onclick="document.getElementById('excelFileInputDay').click()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
-                    <i class="fa-solid fa-file-excel"></i> Nạp File Ngày Mới
-                </button>
-                <button onclick="exportToExcelDay()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Xuất Excel Ngày
-                </button>
-            </div>
-
-            <div id="toolbar-week" class="flex flex-wrap items-center gap-2 hidden">
-                <label class="cursor-pointer px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Nạp/Backup File Tuần
-                    <input type="file" id="excelFileInputWeek" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUploadWeek(event)">
-                </label>
-                <button onclick="exportDatabaseWeek()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Xuất Backup Tuần
+                <button onclick="exportToExcel()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Xuất Excel/CSV
                 </button>
             </div>
         </div>
@@ -93,18 +83,21 @@
 
     <!-- STATUS BANNER -->
     <div class="bg-slate-900/50 border-b border-slate-800/60 py-2 px-4 text-xs text-slate-400">
-        <div class="max-w-[1700px] mx-auto flex justify-between items-center">
+        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <span id="syncDot" class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="statusBannerText">Đang kết nối đến Supabase Cloud...</span>
             </div>
-            <div id="lastUpdatedText" class="text-slate-400 font-medium">Cập nhật lần cuối: --</div>
+            <div id="lastUpdatedText" class="text-slate-400 font-medium">
+                Cập nhật lần cuối: --
+            </div>
         </div>
     </div>
 
-    <!-- ================= VIEW 1: XEM THEO NGÀY ================= -->
-    <div id="view-container-day" class="max-w-[1700px] mx-auto px-4 py-5 flex-1 w-full space-y-5">
-        <!-- Bộ lọc ngày -->
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="max-w-[1600px] mx-auto px-4 py-5 flex-1 w-full space-y-5">
+
+        <!-- BỘ LỌC THỜI GIAN VÀ ĐƠN VỊ -->
         <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3">
                 <div class="flex items-center space-x-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1.5">
@@ -119,17 +112,22 @@
                     <span class="text-xs text-slate-400">Đến:</span>
                     <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
                 </div>
-                <button onclick="clearDateFilter()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">Xóa Lọc</button>
+                <button onclick="clearDateFilter()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">
+                    Xóa Lọc Ngày
+                </button>
             </div>
+
             <div class="flex items-center gap-2">
                 <button onclick="setQuickFilter('7')" id="btn-quick-7" class="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-medium border border-blue-500 transition">7 ngày gần nhất</button>
+                <button onclick="setQuickFilter('14')" id="btn-quick-14" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">14 ngày gần nhất</button>
                 <button onclick="setQuickFilter('all')" id="btn-quick-all" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">Tất cả lịch sử</button>
             </div>
         </div>
 
-        <!-- KPI Cards Ngày -->
+        <!-- KPI CARDS SECTION -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="glass-card p-4 rounded-2xl flex flex-col justify-between">
+            <!-- Card 1: YÊU CẦU CRM -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">YÊU CẦU CRM</span>
@@ -139,9 +137,12 @@
                 </div>
                 <div class="flex justify-between items-center mt-4 text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
                     <span id="kpiCrmAvg" class="text-emerald-400 font-semibold">TB: --/ngày</span>
+                    <span class="text-slate-400">Lịch sử</span>
                 </div>
             </div>
-            <div class="glass-card p-4 rounded-2xl flex flex-col justify-between">
+
+            <!-- Card 2: TIN NHẮN ZALO OA -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">TIN NHẮN ZALO OA</span>
@@ -150,10 +151,19 @@
                     <div id="kpiZaloMsgValue" class="text-3xl font-extrabold text-white mt-2">--</div>
                 </div>
                 <div class="space-y-1 mt-3 pt-2 border-t border-slate-800/80 text-[11px]">
-                    <div class="flex justify-between"><span class="text-slate-400">Tỷ lệ phản hồi:</span><span id="kpiZaloRate" class="text-cyan-400 font-semibold">--%</span></div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Tỷ lệ phản hồi:</span>
+                        <span id="kpiZaloRate" class="text-cyan-400 font-semibold">--%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">TG phản hồi đầu:</span>
+                        <span id="kpiZaloTime" class="text-cyan-400 font-semibold">-- phút</span>
+                    </div>
                 </div>
             </div>
-            <div class="glass-card p-4 rounded-2xl flex flex-col justify-between">
+
+            <!-- Card 3: CUỘC GỌI TỔNG ĐÀI -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">CUỘC GỌI TỔNG ĐÀI</span>
@@ -163,9 +173,12 @@
                 </div>
                 <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
                     <span id="kpiCallsMissed" class="text-rose-400 font-semibold">Lỡ: --</span>
+                    <span id="kpiCallsAnswered" class="text-emerald-400 font-semibold">Nhấc máy: --%</span>
                 </div>
             </div>
-            <div class="glass-card p-4 rounded-2xl flex flex-col justify-between">
+
+            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">KHẢO SÁT WEB & CSAT</span>
@@ -175,9 +188,12 @@
                 </div>
                 <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
                     <span id="kpiWebScore" class="text-amber-400 font-semibold">Web: --</span>
+                    <span id="kpiCsatZalo" class="text-emerald-400 font-semibold">CSAT Zalo: --%</span>
                 </div>
             </div>
-            <div class="glass-card p-4 rounded-2xl flex flex-col justify-between">
+
+            <!-- Card 5: THOẠI & CHỜ TB -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300">THOẠI & CHỜ TB</span>
@@ -186,185 +202,554 @@
                     <div id="kpiTalkTime" class="text-3xl font-extrabold text-white mt-2">--s</div>
                 </div>
                 <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
-                    <span class="text-slate-400">Thời gian chờ:</span><span id="kpiWaitTime" class="text-purple-400 font-semibold">--s</span>
+                    <span class="text-slate-400">Thời gian chờ:</span>
+                    <span id="kpiWaitTime" class="text-purple-400 font-semibold">--s</span>
                 </div>
             </div>
         </div>
 
-        <!-- Biểu đồ & Ma trận Ngày -->
+        <!-- ROW 1: BIỂU ĐỒ XU HƯỚNG & TOP VẤN ĐỀ -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col">
-                <h2 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-chart-line text-blue-400 mr-2"></i>Biểu Đồ Xu Hướng Hiệu Suất Theo Ngày</h2>
-                <div class="relative flex-1 w-full min-h-[300px]"><canvas id="trendChartDay"></canvas></div>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-400"></i>
+                            Biểu Đồ Xu Hướng Hiệu Suất Tổng Hợp
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Có thể lựa chọn nhiều kiểu xem</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex gap-1">
+                        <button onclick="setChartType('bar')" id="btn-chart-bar" class="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition">Dạng Cột (Bar)</button>
+                        <button onclick="setChartType('line')" id="btn-chart-line" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Dạng Đường (Line)</button>
+                    </div>
+                </div>
+                <div class="relative flex-1 w-full min-h-[300px]">
+                    <canvas id="trendChart"></canvas>
+                </div>
             </div>
+
             <div class="glass-card p-5 rounded-2xl flex flex-col">
-                <h2 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i>Top Vấn Đề Phản Ánh</h2>
-                <div class="relative flex-1 w-full min-h-[260px] flex items-center justify-center"><canvas id="categoryChartDay"></canvas></div>
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                            Top Vấn Đề Phản Ánh
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Phân bổ nhóm vấn đề theo kỳ lọc</p>
+                    </div>
+                    <select id="pieLimitSelect" onchange="updatePieChart()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none">
+                        <option value="3">Top 3</option>
+                        <option value="5" selected>Top 5</option>
+                        <option value="7">Top 7</option>
+                        <option value="all">Tất cả</option>
+                    </select>
+                </div>
+                <div class="relative flex-1 w-full min-h-[260px] flex items-center justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
         </div>
 
+        <!-- ROW 2: SO SÁNH ĐƠN VỊ & ZALO OA -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-indigo-400"></i>
+                            So Sánh Hiệu Suất Theo Đơn Vị
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Đối chiếu Cuộc gọi và Yêu cầu CRM giữa các cảng theo từng ngày</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex gap-1">
+                        <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition">Cột (Bar)</button>
+                        <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Đường (Line)</button>
+                        <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Vùng (Area)</button>
+                    </div>
+                </div>
+                <div class="relative flex-1 w-full min-h-[260px]">
+                    <canvas id="unitChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen text-cyan-400"></i>
+                            Chi Tiết Kênh Zalo OA
+                        </h2>
+                        <span class="px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-semibold">Cloud Sync</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="text-[11px] text-slate-400 uppercase font-semibold">NGƯỜI QUAN TÂM</div>
+                            <div id="zaloTotalFollowers" class="text-2xl font-black text-cyan-400 mt-1">--</div>
+                            <div class="text-[10px] text-slate-500 mt-1">Tổng tích lũy</div>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="text-[11px] text-slate-400 uppercase font-semibold">QUAN TÂM MỚI</div>
+                            <div id="zaloNewFollowers" class="text-2xl font-black text-emerald-400 mt-1">--</div>
+                            <div class="text-[10px] text-slate-500 mt-1">Trong kỳ chọn</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-xl flex justify-between items-center">
+                            <span class="text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-user-minus text-rose-400 text-xs"></i> Bỏ quan tâm:
+                            </span>
+                            <span id="zaloUnfollow" class="font-bold text-rose-400">--</span>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-xl flex justify-between items-center">
+                            <span class="text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane text-blue-400 text-xs"></i> Lượt trả lời / tin gửi:
+                            </span>
+                            <span id="zaloReplyRate" class="font-bold text-blue-400">--%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500 mt-4">
+                    <span>Nguồn: Supabase Cloud</span>
+                    <span class="text-emerald-400 font-medium">Hoạt động tốt</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATRIX TABLE SECTION -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-sm font-bold text-white"><i class="fa-solid fa-table-cells text-amber-400 mr-2"></i>Bảng Thống Kê Chi Tiết Nhóm Vấn Đề Theo Ngày</h2>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-amber-400"></i>
+                        Bảng Thống Kê Chi Tiết Nhóm Vấn Đề Phản Ánh Theo Ngày
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Ma trận dữ liệu tự động thay đổi theo khoảng thời gian lọc</p>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900/90 border border-slate-700 text-xs rounded-xl pl-8 pr-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
             <div class="overflow-x-auto rounded-xl border border-slate-800">
                 <table class="w-full text-left border-collapse text-xs">
-                    <thead><tr id="matrixTableHeaderDay" class="bg-slate-900/90 text-slate-400 border-b border-slate-800"><th class="p-3 font-bold text-slate-200">NHÓM VẤN ĐỀ</th></tr></thead>
-                    <tbody id="matrixTableBodyDay" class="divide-y divide-slate-800/60 text-slate-300"></tbody>
+                    <thead>
+                        <tr id="matrixTableHeader" class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                            <th class="p-3 font-bold text-slate-200 min-w-[280px]">NHÓM VẤN ĐỀ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                    </tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- ================= VIEW 2: XEM THEO TUẦN ================= -->
-    <div id="view-container-week" class="max-w-[1700px] mx-auto px-4 py-5 flex-1 w-full space-y-5 hidden">
-        <!-- Bộ lọc tuần -->
-        <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-calendar-week text-indigo-400"></i>
-                    <span>Bộ lọc kỳ báo cáo tuần:</span>
-                </span>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs text-slate-400">Từ tuần:</span>
-                    <select id="filter-start-week" onchange="applyWeekFilter()" class="glass-input text-xs rounded-xl px-3 py-2 text-slate-200"></select>
-                    <span class="text-xs text-slate-400">đến tuần:</span>
-                    <select id="filter-end-week" onchange="applyWeekFilter()" class="glass-input text-xs rounded-xl px-3 py-2 text-slate-200"></select>
-                </div>
-                <div id="filter-date-badge" class="px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">--</div>
-            </div>
-            <button onclick="setQuickWeekFilter(7)" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white transition">7 tuần gần nhất</button>
-        </div>
-
-        <!-- KPI Cards Tuần -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-xs font-medium text-slate-400">Tổng Yêu Cầu (CRM)</p>
-                <h3 id="kpi-crm-week" class="text-xl font-bold text-slate-100 mt-1">--</h3>
-                <span id="kpi-crm-avg-week" class="text-xs text-emerald-400 font-medium">TB/tuần: --</span>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-xs font-medium text-slate-400">Lượt Tin Nhắn Zalo</p>
-                <h3 id="kpi-zalo-week" class="text-xl font-bold text-slate-100 mt-1">--</h3>
-                <span id="kpi-zalo-rate-week" class="text-xs text-indigo-300 font-medium">Tỷ lệ PH: --%</span>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-xs font-medium text-slate-400">Cuộc Gọi Đến Tổng Đài</p>
-                <h3 id="kpi-calls-week" class="text-xl font-bold text-slate-100 mt-1">--</h3>
-                <span id="kpi-missed-week" class="text-xs text-rose-400 font-medium">Số cuộc lỡ: --</span>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-xs font-medium text-purple-300">Khảo Sát (Web / App)</p>
-                <h3 id="kpi-survey-ratio-week" class="text-xl font-bold text-slate-100 mt-1">0 / 0</h3>
-                <span id="kpi-survey-web-week" class="text-xs text-blue-400 font-medium">Web: 0/50</span>
-            </div>
-        </div>
-
-        <!-- Biểu đồ & Ma trận Tuần -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col">
-                <h2 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-chart-area text-indigo-400 mr-2"></i>Xu Hướng Tổng Hợp Theo Tuần</h2>
-                <div class="relative flex-1 w-full min-h-[300px]"><canvas id="trendChartWeek"></canvas></div>
-            </div>
-            <div class="glass-card p-5 rounded-2xl flex flex-col">
-                <h2 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i>Phân Bổ Vấn Đề Tuần</h2>
-                <div class="relative flex-1 w-full min-h-[260px] flex items-center justify-center"><canvas id="issueDonutChartWeek"></canvas></div>
-            </div>
-        </div>
-
+        <!-- PHẦN MỚI: NHẬT KÝ VẬN HÀNH SỰ CỐ -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
-            <h2 class="text-sm font-bold text-white"><i class="fa-solid fa-table-cells text-indigo-400 mr-2"></i>Bảng Ma Trận Chi Tiết Theo Tuần</h2>
-            <div class="overflow-x-auto rounded-xl border border-slate-800 max-h-[400px]">
-                <table class="w-full text-left text-xs text-slate-300 border-collapse">
-                    <thead id="matrix-thead-week" class="bg-slate-900 text-slate-300 uppercase sticky top-0 z-20 border-b border-slate-800"></thead>
-                    <tbody id="matrix-tbody-week" class="divide-y divide-slate-800/60 bg-slate-900/30"></tbody>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                        Nhật Ký Vận Hành Sự Cố & Khắc Phục
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Theo dõi lịch sử sự cố, thời gian gián đoạn và đơn vị chịu trách nhiệm</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <!-- Bộ lọc theo khoảng ngày cho Nhật ký sự cố -->
+                    <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                        <span class="text-xs text-slate-400">Từ:</span>
+                        <input type="date" id="incidentFilterStart" onchange="renderIncidentTable()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                        <span class="text-xs text-slate-400">Đến:</span>
+                        <input type="date" id="incidentFilterEnd" onchange="renderIncidentTable()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                    </div>
+                    <button onclick="clearIncidentFilter()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">
+                        Xóa Lọc
+                    </button>
+                    
+                    <!-- Nút mở Modal Thêm mới sự cố -->
+                    <button onclick="openIncidentModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-rose-600/25">
+                        <i class="fa-solid fa-plus"></i> Thêm sự cố mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                            <th class="p-3 font-bold text-slate-200">NGÀY SỰ CỐ</th>
+                            <th class="p-3 font-bold text-slate-200">NGÀY KHẮC PHỤC</th>
+                            <th class="p-3 font-bold text-center text-rose-400">TỔNG GIỜ</th>
+                            <th class="p-3 font-bold text-slate-200 min-w-[300px]">NỘI DUNG SỰ CỐ</th>
+                            <th class="p-3 font-bold text-slate-200">ĐƠN VỊ / BỘ PHẬN</th>
+                            <th class="p-3 font-bold text-center text-slate-200">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidentTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- Dữ liệu render động -->
+                    </tbody>
                 </table>
             </div>
         </div>
-    </div>
+
+    </main>
 
     <!-- FOOTER -->
     <footer class="bg-slate-900/40 border-t border-slate-800/80 py-4 mt-auto text-center text-xs text-slate-500">
         <p>Trung Tâm Khai Thác & Dịch Vụ Khách Hàng - Cảng Hải Phòng © 2026</p>
     </footer>
 
-    <!-- SCRIPT TÍCH HỢP 2 DATABASE SUPABASE & 2 CHẾ ĐỘ XEM -->
+    <!-- CỬA SỔ MODAL (MESSENGER PHỤ) NHẬP/SỬA SỰ CỐ -->
+    <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-rose-400"></i> Thêm Sự Cố Vận Hành Mới
+                </h3>
+                <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white transition text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Form -->
+            <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="incidentId">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Ngày Sự Cố *</label>
+                        <input type="date" id="incDate" required class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Ngày Khắc Phục</label>
+                        <input type="date" id="incResolvedDate" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Tổng Thời Gian (Giờ)</label>
+                        <input type="number" step="0.1" id="incTotalHours" placeholder="VD: 2.5" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Đơn Vị / Bộ Phận *</label>
+                        <input type="text" id="incUnit" required placeholder="VD: Chi nhánh Cảng Tân Vũ" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Nội Dung Sự Cố Chi Tiết *</label>
+                    <textarea id="incContent" rows="3" required placeholder="Mô tả sự cố, nguyên nhân và hướng giải quyết..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl p-3 text-slate-200 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+
+                <!-- Modal Footer Buttons -->
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeIncidentModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        Hủy Bỏ
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition shadow-lg shadow-rose-600/20">
+                        Lưu Lại Sự Cố
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & SUPABASE CLOUD STORAGE LOGIC -->
     <script>
-        // --- 1. CẤU HÌNH SUPABASE CHO 2 PROJECT ĐỘC LẬP ---
-        const SUPABASE_URL_DAY = "https://mcbdazrdhdrinnpuxdys.supabase.co";
-        const SUPABASE_KEY_DAY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
+        const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
 
-        const SUPABASE_URL_WEEK = "https://xmecpfeujkvidwmqprzd.supabase.co";
-        const SUPABASE_KEY_WEEK = "sb_publishable_wK5FXrtBK7qPdmJ5fS1aag_gJ3Gdv3G";
+        const defaultDatabase = [
+            {
+                date: "14/09/2026",
+                kpi: { crm: 2992, zaloMsg: 388, zaloRate: 99.74, zaloTime: 0.6, calls: 19, callsMissed: 0, callsRate: 100, talkTime: 70.1, waitTime: 4.1 },
+                categories: {
+                    "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052,
+                    "Thông tin khai thác và tình trạng hàng hoá": 66, "Gia hạn lệnh lấy hàng": 56, "Các vấn đề về thủ tục Hải quan": 51,
+                    "Kiểm tra tình trạng thanh toán": 45, "Quy trình và thủ tục tại Cảng": 108, "Huỷ/điều chỉnh và các vđ hoá đơn": 99,
+                    "Dịch vụ Cảng biển": 37, "Biểu phí và các chính sách thanh toán": 22, "Dịch vụ chăm sóc khách hàng": 52,
+                    "Cơ sở hạ tầng và trang thiết bị": 1, "Hư hỏng hoặc mất mát hàng hóa": 0
+                },
+                units: {
+                    calls: { "Chi nhánh Cảng Tân Vũ": 17, "Cảng Hoàng Diệu Chùa Vẽ": 2 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 2971, "Cảng Hoàng Diệu Chùa Vẽ": 21 }
+                },
+                zaloDetails: { totalFollowers: 3324, newFollowers: 3, unfollowers: 0, replyRate: 99.74, csat: 0.99 },
+                surveys: { webCount: 0, webScore: "0/50" }
+            },
+            {
+                date: "15/09/2026",
+                kpi: { crm: 3520, zaloMsg: 400, zaloRate: 100, zaloTime: 1.5, calls: 25, callsMissed: 0, callsRate: 100, talkTime: 90, waitTime: 10 },
+                categories: {
+                    "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052,
+                    "Thông tin khai thác và tình trạng hàng hoá": 66, "Gia hạn lệnh lấy hàng": 56, "Các vấn đề về thủ tục Hải quan": 51,
+                    "Kiểm tra tình trạng thanh toán": 45, "Quy trình và thủ tục tại Cảng": 108, "Huỷ/điều chỉnh và các vđ hoá đơn": 99,
+                    "Dịch vụ Cảng biển": 37, "Biểu phí và các chính sách thanh toán": 22, "Dịch vụ chăm sóc khách hàng": 52,
+                    "Cơ sở hạ tầng và trang thiết bị": 1, "Hư hỏng hoặc mất mát hàng hóa": 0
+                },
+                units: {
+                    calls: { "Chi nhánh Cảng Tân Vũ": 20, "Cảng Hoàng Diệu Chùa Vẽ": 5 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 3500, "Cảng Hoàng Diệu Chùa Vẽ": 20 }
+                },
+                zaloDetails: { totalFollowers: 3350, newFollowers: 10, unfollowers: 0, replyRate: 100, csat: 1.0 },
+                surveys: { webCount: 1, webScore: "45/50" }
+            }
+        ];
 
-        let currentMode = 'day';
+        const defaultIncidents = [
+            {
+                id: "inc-1",
+                date: "2026-09-14",
+                resolvedDate: "2026-09-14",
+                totalHours: 1.5,
+                content: "Sự cố gián đoạn kết nối cổng Eport do lỗi đường truyền mạng nội bộ.",
+                unit: "Chi nhánh Cảng Tân Vũ"
+            },
+            {
+                id: "inc-2",
+                date: "2026-09-15",
+                resolvedDate: "2026-09-15",
+                totalHours: 0.5,
+                content: "Tổng đài viên báo cáo nghẽn cuộc gọi trong 30 phút giờ cao điểm sáng.",
+                unit: "Cảng Hoàng Diệu Chùa Vẽ"
+            }
+        ];
+
+        let database = [];
+        let filteredData = [];
+        let incidentsList = [];
+        let currentChartType = 'bar';
+        let currentUnitChartType = 'bar';
+        let trendChartInstance = null;
+        let categoryChartInstance = null;
+        let unitChartInstance = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            initChartsDay();
-            await loadDataDayFromSupabase();
-            await loadDataWeekFromSupabase();
-            switchViewMode('day');
+            try {
+                initCharts();
+                await loadDataFromSupabase();
+            } catch (err) {
+                console.error("Initialization error:", err);
+                database = JSON.parse(JSON.stringify(defaultDatabase));
+                incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                sortDatabase();
+                updateDeleteSelectOptions();
+                setQuickFilter('7');
+                renderIncidentTable();
+                updateLastUpdatedDisplay(new Date().toISOString());
+            }
         });
 
-        function switchViewMode(mode) {
-            currentMode = mode;
-            const btnDay = document.getElementById('btn-tab-day');
-            const btnWeek = document.getElementById('btn-tab-week');
-            const containerDay = document.getElementById('view-container-day');
-            const containerWeek = document.getElementById('view-container-week');
-            const toolbarDay = document.getElementById('toolbar-day');
-            const toolbarWeek = document.getElementById('toolbar-week');
+        function formatDisplayTimestamp(isoString) {
+            if (!isoString) return "--";
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${hours}:${minutes}:${seconds} - ${day}/${month}/${year}`;
+        }
 
-            if (mode === 'day') {
-                btnDay.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 bg-blue-600 text-white shadow-md";
-                btnWeek.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-400 hover:text-white";
-                containerDay.classList.remove('hidden');
-                containerWeek.classList.add('hidden');
-                toolbarDay.classList.remove('hidden');
-                toolbarWeek.classList.add('hidden');
-            } else {
-                btnWeek.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
-                btnDay.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-400 hover:text-white";
-                containerWeek.classList.remove('hidden');
-                containerDay.classList.add('hidden');
-                toolbarWeek.classList.remove('hidden');
-                toolbarDay.classList.add('hidden');
+        function updateLastUpdatedDisplay(isoString) {
+            const el = document.getElementById('lastUpdatedText');
+            if (el) {
+                el.innerText = `Cập nhật lần cuối: ${formatDisplayTimestamp(isoString)}`;
             }
         }
 
-        // ================= LOGIC XEM THEO NGÀY (PROJECT 1) =================
-        let databaseDay = [];
-        let filteredDataDay = [];
-        let trendChartDayInst = null;
-        let categoryChartDayInst = null;
+        function sortDatabase() {
+            database.sort((a, b) => {
+                const da = parseDateStandard(a.date);
+                const db = parseDateStandard(b.date);
+                if (!da || !db) return 0;
+                return da - db;
+            });
+        }
 
-        async function loadDataDayFromSupabase() {
+        function excelSerialToDate(serial) {
+            const utc_days = Math.floor(serial - 25569);
+            const utc_value = utc_days * 86400;
+            const date_info = new Date(utc_value * 1000);
+            
+            const day = String(date_info.getDate()).padStart(2, '0');
+            const month = String(date_info.getMonth() + 1).padStart(2, '0');
+            const year = date_info.getFullYear();
+            
+            return `${day}/${month}/${year}`;
+        }
+
+        function sanitizeDatabaseDates(data) {
+            let hasChanged = false;
+            data.forEach(item => {
+                let dStr = String(item.date).trim();
+                if (!isNaN(dStr) && Number(dStr) > 30000) {
+                    item.date = excelSerialToDate(Number(dStr));
+                    hasChanged = true;
+                }
+            });
+            return hasChanged;
+        }
+
+        async function loadDataFromSupabase() {
             try {
-                const response = await fetch(`${SUPABASE_URL_DAY}/rest/v1/cskh_daily_records?id=eq.1`, {
-                    headers: { "apikey": SUPABASE_KEY_DAY, "Authorization": `Bearer ${SUPABASE_KEY_DAY}` }
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records?id=eq.1`, {
+                    method: "GET",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    }
                 });
+
                 if (response.ok) {
                     const result = await response.json();
                     if (result && result.length > 0 && result[0].payload) {
-                        databaseDay = result[0].payload;
+                        database = result[0].payload;
+                        incidentsList = result[0].incidents || JSON.parse(JSON.stringify(defaultIncidents));
+                        const serverUpdatedAt = result[0].updated_at || new Date().toISOString();
+                        
+                        if (sanitizeDatabaseDates(database)) {
+                            await saveDataToSupabase();
+                        }
+
+                        sortDatabase();
+                        updateLastUpdatedDisplay(serverUpdatedAt);
                         document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
-                        document.getElementById('statusBannerText').innerText = "Đã kết nối Supabase Cloud (Xem Theo Ngày).";
+                        document.getElementById('statusBannerText').innerText = "Đã kết nối và đồng bộ dữ liệu thành công từ Supabase Cloud.";
+                    } else {
+                        database = JSON.parse(JSON.stringify(defaultDatabase));
+                        incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                        sortDatabase();
+                        await saveDataToSupabase();
                     }
+                } else {
+                    database = JSON.parse(JSON.stringify(defaultDatabase));
+                    incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                    sortDatabase();
+                    await saveDataToSupabase();
                 }
-            } catch (e) {
-                console.warn("Lỗi kết nối DB Ngày:", e);
+            } catch (err) {
+                console.warn("Lỗi tải Supabase, sử dụng dữ liệu mặc định:", err);
+                document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-amber-500";
+                document.getElementById('statusBannerText').innerText = "Sử dụng chế độ ngoại tuyến / Dữ liệu mặc định.";
+                database = JSON.parse(JSON.stringify(defaultDatabase));
+                incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                sortDatabase();
+                updateLastUpdatedDisplay(new Date().toISOString());
             }
-            if (databaseDay.length === 0) {
-                databaseDay = [
-                    { date: "14/09/2026", kpi: { crm: 2992, zaloMsg: 388, zaloRate: 99.74, zaloTime: 0.6, calls: 19, callsMissed: 0, callsRate: 100, talkTime: 70.1, waitTime: 4.1 }, categories: { "Duyệt lệnh Eport": 2052, "Thông tin liên hệ, Mã số thuế": 224 }, surveys: { webCount: 1, webScore: "45/50" }, zaloDetails: { totalFollowers: 3324 } },
-                    { date: "15/09/2026", kpi: { crm: 3520, zaloMsg: 400, zaloRate: 100, zaloTime: 1.5, calls: 25, callsMissed: 0, callsRate: 100, talkTime: 90, waitTime: 10 }, categories: { "Duyệt lệnh Eport": 2100, "Thông tin liên hệ, Mã số thuế": 230 }, surveys: { webCount: 2, webScore: "48/50" }, zaloDetails: { totalFollowers: 3350 } }
-                ];
-            }
+
+            updateDeleteSelectOptions();
             setQuickFilter('7');
+            renderIncidentTable();
         }
 
-        function setQuickFilter(type) {
-            if (type === 'all') filteredDataDay = [...databaseDay];
-            else filteredDataDay = databaseDay.slice(-parseInt(type));
-            updateDashboardDay();
+        async function saveDataToSupabase() {
+            sortDatabase();
+            const currentIsoTime = new Date().toISOString();
+            try {
+                const payload = { 
+                    id: 1, 
+                    payload: database, 
+                    incidents: incidentsList,
+                    updated_at: currentIsoTime 
+                };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Lỗi khi ghi dữ liệu lên Supabase.");
+                } else {
+                    updateLastUpdatedDisplay(currentIsoTime);
+                    document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
+                    document.getElementById('statusBannerText').innerText = "Đã đồng bộ dữ liệu lên Supabase Cloud thành công.";
+                }
+            } catch (err) {
+                console.error("Supabase save error:", err);
+            }
+        }
+
+        function updateDeleteSelectOptions() {
+            const select = document.getElementById('deleteDateSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            if (!database || database.length === 0) {
+                select.innerHTML = '<option value="">Không có ngày</option>';
+                return;
+            }
+            database.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.date;
+                opt.innerText = item.date;
+                select.appendChild(opt);
+            });
+        }
+
+        async function deleteSelectedDate() {
+            const dateToDelete = document.getElementById('deleteDateSelect').value;
+            if (!dateToDelete) {
+                alert("Không có ngày nào được chọn để xóa.");
+                return;
+            }
+
+            const passwordInput = prompt("Vui lòng nhập mật khẩu xác thực bảo mật để xóa dữ liệu:");
+            if (passwordInput === null) {
+                return;
+            }
+            if (passwordInput !== "6868") {
+                alert("Mật khẩu không chính xác! Thao tác xóa đã bị hủy.");
+                return;
+            }
+
+            if (confirm(`Bạn có chắc chắn muốn xóa dữ liệu ngày ${dateToDelete} trên Cloud?`)) {
+                database = database.filter(item => item.date !== dateToDelete);
+                sortDatabase();
+                await saveDataToSupabase();
+                updateDeleteSelectOptions();
+                applyDateFilter();
+                alert(`Đã xóa thành công ngày ${dateToDelete} trên Supabase Cloud.`);
+            }
+        }
+
+        function parseDateStandard(dateStr) {
+            if (!dateStr) return null;
+            let str = String(dateStr).trim();
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            if (str.includes('-')) {
+                const parts = str.split('-');
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+            return null;
+        }
+
+        function applyCustomDateFilter() {
+            setQuickFilterUI(null);
+            applyDateFilter();
         }
 
         function clearDateFilter() {
@@ -373,193 +758,777 @@
             setQuickFilter('7');
         }
 
-        function applyCustomDateFilter() {
+        function setQuickFilter(type) {
+            setQuickFilterUI(type);
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+
+            if (type === 'all') {
+                filteredData = [...database];
+            } else {
+                const n = parseInt(type);
+                filteredData = database.slice(-n);
+            }
+            updateDashboard();
+        }
+
+        function setQuickFilterUI(type) {
+            ['7', '14', 'all'].forEach(t => {
+                const btn = document.getElementById(`btn-quick-${t}`);
+                if (!btn) return;
+                if (t === type) {
+                    btn.className = "px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-medium border border-blue-500 transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition";
+                }
+            });
+        }
+
+        function applyDateFilter() {
             const startStr = document.getElementById('filterStartDate').value;
             const endStr = document.getElementById('filterEndDate').value;
-            if (!startStr && !endStr) { filteredDataDay = [...databaseDay]; updateDashboardDay(); return; }
-            const sDate = startStr ? new Date(startStr) : null;
-            const eDate = endStr ? new Date(endStr) : null;
-            filteredDataDay = databaseDay.filter(item => {
-                const parts = item.date.split('/');
-                const d = new Date(parts[2], parts[1]-1, parts[0]);
-                if (sDate && d < sDate) return false;
-                if (eDate && d > eDate) return false;
-                return true;
-            });
-            updateDashboardDay();
+
+            if (!startStr && !endStr) {
+                filteredData = [...database];
+            } else {
+                const startDate = startStr ? new Date(startStr) : null;
+                const endDate = endStr ? new Date(endStr) : null;
+
+                filteredData = database.filter(item => {
+                    const d = parseDateStandard(item.date);
+                    if (!d) return true;
+                    if (startDate && d < startDate) return false;
+                    if (endDate) {
+                        const endCompare = new Date(endDate);
+                        endCompare.setHours(23, 59, 59);
+                        if (d > endCompare) return false;
+                    }
+                    return true;
+                });
+            }
+            sortDatabase();
+            updateDashboard();
         }
 
-        function updateDashboardDay() {
-            if (filteredDataDay.length === 0) return;
-            const latest = filteredDataDay[filteredDataDay.length - 1];
-            const totalCrm = filteredDataDay.reduce((a, c) => a + (c.kpi.crm || 0), 0);
-            const totalZalo = filteredDataDay.reduce((a, c) => a + (c.kpi.zaloMsg || 0), 0);
-            const totalCalls = filteredDataDay.reduce((a, c) => a + (c.kpi.calls || 0), 0);
-            const totalWeb = filteredDataDay.reduce((a, c) => a + (c.surveys ? c.surveys.webCount || 0 : 0), 0);
+        function updateDashboard() {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('kpiCrmValue').innerText = '0';
+                document.getElementById('kpiZaloMsgValue').innerText = '0';
+                document.getElementById('kpiCallsValue').innerText = '0';
+                document.getElementById('kpiSurveyValue').innerText = '0 lượt';
+                document.getElementById('kpiWebScore').innerText = 'Web: 0/50';
+                document.getElementById('kpiCsatZalo').innerText = 'CSAT Zalo: 0%';
+                renderMatrixTable();
+                updateCharts();
+                return;
+            }
 
-            document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString();
-            document.getElementById('kpiCrmAvg').innerText = `TB: ${(totalCrm/filteredDataDay.length).toFixed(1)}/ngày`;
-            document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString();
+            const latest = filteredData[filteredData.length - 1];
+
+            let totalCrm = filteredData.reduce((acc, curr) => acc + (curr.kpi.crm || 0), 0);
+            let avgCrmPerDay = (totalCrm / filteredData.length).toFixed(1);
+            document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString('vi-VN');
+            document.getElementById('kpiCrmAvg').innerText = `TB: ${avgCrmPerDay}/ngày`;
+
+            let totalZalo = filteredData.reduce((acc, curr) => acc + (curr.kpi.zaloMsg || 0), 0);
+            document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString('vi-VN');
             document.getElementById('kpiZaloRate').innerText = `${latest.kpi.zaloRate}%`;
-            document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString();
+            document.getElementById('kpiZaloTime').innerText = `${latest.kpi.zaloTime} phút`;
+
+            let totalCalls = filteredData.reduce((acc, curr) => acc + (curr.kpi.calls || 0), 0);
+            document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString('vi-VN');
             document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi.callsMissed}`;
-            document.getElementById('kpiSurveyValue').innerText = `${totalWeb} lượt`;
-            document.getElementById('kpiWebScore').innerText = `Web: ${latest.surveys ? latest.surveys.webScore : '0/50'}`;
-            document.getElementById('kpiTalkTime').innerText = `${latest.kpi.talkTime}s`;
-            document.getElementById('kpiWaitTime').innerText = `${latest.kpi.waitTime}s`;
+            document.getElementById('kpiCallsAnswered').innerText = `Nhấc máy: ${latest.kpi.callsRate}%`;
 
-            renderMatrixTableDay();
-            renderChartsDay();
-        }
-
-        function initChartsDay() {
-            const ctx1 = document.getElementById('trendChartDay').getContext('2d');
-            trendChartDayInst = new Chart(ctx1, { type: 'bar', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
-
-            const ctx2 = document.getElementById('categoryChartDay').getContext('2d');
-            categoryChartDayInst = new Chart(ctx2, { type: 'doughnut', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
-        }
-
-        function renderChartsDay() {
-            const dates = filteredDataDay.map(d => d.date);
-            trendChartDayInst.data.labels = dates;
-            trendChartDayInst.data.datasets = [
-                { label: 'Yêu Cầu CRM', data: filteredDataDay.map(d => d.kpi.crm), backgroundColor: '#3b82f6' },
-                { label: 'Tin Nhắn Zalo', data: filteredDataDay.map(d => d.kpi.zaloMsg), backgroundColor: '#8b5cf6' }
-            ];
-            trendChartDayInst.update();
-
-            const latest = filteredDataDay[filteredDataDay.length - 1];
-            const cats = latest.categories || {};
-            categoryChartDayInst.data.labels = Object.keys(cats);
-            categoryChartDayInst.data.datasets = [{ data: Object.values(cats), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899'] }];
-            categoryChartDayInst.update();
-        }
-
-        function renderMatrixTableDay() {
-            const thead = document.getElementById('matrixTableHeaderDay');
-            const tbody = document.getElementById('matrixTableBodyDay');
-            let hHtml = '<th class="p-3 font-bold text-slate-200">NHÓM VẤN ĐỀ</th>';
-            filteredDataDay.forEach(d => hHtml += `<th class="p-3 text-center">${d.date}</th>`);
-            thead.innerHTML = hHtml;
-
-            let allCats = new Set();
-            filteredDataDay.forEach(d => { if (d.categories) Object.keys(d.categories).forEach(k => allCats.add(k)); });
-
-            let bHtml = '';
-            allCats.forEach(cat => {
-                bHtml += `<tr class="border-b border-slate-800/40"><td class="p-3 font-medium text-slate-200">${cat}</td>`;
-                filteredDataDay.forEach(d => {
-                    const val = (d.categories && d.categories[cat]) ? d.categories[cat] : 0;
-                    bHtml += `<td class="p-3 text-center text-slate-300">${val}</td>`;
-                });
-                bHtml += `</tr>`;
-            });
-            tbody.innerHTML = bHtml;
-        }
-
-        function handleExcelImportDay(e) { alert("Tính năng nạp Excel Ngày sẵn sàng hoạt động!"); }
-        function exportToExcelDay() { alert("Tính năng xuất Excel Ngày sẵn sàng hoạt động!"); }
-
-
-        // ================= LOGIC XEM THEO TUẦN (PROJECT 2) =================
-        let databaseWeek = [];
-        let trendChartWeekInst = null;
-        let donutChartWeekInst = null;
-
-        async function loadDataWeekFromSupabase() {
-            try {
-                const response = await fetch(`${SUPABASE_URL_WEEK}/rest/v1/cskh_monthly_records?select=*`, {
-                    headers: { "apikey": SUPABASE_KEY_WEEK, "Authorization": `Bearer ${SUPABASE_KEY_WEEK}` }
-                });
-                if (response.ok) {
-                    const rows = await response.json();
-                    const row = rows.find(r => r.id === 1 || (r.payload && r.payload.masterDatabase));
-                    if (row && row.payload && row.payload.masterDatabase) {
-                        databaseWeek = row.payload.masterDatabase;
+            let totalWebSurvey = filteredData.reduce((acc, curr) => acc + (curr.surveys && curr.surveys.webCount ? curr.surveys.webCount : 0), 0);
+            
+            let webScoresList = [];
+            filteredData.forEach(curr => {
+                if (curr.surveys && curr.surveys.webScore) {
+                    let scoreStr = String(curr.surveys.webScore).split('/')[0];
+                    let scoreVal = parseFloat(scoreStr);
+                    if (!isNaN(scoreVal) && scoreVal > 0) {
+                        webScoresList.push(scoreVal);
                     }
                 }
-            } catch (e) {
-                console.warn("Lỗi kết nối DB Tuần:", e);
+            });
+            let avgWebScore = webScoresList.length > 0 ? (webScoresList.reduce((a, b) => a + b, 0) / webScoresList.length).toFixed(1) : 0;
+
+            document.getElementById('kpiSurveyValue').innerText = `${totalWebSurvey.toLocaleString('vi-VN')} lượt`;
+            document.getElementById('kpiWebScore').innerText = `Web: ${avgWebScore}/50`;
+
+            let csatList = [];
+            filteredData.forEach(curr => {
+                let csatVal = curr.zaloDetails && curr.zaloDetails.csat !== undefined ? Number(curr.zaloDetails.csat) : 0;
+                if (csatVal > 0) {
+                    csatList.push(csatVal);
+                }
+            });
+            let avgCsat = csatList.length > 0 ? (csatList.reduce((a, b) => a + b, 0) / csatList.length) : 0;
+            document.getElementById('kpiCsatZalo').innerText = `CSAT Zalo: ${Math.round(avgCsat * 100)}%`;
+
+            const talkTimeVal = Number(latest.kpi.talkTime || 0);
+            const waitTimeVal = Number(latest.kpi.waitTime || 0);
+            document.getElementById('kpiTalkTime').innerText = `${Number.isInteger(talkTimeVal) ? talkTimeVal : talkTimeVal.toFixed(1)}s`;
+            document.getElementById('kpiWaitTime').innerText = `${Number.isInteger(waitTimeVal) ? waitTimeVal : waitTimeVal.toFixed(1)}s`;
+
+            document.getElementById('zaloTotalFollowers').innerText = latest.zaloDetails.totalFollowers.toLocaleString('vi-VN');
+            document.getElementById('zaloNewFollowers').innerText = `+${latest.zaloDetails.newFollowers}`;
+            document.getElementById('zaloUnfollow').innerText = `${latest.zaloDetails.unfollowers} người`;
+            document.getElementById('zaloReplyRate').innerText = `${latest.zaloDetails.replyRate}%`;
+
+            renderMatrixTable();
+            updateCharts();
+        }
+
+        function renderMatrixTable() {
+            const headerRow = document.getElementById('matrixTableHeader');
+            const tbody = document.getElementById('matrixTableBody');
+
+            let headerHtml = '<th class="p-3 font-bold text-slate-200 min-w-[280px]">NHÓM VẤN ĐỀ</th>';
+            headerHtml += '<th class="p-3 font-bold text-center text-amber-400 min-w-[120px] bg-slate-900/90 border-r border-slate-800"><i class="fa-solid fa-calculator mr-1"></i> TB / NGÀY</th>';
+
+            filteredData.forEach(item => {
+                headerHtml += `<th class="p-3 font-bold text-center text-slate-300 min-w-[110px]">${item.date}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            let allCategoriesSet = new Set();
+            filteredData.forEach(d => {
+                if (d.categories) Object.keys(d.categories).forEach(k => allCategoriesSet.add(k));
+            });
+            const categories = Array.from(allCategoriesSet);
+
+            tbody.innerHTML = '';
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
+                
+                let rowHtml = `<td class="p-3 font-medium text-slate-200">${cat}</td>`;
+                
+                let sum = 0;
+                let dailyValuesHtml = '';
+                filteredData.forEach(item => {
+                    const val = (item.categories && item.categories[cat] !== undefined) ? item.categories[cat] : 0;
+                    sum += val;
+                    dailyValuesHtml += `<td class="p-3 text-center font-semibold text-slate-300">${val}</td>`;
+                });
+
+                const avg = filteredData.length > 0 ? (sum / filteredData.length).toFixed(1) : 0;
+                
+                rowHtml += `<td class="p-3 text-center font-bold text-amber-400 bg-slate-900/50 border-r border-slate-800">${avg}</td>`;
+                rowHtml += dailyValuesHtml;
+
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* --- LOGIC QUẢN LÝ NHẬT KÝ SỰ CỐ & MODAL --- */
+        function openIncidentModal(id = null) {
+            const modal = document.getElementById('incidentModal');
+            const form = document.getElementById('incidentForm');
+            form.reset();
+            document.getElementById('incidentId').value = '';
+
+            if (id) {
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-rose-400"></i> Chỉnh Sửa Sự Cố Vận Hành';
+                const inc = incidentsList.find(i => i.id === id);
+                if (inc) {
+                    document.getElementById('incidentId').value = inc.id;
+                    document.getElementById('incDate').value = inc.date || '';
+                    document.getElementById('incResolvedDate').value = inc.resolvedDate || '';
+                    document.getElementById('incTotalHours').value = inc.totalHours || '';
+                    document.getElementById('incContent').value = inc.content || '';
+                    document.getElementById('incUnit').value = inc.unit || '';
+                }
+            } else {
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành Mới';
+                // Đặt mặc định ngày sự cố là ngày hiện tại
+                const todayIso = new Date().toISOString().split('T')[0];
+                document.getElementById('incDate').value = todayIso;
             }
-            if (databaseWeek.length === 0) {
-                databaseWeek = [
-                    { period: "W41", dateStart: "2026-10-05", dateEnd: "2026-10-11", crm: 901, zaloMsg: 2573, zaloRate: 99.73, calls: 84, missed: 0, survey: { webCount: 1, webScore: 50, appCount: 0, appScore: 0 }, issues: { "Duyệt lệnh Eport": 633, "Thông tin liên hệ, Mã số thuế": 69 } },
-                    { period: "W42", dateStart: "2026-10-12", dateEnd: "2026-10-18", crm: 950, zaloMsg: 2600, zaloRate: 99.80, calls: 90, missed: 0, survey: { webCount: 2, webScore: 48, appCount: 1, appScore: 49 }, issues: { "Duyệt lệnh Eport": 650, "Thông tin liên hệ, Mã số thuế": 70 } }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeIncidentModal() {
+            document.getElementById('incidentModal').classList.add('hidden');
+        }
+
+        async function handleIncidentSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('incidentId').value;
+            const date = document.getElementById('incDate').value;
+            const resolvedDate = document.getElementById('incResolvedDate').value;
+            const totalHours = parseFloat(document.getElementById('incTotalHours').value) || 0;
+            const content = document.getElementById('incContent').value.trim();
+            const unit = document.getElementById('incUnit').value.trim();
+
+            if (id) {
+                // Sửa
+                const index = incidentsList.findIndex(i => i.id === id);
+                if (index >= 0) {
+                    incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
+                }
+            } else {
+                // Thêm mới
+                const newInc = {
+                    id: 'inc-' + Date.now(),
+                    date,
+                    resolvedDate,
+                    totalHours,
+                    content,
+                    unit
+                };
+                incidentsList.push(newInc);
+            }
+
+            closeIncidentModal();
+            await saveDataToSupabase();
+            renderIncidentTable();
+        }
+
+        async function deleteIncident(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa sự cố vận hành này không?")) {
+                incidentsList = incidentsList.filter(i => i.id !== id);
+                await saveDataToSupabase();
+                renderIncidentTable();
+            }
+        }
+
+        function clearIncidentFilter() {
+            document.getElementById('incidentFilterStart').value = '';
+            document.getElementById('incidentFilterEnd').value = '';
+            renderIncidentTable();
+        }
+
+        function renderIncidentTable() {
+            const tbody = document.getElementById('incidentTableBody');
+            if (!tbody) return;
+
+            const startStr = document.getElementById('incidentFilterStart').value;
+            const endStr = document.getElementById('incidentFilterEnd').value;
+
+            let filteredIncidents = [...incidentsList];
+
+            if (startStr || endStr) {
+                const startDate = startStr ? new Date(startStr) : null;
+                const endDate = endStr ? new Date(endStr) : null;
+
+                filteredIncidents = incidentsList.filter(item => {
+                    if (!item.date) return true;
+                    const d = new Date(item.date);
+                    if (startDate && d < startDate) return false;
+                    if (endDate) {
+                        const endCompare = new Date(endDate);
+                        endCompare.setHours(23, 59, 59);
+                        if (d > endCompare) return false;
+                    }
+                    return true;
+                });
+            }
+
+            // Sắp xếp sự cố mới nhất lên trên
+            filteredIncidents.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filteredIncidents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">Không có bản ghi sự cố nào trong khoảng thời gian này.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filteredIncidents.forEach(inc => {
+                const formatDateDisplay = (dStr) => {
+                    if (!dStr) return '<span class="text-slate-500">--</span>';
+                    const parts = dStr.split('-');
+                    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    return dStr;
+                };
+
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
+                        <td class="p-3 font-medium text-slate-200">${formatDateDisplay(inc.date)}</td>
+                        <td class="p-3 text-slate-300">${formatDateDisplay(inc.resolvedDate)}</td>
+                        <td class="p-3 text-center font-bold text-rose-400">${inc.totalHours || 0}h</td>
+                        <td class="p-3 text-slate-200">${inc.content}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-medium">
+                                ${inc.unit}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="openIncidentModal('${inc.id}')" class="px-2 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-xs transition" title="Sửa">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteIncident('${inc.id}')" class="px-2 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs transition" title="Xóa">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function initCharts() {
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            trendChartInstance = new Chart(ctxTrend, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Yêu Cầu CRM', color: '#ef4444' }, ticks: { color: '#ef4444' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Zalo & Cuộc Gọi', color: '#3b82f6' }, ticks: { color: '#3b82f6' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            categoryChartInstance = new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10 } } } }
+            });
+
+            const ctxUnit = document.getElementById('unitChart').getContext('2d');
+            unitChartInstance = new Chart(ctxUnit, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
+                        y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function setChartType(type) {
+            currentChartType = type;
+            document.getElementById('btn-chart-bar').className = type === 'bar' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition' : 'px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition';
+            document.getElementById('btn-chart-line').className = type === 'line' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition' : 'px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition';
+            updateCharts();
+        }
+
+        function setUnitChartType(type) {
+            currentUnitChartType = type;
+            ['bar', 'line', 'area'].forEach(t => {
+                const btn = document.getElementById(`btn-unit-${t}`);
+                if (!btn) return;
+                if (t === type) {
+                    btn.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition";
+                }
+            });
+            updateCharts();
+        }
+
+        function updateCharts() {
+            if (!filteredData) return;
+            const dates = filteredData.map(d => d.date);
+            const crmRequests = filteredData.map(d => d.kpi.crm);
+            const zaloMsgs = filteredData.map(d => d.kpi.zaloMsg);
+            const calls = filteredData.map(d => d.kpi.calls);
+
+            trendChartInstance.config.type = currentChartType;
+            trendChartInstance.data.labels = dates;
+
+            trendChartInstance.data.datasets = [
+                {
+                    label: 'Yêu Cầu CRM',
+                    data: crmRequests,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#ef4444',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Tin Nhắn Zalo',
+                    data: zaloMsgs,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#3b82f6',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'Cuộc Gọi Đến',
+                    data: calls,
+                    backgroundColor: '#f59e0b',
+                    borderColor: '#f59e0b',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y1'
+                }
+            ];
+            trendChartInstance.update();
+
+            if (filteredData.length > 0) {
+                const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
+                const shortUnitNames = ["Cảng Tân Vũ", "Cảng HDCV"];
+
+                const unitColors = [
+                    { call: '#f97316', callArea: 'rgba(249, 115, 22, 0.25)', crm: '#38bdf8', crmArea: 'rgba(56, 189, 248, 0.25)' },
+                    { call: '#a855f7', callArea: 'rgba(168, 85, 247, 0.25)', crm: '#10b981', crmArea: 'rgba(16, 185, 129, 0.25)' }
                 ];
+
+                let unitDatasets = [];
+                const isLineOrArea = currentUnitChartType === 'line' || currentUnitChartType === 'area';
+
+                unitNames.forEach((u, idx) => {
+                    let callDataByDate = filteredData.map(d => (d.units && d.units.calls && d.units.calls[u]) || 0);
+                    let crmDataByDate = filteredData.map(d => (d.units && d.units.crm && d.units.crm[u]) || 0);
+
+                    unitDatasets.push({
+                        label: `[Cuộc Gọi] ${shortUnitNames[idx]}`,
+                        data: callDataByDate,
+                        backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].callArea : unitColors[idx].call,
+                        borderColor: unitColors[idx].call,
+                        borderWidth: isLineOrArea ? 2.5 : 1,
+                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
+                        fill: currentUnitChartType === 'area',
+                        tension: 0.3,
+                        type: isLineOrArea ? 'line' : 'bar',
+                        hidden: false
+                    });
+
+                    unitDatasets.push({
+                        label: `[CRM] ${shortUnitNames[idx]}`,
+                        data: crmDataByDate,
+                        backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].crmArea : unitColors[idx].crm,
+                        borderColor: unitColors[idx].crm,
+                        borderWidth: isLineOrArea ? 2.5 : 1,
+                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
+                        fill: currentUnitChartType === 'area',
+                        tension: 0.3,
+                        type: isLineOrArea ? 'line' : 'bar',
+                        hidden: true
+                    });
+                });
+
+                unitChartInstance.config.type = isLineOrArea ? 'line' : 'bar';
+                unitChartInstance.data.labels = dates;
+                unitChartInstance.data.datasets = unitDatasets;
+                unitChartInstance.update();
             }
-            initWeekFilters();
-            setQuickWeekFilter(7);
+
+            updatePieChart();
         }
 
-        function initWeekFilters() {
-            const startSelect = document.getElementById('filter-start-week');
-            const endSelect = document.getElementById('filter-end-week');
-            startSelect.innerHTML = ''; endSelect.innerHTML = '';
-            databaseWeek.forEach((d, idx) => {
-                startSelect.innerHTML += `<option value="${idx}">${d.period}</option>`;
-                endSelect.innerHTML += `<option value="${idx}">${d.period}</option>`;
-            });
-            if (databaseWeek.length > 0) endSelect.value = databaseWeek.length - 1;
-        }
+        function updatePieChart() {
+            if (!filteredData || filteredData.length === 0) return;
+            const latest = filteredData[filteredData.length - 1];
+            const limit = document.getElementById('pieLimitSelect').value;
+            const cats = (latest && latest.categories) || {};
 
-        function setQuickWeekFilter(count) {
-            document.getElementById('filter-start-week').value = Math.max(0, databaseWeek.length - count);
-            document.getElementById('filter-end-week').value = databaseWeek.length - 1;
-            applyWeekFilter();
-        }
+            let sorted = Object.keys(cats).map(k => ({ name: k, count: cats[k] })).sort((a,b) => b.count - a.count);
 
-        function applyWeekFilter() {
-            const sIdx = parseInt(document.getElementById('filter-start-week').value) || 0;
-            const eIdx = parseInt(document.getElementById('filter-end-week').value) || (databaseWeek.length - 1);
-            const filtered = databaseWeek.slice(Math.min(sIdx, eIdx), Math.max(sIdx, eIdx) + 1);
-            updateDashboardWeek(filtered);
-        }
-
-        function updateDashboardWeek(filtered) {
-            if (filtered.length === 0) return;
-            const totalCrm = filtered.reduce((a, c) => a + c.crm, 0);
-            const totalZalo = filtered.reduce((a, c) => a + c.zaloMsg, 0);
-            const totalCalls = filtered.reduce((a, c) => a + c.calls, 0);
-
-            document.getElementById('kpi-crm-week').innerText = totalCrm.toLocaleString();
-            document.getElementById('kpi-crm-avg-week').innerText = `TB/tuần: ${Math.round(totalCrm/filtered.length)}`;
-            document.getElementById('kpi-zalo-week').innerText = totalZalo.toLocaleString();
-            document.getElementById('kpi-calls-week').innerText = totalCalls.toLocaleString();
-
-            renderChartsWeek(filtered);
-            renderMatrixTableWeek(filtered);
-        }
-
-        function renderChartsWeek(filtered) {
-            if (!trendChartWeekInst) {
-                trendChartWeekInst = new Chart(document.getElementById('trendChartWeek').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
-                donutChartWeekInst = new Chart(document.getElementById('issueDonutChartWeek').getContext('2d'), { type: 'doughnut', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+            if (limit !== 'all') {
+                const n = parseInt(limit);
+                if (sorted.length > n) {
+                    const topN = sorted.slice(0, n);
+                    const restSum = sorted.slice(n).reduce((acc, cur) => acc + cur.count, 0);
+                    topN.push({ name: 'Khác', count: restSum });
+                    sorted = topN;
+                }
             }
-            trendChartWeekInst.data.labels = filtered.map(d => d.period);
-            trendChartWeekInst.data.datasets = [{ label: 'Yêu Cầu CRM (Tuần)', data: filtered.map(d => d.crm), borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.5)', fill: true }];
-            trendChartWeekInst.update();
 
-            donutChartWeekInst.data.labels = ["Duyệt lệnh Eport", "Thông tin liên hệ, MST"];
-            donutChartWeekInst.data.datasets = [{ data: [1280, 139], backgroundColor: ['#3b82f6', '#10b981'] }];
-            donutChartWeekInst.update();
+            categoryChartInstance.data.labels = sorted.map(i => i.name);
+            categoryChartInstance.data.datasets = [{
+                data: sorted.map(i => i.count),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b']
+            }];
+            categoryChartInstance.update();
         }
 
-        function renderMatrixTableWeek(filtered) {
-            const thead = document.getElementById('matrix-thead-week');
-            const tbody = document.getElementById('matrix-tbody-week');
-            let hHtml = `<tr><th class="px-4 py-3 bg-slate-900">Tuần</th><th class="px-4 py-3 bg-slate-900">CRM</th><th class="px-4 py-3 bg-slate-900">Zalo</th><th class="px-4 py-3 bg-slate-900">Cuộc Gọi</th></tr>`;
-            thead.innerHTML = hHtml;
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            let bHtml = '';
-            filtered.forEach(d => {
-                bHtml += `<tr class="border-b border-slate-800/60"><td class="px-4 py-3 font-bold text-indigo-400">${d.period}</td><td class="px-4 py-3">${d.crm}</td><td class="px-4 py-3">${d.zaloMsg}</td><td class="px-4 py-3">${d.calls}</td></tr>`;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames.includes("THNGAY") ? "THNGAY" : workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    let extractedDate = "";
+                    let kpi = { crm: 0, zaloMsg: 0, zaloRate: 0, zaloTime: 0, calls: 0, callsMissed: 0, callsRate: 0, talkTime: 0, waitTime: 0 };
+                    let categories = {};
+                    let unitCalls = {};
+                    let unitCrm = {};
+                    let zaloDetails = { totalFollowers: 0, newFollowers: 0, unfollowers: 0, replyRate: 0, csat: 0 };
+                    let surveys = { webCount: 0, webScore: "0/50" };
+
+                    let currentSection = "";
+
+                    for (let i = 0; i < rows.length; i++) {
+                        let r = rows[i];
+                        let col0 = r[0] ? String(r[0]).trim() : "";
+                        let col1 = r[1];
+
+                        if (col0.includes("1. Khối KPI")) { currentSection = "kpi"; continue; }
+                        if (col0.includes("2. Khối Phân loại")) { currentSection = "categories"; continue; }
+                        if (col0.includes("3. Khối So sánh")) { currentSection = "units"; continue; }
+                        if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
+                        if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
+
+                        if (col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Chỉ số Zalo OA" || col0 === "Danh mục Kênh" || col0 === "danh mục" || col0 === "Tên Đơn Vị") {
+                            if (col1 !== undefined && col1 !== null && col1 !== "" && !extractedDate) {
+                                if (typeof col1 === 'number') {
+                                    extractedDate = excelSerialToDate(col1);
+                                } else if (col1 instanceof Date) {
+                                    const day = String(col1.getDate()).padStart(2, '0');
+                                    const month = String(col1.getMonth() + 1).padStart(2, '0');
+                                    const year = col1.getFullYear();
+                                    extractedDate = `${day}/${month}/${year}`;
+                                } else {
+                                    let strVal = String(col1).trim();
+                                    if (!isNaN(strVal) && Number(strVal) > 30000) {
+                                        extractedDate = excelSerialToDate(Number(strVal));
+                                    } else if (strVal.includes('T')) {
+                                        extractedDate = strVal.split('T')[0].split('-').reverse().join('/');
+                                    } else if (strVal.includes('/')) {
+                                        extractedDate = strVal;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (currentSection === "kpi") {
+                            if (col0 === "Số yêu cầu (CRM)") kpi.crm = Number(col1) || 0;
+                            if (col0 === "Lượt tin nhắn Zalo") kpi.zaloMsg = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ phản hồi Zalo (%)") kpi.zaloRate = Number(col1) || 0;
+                            if (col0 === "Thời gian phản hồi Zalo (Phút)") kpi.zaloTime = Number(col1) || 0;
+                            if (col0 === "Cuộc gọi đến") kpi.calls = Number(col1) || 0;
+                            if (col0 === "Số cuộc lỡ") kpi.callsMissed = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = Number(col1) || 0;
+                            if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = Number(col1) || 0;
+                            if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "categories") {
+                            if (col0 && col0 !== "Vấn đề phản ánh" && col1 !== undefined && col0 !== "") {
+                                categories[col0] = Number(col1) || 0;
+                            }
+                        }
+
+                        if (currentSection === "units") {
+                            if (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ") {
+                                if (i < 36) unitCalls[col0] = Number(col1) || 0;
+                                else unitCrm[col0] = Number(col1) || 0;
+                            }
+                        }
+
+                        if (currentSection === "zalo") {
+                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = Number(col1) || 0;
+                            if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = Number(col1) || 0;
+                            if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ phản hồi (%)") zaloDetails.replyRate = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ hài lòng CSAT") zaloDetails.csat = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "surveys") {
+                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
+                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
+                        }
+                    }
+
+                    if (!extractedDate) {
+                        const now = new Date();
+                        extractedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+                    }
+
+                    const newRecord = {
+                        date: extractedDate,
+                        kpi: kpi,
+                        categories: categories,
+                        units: { calls: unitCalls, crm: unitCrm },
+                        zaloDetails: zaloDetails,
+                        surveys: surveys
+                    };
+
+                    const existingIndex = database.findIndex(d => d.date === extractedDate);
+                    if (existingIndex >= 0) {
+                        database[existingIndex] = newRecord;
+                        alert(`Đã nạp lại thành công dữ liệu cho ngày ${extractedDate} và đồng bộ lên Supabase Cloud!`);
+                    } else {
+                        database.push(newRecord);
+                        alert(`Đã thêm thành công ngày mới: ${extractedDate} và đồng bộ lên Supabase Cloud!`);
+                    }
+
+                    sortDatabase();
+                    await saveDataToSupabase();
+                    updateDeleteSelectOptions();
+                    applyDateFilter();
+                } catch (err) {
+                    console.error(err);
+                    alert("Lỗi khi đọc file Excel.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function exportToExcel() {
+            if (!database || database.length === 0) {
+                alert("Không có dữ liệu để xuất!");
+                return;
+            }
+
+            sortDatabase();
+            let aoa = [];
+
+            aoa.push(["1. Khối KPI Tổng hợp Chung"]);
+            let rowDate = ["Ngày"];
+            let rowCrm = ["Số yêu cầu (CRM)"];
+            let rowZaloMsg = ["Lượt tin nhắn Zalo"];
+            let rowZaloRate = ["Tỷ lệ phản hồi Zalo (%)"];
+            let rowZaloTime = ["Thời gian phản hồi Zalo (Phút)"];
+            let rowCalls = ["Cuộc gọi đến"];
+            let rowCallsMissed = ["Số cuộc lỡ"];
+            let rowCallsRate = ["Tỷ lệ nhấc máy (%)"];
+            let rowTalkTime = ["Thời gian thoại TB (giây)"];
+            let rowWaitTime = ["Thời gian chờ TB (giây)"];
+
+            database.forEach(item => {
+                rowDate.push(item.date);
+                rowCrm.push(item.kpi.crm || 0);
+                rowZaloMsg.push(item.kpi.zaloMsg || 0);
+                rowZaloRate.push(item.kpi.zaloRate || 0);
+                rowZaloTime.push(item.kpi.zaloTime || 0);
+                rowCalls.push(item.kpi.calls || 0);
+                rowCallsMissed.push(item.kpi.callsMissed || 0);
+                rowCallsRate.push(item.kpi.callsRate || 0);
+                rowTalkTime.push(item.kpi.talkTime || 0);
+                rowWaitTime.push(item.kpi.waitTime || 0);
             });
-            tbody.innerHTML = bHtml;
+
+            aoa.push(rowDate, rowCrm, rowZaloMsg, rowZaloRate, rowZaloTime, rowCalls, rowCallsMissed, rowCallsRate, rowTalkTime, rowWaitTime);
+            aoa.push([]);
+
+            aoa.push(["2. Khối Phân loại Các Vấn Đề Tiếp Nhận (Dùng vẽ Biểu đồ Tròn TOP)"]);
+            let catHeader = ["Vấn đề phản ánh"];
+            database.forEach(item => catHeader.push(item.date));
+            aoa.push(catHeader);
+
+            let allCategories = new Set();
+            database.forEach(d => {
+                if (d.categories) Object.keys(d.categories).forEach(k => allCategories.add(k));
+            });
+
+            Array.from(allCategories).forEach(cat => {
+                let catRow = [cat];
+                database.forEach(item => {
+                    let val = (item.categories && item.categories[cat] !== undefined) ? item.categories[cat] : 0;
+                    catRow.push(val);
+                });
+                aoa.push(catRow);
+            });
+            aoa.push([]);
+
+            aoa.push(["3. Khối So sánh Hiệu suất theo Đơn vị / Phòng ban (Biểu đồ Cột)"]);
+            aoa.push(["Cuộc gọi đến"]);
+            let unitCallHeader = ["Tên Đơn Vị"];
+            database.forEach(item => unitCallHeader.push(item.date));
+            aoa.push(unitCallHeader);
+
+            const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
+            unitNames.forEach(u => {
+                let uRow = [u];
+                database.forEach(item => {
+                    let val = (item.units && item.units.calls && item.units.calls[u] !== undefined) ? item.units.calls[u] : 0;
+                    uRow.push(val);
+                });
+                aoa.push(uRow);
+            });
+
+            aoa.push([]);
+            aoa.push(["CRM Ghi nhận"]);
+            let unitCrmHeader = ["Tên Đơn Vị"];
+            database.forEach(item => unitCrmHeader.push(item.date));
+            aoa.push(unitCrmHeader);
+
+            unitNames.forEach(u => {
+                let uRow = [u];
+                database.forEach(item => {
+                    let val = (item.units && item.units.crm && item.units.crm[u] !== undefined) ? item.units.crm[u] : 0;
+                    uRow.push(val);
+                });
+                aoa.push(uRow);
+            });
+            aoa.push([]);
+
+            aoa.push(["4. Khối Chỉ số Chi tiết Kênh Zalo OA"]);
+            let zaloHeader = ["Chỉ số Zalo OA"];
+            database.forEach(item => zaloHeader.push(item.date));
+            aoa.push(zaloHeader);
+
+            let rowTotalF = ["Người quan tâm"];
+            let rowNewF = ["Người quan tâm mới"];
+            let rowUnf = ["Người dùng bỏ quan tâm"];
+            let rowMsgSend = ["Lượt gửi tin nhắn"];
+            let rowMsgReply = ["Lượt trả lời, phản hồi"];
+            let rowReplyRate = ["Tỷ lệ phản hồi (%)"];
+            let rowFirstTime = ["Thời gian phản hồi đầu tiên (phút)"];
+            let rowCsat = ["Tỷ lệ hài lòng CSAT"];
+
+            database.forEach(item => {
+                rowTotalF.push(item.zaloDetails ? item.zaloDetails.totalFollowers || 0 : 0);
+                rowNewF.push(item.zaloDetails ? item.zaloDetails.newFollowers || 0 : 0);
+                rowUnf.push(item.zaloDetails ? item.zaloDetails.unfollowers || 0 : 0);
+                rowMsgSend.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
+                rowMsgReply.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
+                rowReplyRate.push(item.zaloDetails ? item.zaloDetails.replyRate || 0 : 0);
+                rowFirstTime.push(item.kpi ? item.kpi.zaloTime || 0 : 0);
+                rowCsat.push(item.zaloDetails ? item.zaloDetails.csat || 0 : 0);
+            });
+
+            aoa.push(rowTotalF, rowNewF, rowUnf, rowMsgSend, rowMsgReply, rowReplyRate, rowFirstTime, rowCsat);
+            aoa.push([]);
+
+            aoa.push(["5. LƯỢT KHẢO SÁT WebSite"]);
+            let surveyHeader = ["danh mục"];
+            database.forEach(item => surveyHeader.push(item.date));
+            aoa.push(surveyHeader);
+
+            let rowWebCount = ["Số lượt"];
+            let rowWebScore = ["Điểm đánh giá"];
+            database.forEach(item => {
+                rowWebCount.push(item.surveys ? item.surveys.webCount || 0 : 0);
+                rowWebScore.push(item.surveys ? item.surveys.webScore || "0/50" : "0/50");
+            });
+
+            aoa.push(rowWebCount, rowWebScore);
+
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "THNGAY");
+            XLSX.writeFile(wb, "Bao_Cao_CSKH_Cang_Hai_Phong_Tong_Hop.xlsx");
         }
 
-        function handleExcelImportWeek(e) { alert("Tính năng nạp Excel Tuần sẵn sàng hoạt động!"); }
-        function exportDatabaseWeek() { alert("Tính năng xuất Excel Tuần sẵn sàng hoạt động!"); }
+        function filterTable() {
+            const query = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.getElementById('matrixTableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].innerText.toLowerCase();
+                rows[i].style.display = text.includes(query) ? '' : 'none';
+            }
+        }
     </script>
 </body>
 </html>
