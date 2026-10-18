@@ -351,7 +351,7 @@
             </div>
         </div>
 
-        <!-- NHẬT KÝ VẬN HÀNH SỰ CỐ -->
+        <!-- PHẦN MỚI: NHẬT KÝ VẬN HÀNH SỰ CỐ -->
         <div class="glass-card p-5 rounded-2xl space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -363,6 +363,7 @@
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <!-- Bộ lọc theo khoảng ngày cho Nhật ký sự cố -->
                     <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
                         <span class="text-xs text-slate-400">Từ:</span>
                         <input type="date" id="incidentFilterStart" onchange="renderIncidentTable()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
@@ -375,6 +376,7 @@
                         Xóa Lọc
                     </button>
                     
+                    <!-- Nút mở Modal Thêm mới sự cố -->
                     <button onclick="openIncidentModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-rose-600/25">
                         <i class="fa-solid fa-plus"></i> Thêm sự cố mới
                     </button>
@@ -394,6 +396,7 @@
                         </tr>
                     </thead>
                     <tbody id="incidentTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- Dữ liệu render động -->
                     </tbody>
                 </table>
             </div>
@@ -406,9 +409,10 @@
         <p>Trung Tâm Khai Thác & Dịch Vụ Khách Hàng - Cảng Hải Phòng © 2026</p>
     </footer>
 
-    <!-- MODAL NHẬP/SỬA SỰ CỐ -->
+    <!-- CỬA SỔ MODAL (MESSENGER PHỤ) NHẬP/SỬA SỰ CỐ -->
     <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
+            <!-- Modal Header -->
             <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
                 <h3 id="modalTitle" class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-rose-400"></i> Thêm Sự Cố Vận Hành Mới
@@ -418,6 +422,7 @@
                 </button>
             </div>
 
+            <!-- Modal Body Form -->
             <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" class="p-5 space-y-4">
                 <input type="hidden" id="incidentId">
                 
@@ -448,6 +453,7 @@
                     <textarea id="incContent" rows="3" required placeholder="Mô tả sự cố, nguyên nhân và hướng giải quyết..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl p-3 text-slate-200 focus:outline-none focus:border-blue-500 resize-none"></textarea>
                 </div>
 
+                <!-- Modal Footer Buttons -->
                 <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
                     <button type="button" onclick="closeIncidentModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
                         Hủy Bỏ
@@ -918,6 +924,7 @@
             });
         }
 
+        /* --- LOGIC QUẢN LÝ NHẬT KÝ SỰ CỐ & MODAL --- */
         function openIncidentModal(id = null) {
             const modal = document.getElementById('incidentModal');
             const form = document.getElementById('incidentForm');
@@ -937,6 +944,7 @@
                 }
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành Mới';
+                // Đặt mặc định ngày sự cố là ngày hiện tại
                 const todayIso = new Date().toISOString().split('T')[0];
                 document.getElementById('incDate').value = todayIso;
             }
@@ -958,11 +966,13 @@
             const unit = document.getElementById('incUnit').value.trim();
 
             if (id) {
+                // Sửa
                 const index = incidentsList.findIndex(i => i.id === id);
                 if (index >= 0) {
                     incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
                 }
             } else {
+                // Thêm mới
                 const newInc = {
                     id: 'inc-' + Date.now(),
                     date,
@@ -1019,6 +1029,7 @@
                 });
             }
 
+            // Sắp xếp sự cố mới nhất lên trên
             filteredIncidents.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filteredIncidents.length === 0) {
@@ -1276,7 +1287,7 @@
                         if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
                         if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
 
-                        if (col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Chỉ số Zalo OA" || col0 === "Danh mục Kênh" || col0 === "danh mục" || col0 === "Tên Đơn Vị" || col0 === "Danh mục Kênh khảo sát") {
+                        if (col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Chỉ số Zalo OA" || col0 === "Danh mục Kênh" || col0 === "danh mục" || col0 === "Tên Đơn Vị") {
                             if (col1 !== undefined && col1 !== null && col1 !== "" && !extractedDate) {
                                 if (typeof col1 === 'number') {
                                     extractedDate = excelSerialToDate(col1);
@@ -1317,8 +1328,8 @@
                         }
 
                         if (currentSection === "units") {
-                            if (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ" || col0 === "VP8a") {
-                                if (i < 42) unitCalls[col0] = Number(col1) || 0;
+                            if (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ") {
+                                if (i < 36) unitCalls[col0] = Number(col1) || 0;
                                 else unitCrm[col0] = Number(col1) || 0;
                             }
                         }
@@ -1332,12 +1343,8 @@
                         }
 
                         if (currentSection === "surveys") {
-                            if (col0.toLowerCase() === "website" || col0 === "Số lượt" || col0.toLowerCase() === "web site") {
-                                surveys.webCount = Number(col1) || 0;
-                            }
-                            if (col0.toLowerCase().includes("điểm đánh giá") || col0 === "Điểm đánh giá") {
-                                surveys.webScore = String(col1 || "0/50");
-                            }
+                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
+                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
                         }
                     }
 
@@ -1440,7 +1447,7 @@
             database.forEach(item => unitCallHeader.push(item.date));
             aoa.push(unitCallHeader);
 
-            const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ", "VP8a"];
+            const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
             unitNames.forEach(u => {
                 let uRow = [u];
                 database.forEach(item => {
@@ -1495,11 +1502,11 @@
             aoa.push([]);
 
             aoa.push(["5. LƯỢT KHẢO SÁT WebSite"]);
-            let surveyHeader = ["Danh mục Kênh khảo sát"];
+            let surveyHeader = ["danh mục"];
             database.forEach(item => surveyHeader.push(item.date));
             aoa.push(surveyHeader);
 
-            let rowWebCount = ["Website"];
+            let rowWebCount = ["Số lượt"];
             let rowWebScore = ["Điểm đánh giá"];
             database.forEach(item => {
                 rowWebCount.push(item.surveys ? item.surveys.webCount || 0 : 0);
