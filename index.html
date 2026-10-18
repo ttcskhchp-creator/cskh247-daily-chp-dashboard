@@ -660,4 +660,875 @@
 
         async function saveDataToSupabase() {
             sortDatabase();
-            const currentIsoTime = new Date
+            const currentIsoTime = new Date().toISOString();
+            try {
+                const payload = { 
+                    id: 1, 
+                    payload: database, 
+                    incidents: incidentsList,
+                    updated_at: currentIsoTime 
+                };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Lỗi khi ghi dữ liệu lên Supabase.");
+                } else {
+                    updateLastUpdatedDisplay(currentIsoTime);
+                    document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
+                    document.getElementById('statusBannerText').innerText = "Đã đồng bộ dữ liệu lên Supabase Cloud thành công.";
+                }
+            } catch (err) {
+                console.error("Supabase save error:", err);
+            }
+        }
+
+        function updateDeleteSelectOptions() {
+            const select = document.getElementById('deleteDateSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            if (!database || database.length === 0) {
+                select.innerHTML = '<option value="">Không có ngày</option>';
+                return;
+            }
+            database.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.date;
+                opt.innerText = item.date;
+                select.appendChild(opt);
+            });
+        }
+
+        async function deleteSelectedDate() {
+            const dateToDelete = document.getElementById('deleteDateSelect').value;
+            if (!dateToDelete) {
+                alert("Không có ngày nào được chọn để xóa.");
+                return;
+            }
+
+            const passwordInput = prompt("Vui lòng nhập mật khẩu xác thực bảo mật để xóa dữ liệu:");
+            if (passwordInput === null) {
+                return;
+            }
+            if (passwordInput !== "6868") {
+                alert("Mật khẩu không chính xác! Thao tác xóa đã bị hủy.");
+                return;
+            }
+
+            if (confirm(`Bạn có chắc chắn muốn xóa dữ liệu ngày ${dateToDelete} trên Cloud?`)) {
+                database = database.filter(item => item.date !== dateToDelete);
+                sortDatabase();
+                await saveDataToSupabase();
+                updateDeleteSelectOptions();
+                applyDateFilter();
+                alert(`Đã xóa thành công ngày ${dateToDelete} trên Supabase Cloud.`);
+            }
+        }
+
+        function parseDateStandard(dateStr) {
+            if (!dateStr) return null;
+            let str = String(dateStr).trim();
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            if (str.includes('-')) {
+                const parts = str.split('-');
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+            return null;
+        }
+
+        function applyCustomDateFilter() {
+            setQuickFilterUI(null);
+            applyDateFilter();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            setQuickFilter('7');
+        }
+
+        function setQuickFilter(type) {
+            setQuickFilterUI(type);
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+
+            if (type === 'all') {
+                filteredData = [...database];
+            } else {
+                const n = parseInt(type);
+                filteredData = database.slice(-n);
+            }
+            updateDashboard();
+        }
+
+        function setQuickFilterUI(type) {
+            ['7', '14', 'all'].forEach(t => {
+                const btn = document.getElementById(`btn-quick-${t}`);
+                if (!btn) return;
+                if (t === type) {
+                    btn.className = "px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-medium border border-blue-500 transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition";
+                }
+            });
+        }
+
+        function applyDateFilter() {
+            const startStr = document.getElementById('filterStartDate').value;
+            const endStr = document.getElementById('filterEndDate').value;
+
+            if (!startStr && !endStr) {
+                filteredData = [...database];
+            } else {
+                const startDate = startStr ? new Date(startStr) : null;
+                const endDate = endStr ? new Date(endStr) : null;
+
+                filteredData = database.filter(item => {
+                    const d = parseDateStandard(item.date);
+                    if (!d) return true;
+                    if (startDate && d < startDate) return false;
+                    if (endDate) {
+                        const endCompare = new Date(endDate);
+                        endCompare.setHours(23, 59, 59);
+                        if (d > endCompare) return false;
+                    }
+                    return true;
+                });
+            }
+            sortDatabase();
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('kpiCrmValue').innerText = '0';
+                document.getElementById('kpiZaloMsgValue').innerText = '0';
+                document.getElementById('kpiCallsValue').innerText = '0';
+                document.getElementById('kpiSurveyValue').innerText = '0 lượt';
+                document.getElementById('kpiWebScore').innerText = 'Web: 0/50';
+                document.getElementById('kpiCsatZalo').innerText = 'CSAT Zalo: 0%';
+                renderMatrixTable();
+                updateCharts();
+                return;
+            }
+
+            const latest = filteredData[filteredData.length - 1];
+
+            let totalCrm = filteredData.reduce((acc, curr) => acc + (curr.kpi.crm || 0), 0);
+            let avgCrmPerDay = (totalCrm / filteredData.length).toFixed(1);
+            document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString('vi-VN');
+            document.getElementById('kpiCrmAvg').innerText = `TB: ${avgCrmPerDay}/ngày`;
+
+            let totalZalo = filteredData.reduce((acc, curr) => acc + (curr.kpi.zaloMsg || 0), 0);
+            document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString('vi-VN');
+            document.getElementById('kpiZaloRate').innerText = `${latest.kpi.zaloRate}%`;
+            document.getElementById('kpiZaloTime').innerText = `${latest.kpi.zaloTime} phút`;
+
+            let totalCalls = filteredData.reduce((acc, curr) => acc + (curr.kpi.calls || 0), 0);
+            document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString('vi-VN');
+            document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi.callsMissed}`;
+            document.getElementById('kpiCallsAnswered').innerText = `Nhấc máy: ${latest.kpi.callsRate}%`;
+
+            let totalWebSurvey = filteredData.reduce((acc, curr) => acc + (curr.surveys && curr.surveys.webCount ? curr.surveys.webCount : 0), 0);
+            
+            let webScoresList = [];
+            filteredData.forEach(curr => {
+                if (curr.surveys && curr.surveys.webScore) {
+                    let scoreStr = String(curr.surveys.webScore).split('/')[0];
+                    let scoreVal = parseFloat(scoreStr);
+                    if (!isNaN(scoreVal) && scoreVal > 0) {
+                        webScoresList.push(scoreVal);
+                    }
+                }
+            });
+            let avgWebScore = webScoresList.length > 0 ? (webScoresList.reduce((a, b) => a + b, 0) / webScoresList.length).toFixed(1) : 0;
+
+            document.getElementById('kpiSurveyValue').innerText = `${totalWebSurvey.toLocaleString('vi-VN')} lượt`;
+            document.getElementById('kpiWebScore').innerText = `Web: ${avgWebScore}/50`;
+
+            let csatList = [];
+            filteredData.forEach(curr => {
+                let csatVal = curr.zaloDetails && curr.zaloDetails.csat !== undefined ? Number(curr.zaloDetails.csat) : 0;
+                if (csatVal > 0) {
+                    csatList.push(csatVal);
+                }
+            });
+            let avgCsat = csatList.length > 0 ? (csatList.reduce((a, b) => a + b, 0) / csatList.length) : 0;
+            document.getElementById('kpiCsatZalo').innerText = `CSAT Zalo: ${Math.round(avgCsat * 100)}%`;
+
+            const talkTimeVal = Number(latest.kpi.talkTime || 0);
+            const waitTimeVal = Number(latest.kpi.waitTime || 0);
+            document.getElementById('kpiTalkTime').innerText = `${Number.isInteger(talkTimeVal) ? talkTimeVal : talkTimeVal.toFixed(1)}s`;
+            document.getElementById('kpiWaitTime').innerText = `${Number.isInteger(waitTimeVal) ? waitTimeVal : waitTimeVal.toFixed(1)}s`;
+
+            document.getElementById('zaloTotalFollowers').innerText = latest.zaloDetails.totalFollowers.toLocaleString('vi-VN');
+            document.getElementById('zaloNewFollowers').innerText = `+${latest.zaloDetails.newFollowers}`;
+            document.getElementById('zaloUnfollow').innerText = `${latest.zaloDetails.unfollowers} người`;
+            document.getElementById('zaloReplyRate').innerText = `${latest.zaloDetails.replyRate}%`;
+
+            renderMatrixTable();
+            updateCharts();
+        }
+
+        function renderMatrixTable() {
+            const headerRow = document.getElementById('matrixTableHeader');
+            const tbody = document.getElementById('matrixTableBody');
+
+            let headerHtml = '<th class="p-3 font-bold text-slate-200 min-w-[280px]">NHÓM VẤN ĐỀ</th>';
+            headerHtml += '<th class="p-3 font-bold text-center text-amber-400 min-w-[120px] bg-slate-900/90 border-r border-slate-800"><i class="fa-solid fa-calculator mr-1"></i> TB / NGÀY</th>';
+
+            filteredData.forEach(item => {
+                headerHtml += `<th class="p-3 font-bold text-center text-slate-300 min-w-[110px]">${item.date}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            let allCategoriesSet = new Set();
+            filteredData.forEach(d => {
+                if (d.categories) Object.keys(d.categories).forEach(k => allCategoriesSet.add(k));
+            });
+            const categories = Array.from(allCategoriesSet);
+
+            tbody.innerHTML = '';
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
+                
+                let rowHtml = `<td class="p-3 font-medium text-slate-200">${cat}</td>`;
+                
+                let sum = 0;
+                let dailyValuesHtml = '';
+                filteredData.forEach(item => {
+                    const val = (item.categories && item.categories[cat] !== undefined) ? item.categories[cat] : 0;
+                    sum += val;
+                    dailyValuesHtml += `<td class="p-3 text-center font-semibold text-slate-300">${val}</td>`;
+                });
+
+                const avg = filteredData.length > 0 ? (sum / filteredData.length).toFixed(1) : 0;
+                
+                rowHtml += `<td class="p-3 text-center font-bold text-amber-400 bg-slate-900/50 border-r border-slate-800">${avg}</td>`;
+                rowHtml += dailyValuesHtml;
+
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* --- LOGIC QUẢN LÝ NHẬT KÝ SỰ CỐ & MODAL --- */
+        function openIncidentModal(id = null) {
+            const modal = document.getElementById('incidentModal');
+            const form = document.getElementById('incidentForm');
+            form.reset();
+            document.getElementById('incidentId').value = '';
+
+            if (id) {
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-rose-400"></i> Chỉnh Sửa Sự Cố Vận Hành';
+                const inc = incidentsList.find(i => i.id === id);
+                if (inc) {
+                    document.getElementById('incidentId').value = inc.id;
+                    document.getElementById('incDate').value = inc.date || '';
+                    document.getElementById('incResolvedDate').value = inc.resolvedDate || '';
+                    document.getElementById('incTotalHours').value = inc.totalHours || '';
+                    document.getElementById('incContent').value = inc.content || '';
+                    document.getElementById('incUnit').value = inc.unit || '';
+                }
+            } else {
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành Mới';
+                // Đặt mặc định ngày sự cố là ngày hiện tại
+                const todayIso = new Date().toISOString().split('T')[0];
+                document.getElementById('incDate').value = todayIso;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeIncidentModal() {
+            document.getElementById('incidentModal').classList.add('hidden');
+        }
+
+        async function handleIncidentSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('incidentId').value;
+            const date = document.getElementById('incDate').value;
+            const resolvedDate = document.getElementById('incResolvedDate').value;
+            const totalHours = parseFloat(document.getElementById('incTotalHours').value) || 0;
+            const content = document.getElementById('incContent').value.trim();
+            const unit = document.getElementById('incUnit').value.trim();
+
+            if (id) {
+                // Sửa
+                const index = incidentsList.findIndex(i => i.id === id);
+                if (index >= 0) {
+                    incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
+                }
+            } else {
+                // Thêm mới
+                const newInc = {
+                    id: 'inc-' + Date.now(),
+                    date,
+                    resolvedDate,
+                    totalHours,
+                    content,
+                    unit
+                };
+                incidentsList.push(newInc);
+            }
+
+            closeIncidentModal();
+            await saveDataToSupabase();
+            renderIncidentTable();
+        }
+
+        async function deleteIncident(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa sự cố vận hành này không?")) {
+                incidentsList = incidentsList.filter(i => i.id !== id);
+                await saveDataToSupabase();
+                renderIncidentTable();
+            }
+        }
+
+        function clearIncidentFilter() {
+            document.getElementById('incidentFilterStart').value = '';
+            document.getElementById('incidentFilterEnd').value = '';
+            renderIncidentTable();
+        }
+
+        function renderIncidentTable() {
+            const tbody = document.getElementById('incidentTableBody');
+            if (!tbody) return;
+
+            const startStr = document.getElementById('incidentFilterStart').value;
+            const endStr = document.getElementById('incidentFilterEnd').value;
+
+            let filteredIncidents = [...incidentsList];
+
+            if (startStr || endStr) {
+                const startDate = startStr ? new Date(startStr) : null;
+                const endDate = endStr ? new Date(endStr) : null;
+
+                filteredIncidents = incidentsList.filter(item => {
+                    if (!item.date) return true;
+                    const d = new Date(item.date);
+                    if (startDate && d < startDate) return false;
+                    if (endDate) {
+                        const endCompare = new Date(endDate);
+                        endCompare.setHours(23, 59, 59);
+                        if (d > endCompare) return false;
+                    }
+                    return true;
+                });
+            }
+
+            // Sắp xếp sự cố mới nhất lên trên
+            filteredIncidents.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filteredIncidents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">Không có bản ghi sự cố nào trong khoảng thời gian này.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filteredIncidents.forEach(inc => {
+                const formatDateDisplay = (dStr) => {
+                    if (!dStr) return '<span class="text-slate-500">--</span>';
+                    const parts = dStr.split('-');
+                    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    return dStr;
+                };
+
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
+                        <td class="p-3 font-medium text-slate-200">${formatDateDisplay(inc.date)}</td>
+                        <td class="p-3 text-slate-300">${formatDateDisplay(inc.resolvedDate)}</td>
+                        <td class="p-3 text-center font-bold text-rose-400">${inc.totalHours || 0}h</td>
+                        <td class="p-3 text-slate-200">${inc.content}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-medium">
+                                ${inc.unit}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="openIncidentModal('${inc.id}')" class="px-2 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-xs transition" title="Sửa">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteIncident('${inc.id}')" class="px-2 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs transition" title="Xóa">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function initCharts() {
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            trendChartInstance = new Chart(ctxTrend, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Yêu Cầu CRM', color: '#ef4444' }, ticks: { color: '#ef4444' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Zalo & Cuộc Gọi', color: '#3b82f6' }, ticks: { color: '#3b82f6' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            categoryChartInstance = new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10 } } } }
+            });
+
+            const ctxUnit = document.getElementById('unitChart').getContext('2d');
+            unitChartInstance = new Chart(ctxUnit, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
+                        y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function setChartType(type) {
+            currentChartType = type;
+            document.getElementById('btn-chart-bar').className = type === 'bar' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition' : 'px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition';
+            document.getElementById('btn-chart-line').className = type === 'line' ? 'px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition' : 'px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition';
+            updateCharts();
+        }
+
+        function setUnitChartType(type) {
+            currentUnitChartType = type;
+            ['bar', 'line', 'area'].forEach(t => {
+                const btn = document.getElementById(`btn-unit-${t}`);
+                if (!btn) return;
+                if (t === type) {
+                    btn.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition";
+                }
+            });
+            updateCharts();
+        }
+
+        function updateCharts() {
+            if (!filteredData) return;
+            const dates = filteredData.map(d => d.date);
+            const crmRequests = filteredData.map(d => d.kpi.crm);
+            const zaloMsgs = filteredData.map(d => d.kpi.zaloMsg);
+            const calls = filteredData.map(d => d.kpi.calls);
+
+            trendChartInstance.config.type = currentChartType;
+            trendChartInstance.data.labels = dates;
+
+            trendChartInstance.data.datasets = [
+                {
+                    label: 'Yêu Cầu CRM',
+                    data: crmRequests,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#ef4444',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Tin Nhắn Zalo',
+                    data: zaloMsgs,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#3b82f6',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'Cuộc Gọi Đến',
+                    data: calls,
+                    backgroundColor: '#f59e0b',
+                    borderColor: '#f59e0b',
+                    borderWidth: currentChartType === 'line' ? 3 : 1,
+                    borderRadius: currentChartType === 'bar' ? 4 : 0,
+                    type: currentChartType,
+                    yAxisID: 'y1'
+                }
+            ];
+            trendChartInstance.update();
+
+            if (filteredData.length > 0) {
+                const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
+                const shortUnitNames = ["Cảng Tân Vũ", "Cảng HDCV"];
+
+                const unitColors = [
+                    { call: '#f97316', callArea: 'rgba(249, 115, 22, 0.25)', crm: '#38bdf8', crmArea: 'rgba(56, 189, 248, 0.25)' },
+                    { call: '#a855f7', callArea: 'rgba(168, 85, 247, 0.25)', crm: '#10b981', crmArea: 'rgba(16, 185, 129, 0.25)' }
+                ];
+
+                let unitDatasets = [];
+                const isLineOrArea = currentUnitChartType === 'line' || currentUnitChartType === 'area';
+
+                unitNames.forEach((u, idx) => {
+                    let callDataByDate = filteredData.map(d => (d.units && d.units.calls && d.units.calls[u]) || 0);
+                    let crmDataByDate = filteredData.map(d => (d.units && d.units.crm && d.units.crm[u]) || 0);
+
+                    unitDatasets.push({
+                        label: `[Cuộc Gọi] ${shortUnitNames[idx]}`,
+                        data: callDataByDate,
+                        backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].callArea : unitColors[idx].call,
+                        borderColor: unitColors[idx].call,
+                        borderWidth: isLineOrArea ? 2.5 : 1,
+                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
+                        fill: currentUnitChartType === 'area',
+                        tension: 0.3,
+                        type: isLineOrArea ? 'line' : 'bar',
+                        hidden: false
+                    });
+
+                    unitDatasets.push({
+                        label: `[CRM] ${shortUnitNames[idx]}`,
+                        data: crmDataByDate,
+                        backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].crmArea : unitColors[idx].crm,
+                        borderColor: unitColors[idx].crm,
+                        borderWidth: isLineOrArea ? 2.5 : 1,
+                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
+                        fill: currentUnitChartType === 'area',
+                        tension: 0.3,
+                        type: isLineOrArea ? 'line' : 'bar',
+                        hidden: true
+                    });
+                });
+
+                unitChartInstance.config.type = isLineOrArea ? 'line' : 'bar';
+                unitChartInstance.data.labels = dates;
+                unitChartInstance.data.datasets = unitDatasets;
+                unitChartInstance.update();
+            }
+
+            updatePieChart();
+        }
+
+        function updatePieChart() {
+            if (!filteredData || filteredData.length === 0) return;
+            const latest = filteredData[filteredData.length - 1];
+            const limit = document.getElementById('pieLimitSelect').value;
+            const cats = (latest && latest.categories) || {};
+
+            let sorted = Object.keys(cats).map(k => ({ name: k, count: cats[k] })).sort((a,b) => b.count - a.count);
+
+            if (limit !== 'all') {
+                const n = parseInt(limit);
+                if (sorted.length > n) {
+                    const topN = sorted.slice(0, n);
+                    const restSum = sorted.slice(n).reduce((acc, cur) => acc + cur.count, 0);
+                    topN.push({ name: 'Khác', count: restSum });
+                    sorted = topN;
+                }
+            }
+
+            categoryChartInstance.data.labels = sorted.map(i => i.name);
+            categoryChartInstance.data.datasets = [{
+                data: sorted.map(i => i.count),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b']
+            }];
+            categoryChartInstance.update();
+        }
+
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames.includes("THNGAY") ? "THNGAY" : workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    let extractedDate = "";
+                    let kpi = { crm: 0, zaloMsg: 0, zaloRate: 0, zaloTime: 0, calls: 0, callsMissed: 0, callsRate: 0, talkTime: 0, waitTime: 0 };
+                    let categories = {};
+                    let unitCalls = {};
+                    let unitCrm = {};
+                    let zaloDetails = { totalFollowers: 0, newFollowers: 0, unfollowers: 0, replyRate: 0, csat: 0 };
+                    let surveys = { webCount: 0, webScore: "0/50" };
+
+                    let currentSection = "";
+
+                    for (let i = 0; i < rows.length; i++) {
+                        let r = rows[i];
+                        let col0 = r[0] ? String(r[0]).trim() : "";
+                        let col1 = r[1];
+
+                        if (col0.includes("1. Khối KPI")) { currentSection = "kpi"; continue; }
+                        if (col0.includes("2. Khối Phân loại")) { currentSection = "categories"; continue; }
+                        if (col0.includes("3. Khối So sánh")) { currentSection = "units"; continue; }
+                        if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
+                        if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
+
+                        if (col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Chỉ số Zalo OA" || col0 === "Danh mục Kênh" || col0 === "danh mục" || col0 === "Tên Đơn Vị") {
+                            if (col1 !== undefined && col1 !== null && col1 !== "" && !extractedDate) {
+                                if (typeof col1 === 'number') {
+                                    extractedDate = excelSerialToDate(col1);
+                                } else if (col1 instanceof Date) {
+                                    const day = String(col1.getDate()).padStart(2, '0');
+                                    const month = String(col1.getMonth() + 1).padStart(2, '0');
+                                    const year = col1.getFullYear();
+                                    extractedDate = `${day}/${month}/${year}`;
+                                } else {
+                                    let strVal = String(col1).trim();
+                                    if (!isNaN(strVal) && Number(strVal) > 30000) {
+                                        extractedDate = excelSerialToDate(Number(strVal));
+                                    } else if (strVal.includes('T')) {
+                                        extractedDate = strVal.split('T')[0].split('-').reverse().join('/');
+                                    } else if (strVal.includes('/')) {
+                                        extractedDate = strVal;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (currentSection === "kpi") {
+                            if (col0 === "Số yêu cầu (CRM)") kpi.crm = Number(col1) || 0;
+                            if (col0 === "Lượt tin nhắn Zalo") kpi.zaloMsg = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ phản hồi Zalo (%)") kpi.zaloRate = Number(col1) || 0;
+                            if (col0 === "Thời gian phản hồi Zalo (Phút)") kpi.zaloTime = Number(col1) || 0;
+                            if (col0 === "Cuộc gọi đến") kpi.calls = Number(col1) || 0;
+                            if (col0 === "Số cuộc lỡ") kpi.callsMissed = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = Number(col1) || 0;
+                            if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = Number(col1) || 0;
+                            if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "categories") {
+                            if (col0 && col0 !== "Vấn đề phản ánh" && col1 !== undefined && col0 !== "") {
+                                categories[col0] = Number(col1) || 0;
+                            }
+                        }
+
+                        if (currentSection === "units") {
+                            if (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ") {
+                                if (i < 36) unitCalls[col0] = Number(col1) || 0;
+                                else unitCrm[col0] = Number(col1) || 0;
+                            }
+                        }
+
+                        if (currentSection === "zalo") {
+                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = Number(col1) || 0;
+                            if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = Number(col1) || 0;
+                            if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ phản hồi (%)") zaloDetails.replyRate = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ hài lòng CSAT") zaloDetails.csat = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "surveys") {
+                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
+                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
+                        }
+                    }
+
+                    if (!extractedDate) {
+                        const now = new Date();
+                        extractedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+                    }
+
+                    const newRecord = {
+                        date: extractedDate,
+                        kpi: kpi,
+                        categories: categories,
+                        units: { calls: unitCalls, crm: unitCrm },
+                        zaloDetails: zaloDetails,
+                        surveys: surveys
+                    };
+
+                    const existingIndex = database.findIndex(d => d.date === extractedDate);
+                    if (existingIndex >= 0) {
+                        database[existingIndex] = newRecord;
+                        alert(`Đã nạp lại thành công dữ liệu cho ngày ${extractedDate} và đồng bộ lên Supabase Cloud!`);
+                    } else {
+                        database.push(newRecord);
+                        alert(`Đã thêm thành công ngày mới: ${extractedDate} và đồng bộ lên Supabase Cloud!`);
+                    }
+
+                    sortDatabase();
+                    await saveDataToSupabase();
+                    updateDeleteSelectOptions();
+                    applyDateFilter();
+                } catch (err) {
+                    console.error(err);
+                    alert("Lỗi khi đọc file Excel.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function exportToExcel() {
+            if (!database || database.length === 0) {
+                alert("Không có dữ liệu để xuất!");
+                return;
+            }
+
+            sortDatabase();
+            let aoa = [];
+
+            aoa.push(["1. Khối KPI Tổng hợp Chung"]);
+            let rowDate = ["Ngày"];
+            let rowCrm = ["Số yêu cầu (CRM)"];
+            let rowZaloMsg = ["Lượt tin nhắn Zalo"];
+            let rowZaloRate = ["Tỷ lệ phản hồi Zalo (%)"];
+            let rowZaloTime = ["Thời gian phản hồi Zalo (Phút)"];
+            let rowCalls = ["Cuộc gọi đến"];
+            let rowCallsMissed = ["Số cuộc lỡ"];
+            let rowCallsRate = ["Tỷ lệ nhấc máy (%)"];
+            let rowTalkTime = ["Thời gian thoại TB (giây)"];
+            let rowWaitTime = ["Thời gian chờ TB (giây)"];
+
+            database.forEach(item => {
+                rowDate.push(item.date);
+                rowCrm.push(item.kpi.crm || 0);
+                rowZaloMsg.push(item.kpi.zaloMsg || 0);
+                rowZaloRate.push(item.kpi.zaloRate || 0);
+                rowZaloTime.push(item.kpi.zaloTime || 0);
+                rowCalls.push(item.kpi.calls || 0);
+                rowCallsMissed.push(item.kpi.callsMissed || 0);
+                rowCallsRate.push(item.kpi.callsRate || 0);
+                rowTalkTime.push(item.kpi.talkTime || 0);
+                rowWaitTime.push(item.kpi.waitTime || 0);
+            });
+
+            aoa.push(rowDate, rowCrm, rowZaloMsg, rowZaloRate, rowZaloTime, rowCalls, rowCallsMissed, rowCallsRate, rowTalkTime, rowWaitTime);
+            aoa.push([]);
+
+            aoa.push(["2. Khối Phân loại Các Vấn Đề Tiếp Nhận (Dùng vẽ Biểu đồ Tròn TOP)"]);
+            let catHeader = ["Vấn đề phản ánh"];
+            database.forEach(item => catHeader.push(item.date));
+            aoa.push(catHeader);
+
+            let allCategories = new Set();
+            database.forEach(d => {
+                if (d.categories) Object.keys(d.categories).forEach(k => allCategories.add(k));
+            });
+
+            Array.from(allCategories).forEach(cat => {
+                let catRow = [cat];
+                database.forEach(item => {
+                    let val = (item.categories && item.categories[cat] !== undefined) ? item.categories[cat] : 0;
+                    catRow.push(val);
+                });
+                aoa.push(catRow);
+            });
+            aoa.push([]);
+
+            aoa.push(["3. Khối So sánh Hiệu suất theo Đơn vị / Phòng ban (Biểu đồ Cột)"]);
+            aoa.push(["Cuộc gọi đến"]);
+            let unitCallHeader = ["Tên Đơn Vị"];
+            database.forEach(item => unitCallHeader.push(item.date));
+            aoa.push(unitCallHeader);
+
+            const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
+            unitNames.forEach(u => {
+                let uRow = [u];
+                database.forEach(item => {
+                    let val = (item.units && item.units.calls && item.units.calls[u] !== undefined) ? item.units.calls[u] : 0;
+                    uRow.push(val);
+                });
+                aoa.push(uRow);
+            });
+
+            aoa.push([]);
+            aoa.push(["CRM Ghi nhận"]);
+            let unitCrmHeader = ["Tên Đơn Vị"];
+            database.forEach(item => unitCrmHeader.push(item.date));
+            aoa.push(unitCrmHeader);
+
+            unitNames.forEach(u => {
+                let uRow = [u];
+                database.forEach(item => {
+                    let val = (item.units && item.units.crm && item.units.crm[u] !== undefined) ? item.units.crm[u] : 0;
+                    uRow.push(val);
+                });
+                aoa.push(uRow);
+            });
+            aoa.push([]);
+
+            aoa.push(["4. Khối Chỉ số Chi tiết Kênh Zalo OA"]);
+            let zaloHeader = ["Chỉ số Zalo OA"];
+            database.forEach(item => zaloHeader.push(item.date));
+            aoa.push(zaloHeader);
+
+            let rowTotalF = ["Người quan tâm"];
+            let rowNewF = ["Người quan tâm mới"];
+            let rowUnf = ["Người dùng bỏ quan tâm"];
+            let rowMsgSend = ["Lượt gửi tin nhắn"];
+            let rowMsgReply = ["Lượt trả lời, phản hồi"];
+            let rowReplyRate = ["Tỷ lệ phản hồi (%)"];
+            let rowFirstTime = ["Thời gian phản hồi đầu tiên (phút)"];
+            let rowCsat = ["Tỷ lệ hài lòng CSAT"];
+
+            database.forEach(item => {
+                rowTotalF.push(item.zaloDetails ? item.zaloDetails.totalFollowers || 0 : 0);
+                rowNewF.push(item.zaloDetails ? item.zaloDetails.newFollowers || 0 : 0);
+                rowUnf.push(item.zaloDetails ? item.zaloDetails.unfollowers || 0 : 0);
+                rowMsgSend.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
+                rowMsgReply.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
+                rowReplyRate.push(item.zaloDetails ? item.zaloDetails.replyRate || 0 : 0);
+                rowFirstTime.push(item.kpi ? item.kpi.zaloTime || 0 : 0);
+                rowCsat.push(item.zaloDetails ? item.zaloDetails.csat || 0 : 0);
+            });
+
+            aoa.push(rowTotalF, rowNewF, rowUnf, rowMsgSend, rowMsgReply, rowReplyRate, rowFirstTime, rowCsat);
+            aoa.push([]);
+
+            aoa.push(["5. LƯỢT KHẢO SÁT WebSite"]);
+            let surveyHeader = ["danh mục"];
+            database.forEach(item => surveyHeader.push(item.date));
+            aoa.push(surveyHeader);
+
+            let rowWebCount = ["Số lượt"];
+            let rowWebScore = ["Điểm đánh giá"];
+            database.forEach(item => {
+                rowWebCount.push(item.surveys ? item.surveys.webCount || 0 : 0);
+                rowWebScore.push(item.surveys ? item.surveys.webScore || "0/50" : "0/50");
+            });
+
+            aoa.push(rowWebCount, rowWebScore);
+
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "THNGAY");
+            XLSX.writeFile(wb, "Bao_Cao_CSKH_Cang_Hai_Phong_Tong_Hop.xlsx");
+        }
+
+        function filterTable() {
+            const query = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.getElementById('matrixTableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].innerText.toLowerCase();
+                rows[i].style.display = text.includes(query) ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
