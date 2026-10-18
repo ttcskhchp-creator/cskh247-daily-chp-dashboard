@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Hiệu Suất CSKH247 - Cảng Hải Phòng</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#0f172a',
+                            900: '#0b0f19',
+                            950: '#05070e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #05070e; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- HEADER & TOOLBAR -->
+    <header class="bg-slate-900/90 border-b border-slate-800/80 sticky top-0 z-50 backdrop-blur-md px-4 py-3">
+        <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xl">
+                    <i class="fa-solid fa-ship"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-white">TRUNG TÂM KHAI THÁC & DỊCH VỤ KHÁCH HÀNG </h1>
+                    <p class="text-xs text-slate-400">Báo cáo hiệu suất CSKH247 - Lưu trữ Cloud Supabase</p>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div class="flex flex-wrap items-center gap-2">
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
+                <button onclick="document.getElementById('excelFileInput').click()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                    <i class="fa-solid fa-file-excel"></i> Nạp File Excel Ngày Mới
+                </button>
+                
+                <!-- Xóa dữ liệu theo ngày chọn (có mật khẩu bảo vệ) -->
+                <div class="flex items-center gap-1 bg-slate-800/80 border border-slate-700/80 rounded-xl p-1">
+                    <select id="deleteDateSelect" class="bg-slate-900 text-slate-200 text-xs rounded-lg px-2 py-1 focus:outline-none border border-slate-700">
+                        <!-- Render các ngày hiện có -->
+                    </select>
+                    <button onclick="deleteSelectedDate()" class="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs font-semibold transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Xóa Ngày Này
+                    </button>
+                </div>
+
+                <button onclick="exportToExcel()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Xuất Excel/CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- STATUS BANNER -->
+    <div class="bg-slate-900/50 border-b border-slate-800/60 py-2 px-4 text-xs text-slate-400">
+        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span id="syncDot" class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span id="statusBannerText">Đang kết nối đến Supabase Cloud...</span>
+            </div>
+            <div id="lastUpdatedText" class="text-slate-400 font-medium">
+                Cập nhật lần cuối: --
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="max-w-[1600px] mx-auto px-4 py-5 flex-1 w-full space-y-5">
+
+        <!-- BỘ LỌC THỜI GIAN VÀ ĐƠN VỊ -->
+        <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center space-x-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1.5">
+                    <i class="fa-solid fa-calendar-days text-blue-400 text-xs"></i>
+                    <span class="text-xs text-slate-300 font-semibold">Lọc Khoảng Thời Gian:</span>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                    <span class="text-xs text-slate-400">Từ:</span>
+                    <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                </div>
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                    <span class="text-xs text-slate-400">Đến:</span>
+                    <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                </div>
+                <button onclick="clearDateFilter()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">
+                    Xóa Lọc Ngày
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="setQuickFilter('7')" id="btn-quick-7" class="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-medium border border-blue-500 transition">7 ngày gần nhất</button>
+                <button onclick="setQuickFilter('14')" id="btn-quick-14" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">14 ngày gần nhất</button>
+                <button onclick="setQuickFilter('all')" id="btn-quick-all" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">Tất cả lịch sử</button>
+            </div>
+        </div>
+
+        <!-- KPI CARDS SECTION -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Card 1: YÊU CẦU CRM -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">YÊU CẦU CRM</span>
+                        <i class="fa-solid fa-headset text-slate-500 text-lg"></i>
+                    </div>
+                    <div id="kpiCrmValue" class="text-3xl font-extrabold text-white mt-2">--</div>
+                </div>
+                <div class="flex justify-between items-center mt-4 text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
+                    <span id="kpiCrmAvg" class="text-emerald-400 font-semibold">TB: --/ngày</span>
+                    <span class="text-slate-400">Lịch sử</span>
+                </div>
+            </div>
+
+            <!-- Card 2: TIN NHẮN ZALO OA -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">TIN NHẮN ZALO OA</span>
+                        <i class="fa-solid fa-comments text-slate-500 text-lg"></i>
+                    </div>
+                    <div id="kpiZaloMsgValue" class="text-3xl font-extrabold text-white mt-2">--</div>
+                </div>
+                <div class="space-y-1 mt-3 pt-2 border-t border-slate-800/80 text-[11px]">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Tỷ lệ phản hồi:</span>
+                        <span id="kpiZaloRate" class="text-cyan-400 font-semibold">--%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">TG phản hồi đầu:</span>
+                        <span id="kpiZaloTime" class="text-cyan-400 font-semibold">-- phút</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: CUỘC GỌI TỔNG ĐÀI -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">CUỘC GỌI TỔNG ĐÀI</span>
+                        <i class="fa-solid fa-phone text-slate-500 text-lg"></i>
+                    </div>
+                    <div id="kpiCallsValue" class="text-3xl font-extrabold text-white mt-2">--</div>
+                </div>
+                <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
+                    <span id="kpiCallsMissed" class="text-rose-400 font-semibold">Lỡ: --</span>
+                    <span id="kpiCallsAnswered" class="text-emerald-400 font-semibold">Nhấc máy: --%</span>
+                </div>
+            </div>
+
+            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">KHẢO SÁT WEB & CSAT</span>
+                        <i class="fa-solid fa-globe text-slate-500 text-lg"></i>
+                    </div>
+                    <div id="kpiSurveyValue" class="text-3xl font-extrabold text-white mt-2">-- lượt</div>
+                </div>
+                <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
+                    <span id="kpiWebScore" class="text-amber-400 font-semibold">Web: --</span>
+                    <span id="kpiCsatZalo" class="text-emerald-400 font-semibold">CSAT Zalo: --%</span>
+                </div>
+            </div>
+
+            <!-- Card 5: THOẠI & CHỜ TB -->
+            <div class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">THOẠI & CHỜ TB</span>
+                        <i class="fa-solid fa-clock text-slate-500 text-lg"></i>
+                    </div>
+                    <div id="kpiTalkTime" class="text-3xl font-extrabold text-white mt-2">--s</div>
+                </div>
+                <div class="flex justify-between items-center mt-4 text-[11px] pt-2 border-t border-slate-800/80">
+                    <span class="text-slate-400">Thời gian chờ:</span>
+                    <span id="kpiWaitTime" class="text-purple-400 font-semibold">--s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 1: BIỂU ĐỒ XU HƯỚNG & TOP VẤN ĐỀ -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-400"></i>
+                            Biểu Đồ Xu Hướng Hiệu Suất Tổng Hợp
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Có thể lựa chọn nhiều kiểu xem</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex gap-1">
+                        <button onclick="setChartType('bar')" id="btn-chart-bar" class="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition">Dạng Cột (Bar)</button>
+                        <button onclick="setChartType('line')" id="btn-chart-line" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Dạng Đường (Line)</button>
+                    </div>
+                </div>
+                <div class="relative flex-1 w-full min-h-[300px]">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                            Top Vấn Đề Phản Ánh
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Phân bổ nhóm vấn đề theo kỳ lọc</p>
+                    </div>
+                    <select id="pieLimitSelect" onchange="updatePieChart()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none">
+                        <option value="3">Top 3</option>
+                        <option value="5" selected>Top 5</option>
+                        <option value="7">Top 7</option>
+                        <option value="all">Tất cả</option>
+                    </select>
+                </div>
+                <div class="relative flex-1 w-full min-h-[260px] flex items-center justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: SO SÁNH ĐƠN VỊ & ZALO OA -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="glass-card p-5 rounded-2xl lg:col-span-2 flex flex-col">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-indigo-400"></i>
+                            So Sánh Hiệu Suất Theo Đơn Vị
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Đối chiếu Cuộc gọi và Yêu cầu CRM giữa các cảng theo từng ngày</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex gap-1">
+                        <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition">Cột (Bar)</button>
+                        <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Đường (Line)</button>
+                        <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition">Vùng (Area)</button>
+                    </div>
+                </div>
+                <div class="relative flex-1 w-full min-h-[260px]">
+                    <canvas id="unitChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen text-cyan-400"></i>
+                            Chi Tiết Kênh Zalo OA
+                        </h2>
+                        <span class="px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-semibold">Cloud Sync</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="text-[11px] text-slate-400 uppercase font-semibold">NGƯỜI QUAN TÂM</div>
+                            <div id="zaloTotalFollowers" class="text-2xl font-black text-cyan-400 mt-1">--</div>
+                            <div class="text-[10px] text-slate-500 mt-1">Tổng tích lũy</div>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="text-[11px] text-slate-400 uppercase font-semibold">QUAN TÂM MỚI</div>
+                            <div id="zaloNewFollowers" class="text-2xl font-black text-emerald-400 mt-1">--</div>
+                            <div class="text-[10px] text-slate-500 mt-1">Trong kỳ chọn</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-xl flex justify-between items-center">
+                            <span class="text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-user-minus text-rose-400 text-xs"></i> Bỏ quan tâm:
+                            </span>
+                            <span id="zaloUnfollow" class="font-bold text-rose-400">--</span>
+                        </div>
+                        <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-xl flex justify-between items-center">
+                            <span class="text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane text-blue-400 text-xs"></i> Lượt trả lời / tin gửi:
+                            </span>
+                            <span id="zaloReplyRate" class="font-bold text-blue-400">--%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500 mt-4">
+                    <span>Nguồn: Supabase Cloud</span>
+                    <span class="text-emerald-400 font-medium">Hoạt động tốt</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATRIX TABLE SECTION -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-amber-400"></i>
+                        Bảng Thống Kê Chi Tiết Nhóm Vấn Đề Phản Ánh Theo Ngày
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Ma trận dữ liệu tự động thay đổi theo khoảng thời gian lọc</p>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900/90 border border-slate-700 text-xs rounded-xl pl-8 pr-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr id="matrixTableHeader" class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                            <th class="p-3 font-bold text-slate-200 min-w-[280px]">NHÓM VẤN ĐỀ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PHẦN MỚI: NHẬT KÝ VẬN HÀNH SỰ CỐ -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                        Nhật Ký Vận Hành Sự Cố & Khắc Phục
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Theo dõi lịch sử sự cố, thời gian gián đoạn và đơn vị chịu trách nhiệm</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <!-- Bộ lọc theo khoảng ngày cho Nhật ký sự cố -->
+                    <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                        <span class="text-xs text-slate-400">Từ:</span>
+                        <input type="date" id="incidentFilterStart" onchange="renderIncidentTable()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1">
+                        <span class="text-xs text-slate-400">Đến:</span>
+                        <input type="date" id="incidentFilterEnd" onchange="renderIncidentTable()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer">
+                    </div>
+                    <button onclick="clearIncidentFilter()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition">
+                        Xóa Lọc
+                    </button>
+                    
+                    <!-- Nút mở Modal Thêm mới sự cố -->
+                    <button onclick="openIncidentModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-rose-600/25">
+                        <i class="fa-solid fa-plus"></i> Thêm sự cố mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                            <th class="p-3 font-bold text-slate-200">NGÀY SỰ CỐ</th>
+                            <th class="p-3 font-bold text-slate-200">NGÀY KHẮC PHỤC</th>
+                            <th class="p-3 font-bold text-center text-rose-400">TỔNG GIỜ</th>
+                            <th class="p-3 font-bold text-slate-200 min-w-[300px]">NỘI DUNG SỰ CỐ</th>
+                            <th class="p-3 font-bold text-slate-200">ĐƠN VỊ / BỘ PHẬN</th>
+                            <th class="p-3 font-bold text-center text-slate-200">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidentTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- Dữ liệu render động -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900/40 border-t border-slate-800/80 py-4 mt-auto text-center text-xs text-slate-500">
+        <p>Trung Tâm Khai Thác & Dịch Vụ Khách Hàng - Cảng Hải Phòng © 2026</p>
+    </footer>
+
+    <!-- CỬA SỔ MODAL (MESSENGER PHỤ) NHẬP/SỬA SỰ CỐ -->
+    <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-rose-400"></i> Thêm Sự Cố Vận Hành Mới
+                </h3>
+                <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white transition text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Form -->
+            <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="incidentId">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Ngày Sự Cố *</label>
+                        <input type="date" id="incDate" required class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Ngày Khắc Phục</label>
+                        <input type="date" id="incResolvedDate" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Tổng Thời Gian (Giờ)</label>
+                        <input type="number" step="0.1" id="incTotalHours" placeholder="VD: 2.5" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Đơn Vị / Bộ Phận *</label>
+                        <input type="text" id="incUnit" required placeholder="VD: Chi nhánh Cảng Tân Vũ" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Nội Dung Sự Cố Chi Tiết *</label>
+                    <textarea id="incContent" rows="3" required placeholder="Mô tả sự cố, nguyên nhân và hướng giải quyết..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl p-3 text-slate-200 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+
+                <!-- Modal Footer Buttons -->
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeIncidentModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        Hủy Bỏ
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition shadow-lg shadow-rose-600/20">
+                        Lưu Lại Sự Cố
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & SUPABASE CLOUD STORAGE LOGIC -->
+    <script>
+        const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
+
+        const defaultDatabase = [
+            {
+                date: "14/09/2026",
+                kpi: { crm: 2992, zaloMsg: 388, zaloRate: 99.74, zaloTime: 0.6, calls: 19, callsMissed: 0, callsRate: 100, talkTime: 70.1, waitTime: 4.1 },
+                categories: {
+                    "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052,
+                    "Thông tin khai thác và tình trạng hàng hoá": 66, "Gia hạn lệnh lấy hàng": 56, "Các vấn đề về thủ tục Hải quan": 51,
+                    "Kiểm tra tình trạng thanh toán": 45, "Quy trình và thủ tục tại Cảng": 108, "Huỷ/điều chỉnh và các vđ hoá đơn": 99,
+                    "Dịch vụ Cảng biển": 37, "Biểu phí và các chính sách thanh toán": 22, "Dịch vụ chăm sóc khách hàng": 52,
+                    "Cơ sở hạ tầng và trang thiết bị": 1, "Hư hỏng hoặc mất mát hàng hóa": 0
+                },
+                units: {
+                    calls: { "Chi nhánh Cảng Tân Vũ": 17, "Cảng Hoàng Diệu Chùa Vẽ": 2 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 2971, "Cảng Hoàng Diệu Chùa Vẽ": 21 }
+                },
+                zaloDetails: { totalFollowers: 3324, newFollowers: 3, unfollowers: 0, replyRate: 99.74, csat: 0.99 },
+                surveys: { webCount: 0, webScore: "0/50" }
+            },
+            {
+                date: "15/09/2026",
+                kpi: { crm: 3520, zaloMsg: 400, zaloRate: 100, zaloTime: 1.5, calls: 25, callsMissed: 0, callsRate: 100, talkTime: 90, waitTime: 10 },
+                categories: {
+                    "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052,
+                    "Thông tin khai thác và tình trạng hàng hoá": 66, "Gia hạn lệnh lấy hàng": 56, "Các vấn đề về thủ tục Hải quan": 51,
+                    "Kiểm tra tình trạng thanh toán": 45, "Quy trình và thủ tục tại Cảng": 108, "Huỷ/điều chỉnh và các vđ hoá đơn": 99,
+                    "Dịch vụ Cảng biển": 37, "Biểu phí và các chính sách thanh toán": 22, "Dịch vụ chăm sóc khách hàng": 52,
+                    "Cơ sở hạ tầng và trang thiết bị": 1, "Hư hỏng hoặc mất mát hàng hóa": 0
+                },
+                units: {
+                    calls: { "Chi nhánh Cảng Tân Vũ": 20, "Cảng Hoàng Diệu Chùa Vẽ": 5 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 3500, "Cảng Hoàng Diệu Chùa Vẽ": 20 }
+                },
+                zaloDetails: { totalFollowers: 3350, newFollowers: 10, unfollowers: 0, replyRate: 100, csat: 1.0 },
+                surveys: { webCount: 1, webScore: "45/50" }
+            }
+        ];
+
+        const defaultIncidents = [
+            {
+                id: "inc-1",
+                date: "2026-09-14",
+                resolvedDate: "2026-09-14",
+                totalHours: 1.5,
+                content: "Sự cố gián đoạn kết nối cổng Eport do lỗi đường truyền mạng nội bộ.",
+                unit: "Chi nhánh Cảng Tân Vũ"
+            },
+            {
+                id: "inc-2",
+                date: "2026-09-15",
+                resolvedDate: "2026-09-15",
+                totalHours: 0.5,
+                content: "Tổng đài viên báo cáo nghẽn cuộc gọi trong 30 phút giờ cao điểm sáng.",
+                unit: "Cảng Hoàng Diệu Chùa Vẽ"
+            }
+        ];
+
+        let database = [];
+        let filteredData = [];
+        let incidentsList = [];
+        let currentChartType = 'bar';
+        let currentUnitChartType = 'bar';
+        let trendChartInstance = null;
+        let categoryChartInstance = null;
+        let unitChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                initCharts();
+                await loadDataFromSupabase();
+            } catch (err) {
+                console.error("Initialization error:", err);
+                database = JSON.parse(JSON.stringify(defaultDatabase));
+                incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                sortDatabase();
+                updateDeleteSelectOptions();
+                setQuickFilter('7');
+                renderIncidentTable();
+                updateLastUpdatedDisplay(new Date().toISOString());
+            }
+        });
+
+        function formatDisplayTimestamp(isoString) {
+            if (!isoString) return "--";
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${hours}:${minutes}:${seconds} - ${day}/${month}/${year}`;
+        }
+
+        function updateLastUpdatedDisplay(isoString) {
+            const el = document.getElementById('lastUpdatedText');
+            if (el) {
+                el.innerText = `Cập nhật lần cuối: ${formatDisplayTimestamp(isoString)}`;
+            }
+        }
+
+        function sortDatabase() {
+            database.sort((a, b) => {
+                const da = parseDateStandard(a.date);
+                const db = parseDateStandard(b.date);
+                if (!da || !db) return 0;
+                return da - db;
+            });
+        }
+
+        function excelSerialToDate(serial) {
+            const utc_days = Math.floor(serial - 25569);
+            const utc_value = utc_days * 86400;
+            const date_info = new Date(utc_value * 1000);
+            
+            const day = String(date_info.getDate()).padStart(2, '0');
+            const month = String(date_info.getMonth() + 1).padStart(2, '0');
+            const year = date_info.getFullYear();
+            
+            return `${day}/${month}/${year}`;
+        }
+
+        function sanitizeDatabaseDates(data) {
+            let hasChanged = false;
+            data.forEach(item => {
+                let dStr = String(item.date).trim();
+                if (!isNaN(dStr) && Number(dStr) > 30000) {
+                    item.date = excelSerialToDate(Number(dStr));
+                    hasChanged = true;
+                }
+            });
+            return hasChanged;
+        }
+
+        async function loadDataFromSupabase() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records?id=eq.1`, {
+                    method: "GET",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result && result.length > 0 && result[0].payload) {
+                        database = result[0].payload;
+                        incidentsList = result[0].incidents || JSON.parse(JSON.stringify(defaultIncidents));
+                        const serverUpdatedAt = result[0].updated_at || new Date().toISOString();
+                        
+                        if (sanitizeDatabaseDates(database)) {
+                            await saveDataToSupabase();
+                        }
+
+                        sortDatabase();
+                        updateLastUpdatedDisplay(serverUpdatedAt);
+                        document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
+                        document.getElementById('statusBannerText').innerText = "Đã kết nối và đồng bộ dữ liệu thành công từ Supabase Cloud.";
+                    } else {
+                        database = JSON.parse(JSON.stringify(defaultDatabase));
+                        incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                        sortDatabase();
+                        await saveDataToSupabase();
+                    }
+                } else {
+                    database = JSON.parse(JSON.stringify(defaultDatabase));
+                    incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                    sortDatabase();
+                    await saveDataToSupabase();
+                }
+            } catch (err) {
+                console.warn("Lỗi tải Supabase, sử dụng dữ liệu mặc định:", err);
+                document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-amber-500";
+                document.getElementById('statusBannerText').innerText = "Sử dụng chế độ ngoại tuyến / Dữ liệu mặc định.";
+                database = JSON.parse(JSON.stringify(defaultDatabase));
+                incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                sortDatabase();
+                updateLastUpdatedDisplay(new Date().toISOString());
+            }
+
+            updateDeleteSelectOptions();
+            setQuickFilter('7');
+            renderIncidentTable();
+        }
+
+        async function saveDataToSupabase() {
+            sortDatabase();
+            const currentIsoTime = new Date
