@@ -466,7 +466,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT & SUPABASE CLOUD & STORAGE SYNC LOGIC -->
+    <!-- JAVASCRIPT & SUPABASE CLOUD SYNC LOGIC -->
     <script>
         const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
@@ -894,18 +894,34 @@
             let unitDatasets = [];
             const isLineArea = currentUnitChartType === 'line' || currentUnitChartType === 'area';
 
+            // PHÂN MÀU RÕ RÀNG CHO ĐƠN VỊ VÀ CHỈ SỐ:
+            // 1. Cuộc Gọi Tân Vũ: Cam rực (#f97316)
+            // 2. CRM Tân Vũ: Xanh dương (#38bdf8)
+            // 3. Cuộc Gọi HDCV: Tím sáng (#c084fc)
+            // 4. CRM HDCV: Xanh ngọc (#2dd4bf)
+            const unitColors = [
+                { call: '#f97316', crm: '#38bdf8' }, // Tân Vũ
+                { call: '#c084fc', crm: '#2dd4bf' }  // HDCV
+            ];
+
             unitNames.forEach((u, idx) => {
+                const colors = unitColors[idx];
                 unitDatasets.push({
                     label: `[Cuộc Gọi] ${shortUnits[idx]}`,
                     data: filteredData.map(d => d.units?.calls?.[u] || 0),
-                    backgroundColor: currentUnitChartType === 'area' ? 'rgba(249, 115, 22, 0.25)' : '#f97316',
-                    borderColor: '#f97316', fill: currentUnitChartType === 'area', type: isLineArea ? 'line' : 'bar'
+                    backgroundColor: currentUnitChartType === 'area' ? `${colors.call}40` : colors.call,
+                    borderColor: colors.call, 
+                    fill: currentUnitChartType === 'area', 
+                    type: isLineArea ? 'line' : 'bar'
                 });
                 unitDatasets.push({
                     label: `[CRM] ${shortUnits[idx]}`,
                     data: filteredData.map(d => d.units?.crm?.[u] || 0),
-                    backgroundColor: currentUnitChartType === 'area' ? 'rgba(56, 189, 248, 0.25)' : '#38bdf8',
-                    borderColor: '#38bdf8', fill: currentUnitChartType === 'area', type: isLineArea ? 'line' : 'bar', hidden: true
+                    backgroundColor: currentUnitChartType === 'area' ? `${colors.crm}40` : colors.crm,
+                    borderColor: colors.crm, 
+                    fill: currentUnitChartType === 'area', 
+                    type: isLineArea ? 'line' : 'bar', 
+                    hidden: false
                 });
             });
 
@@ -1058,7 +1074,6 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Đẩy file gốc lên Storage Bucket để tối ưu Database
             try {
                 const safeFileName = `CSKH_${Date.now()}_${file.name}`;
                 await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${safeFileName}`, {
@@ -1070,9 +1085,8 @@
                     },
                     body: file
                 });
-                console.log("Đã upload file lên Storage Bucket thành công.");
             } catch (storageErr) {
-                console.warn("Lỗi upload storage:", storageErr);
+                console.warn("Storage upload error:", storageErr);
             }
 
             const reader = new FileReader();
@@ -1155,7 +1169,7 @@
                     await saveDataToSupabase();
                     updateDeleteSelectOptions();
                     applyDateFilter();
-                    alert(`Đã nạp file, lưu Storage và đồng bộ thành công ngày ${extractedDate}!`);
+                    alert(`Đã nạp file và đồng bộ thành công ngày ${extractedDate}!`);
                 } catch (err) {
                     console.error(err);
                     alert("Lỗi đọc file Excel.");
