@@ -470,7 +470,7 @@
     <script>
         const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
-        const STORAGE_BUCKET = "cskh-excel-files"; // Tên bucket bạn đã tạo trên Supabase
+        const STORAGE_BUCKET = "cskh-excel-files";
 
         const defaultDatabase = [
             {
@@ -538,19 +538,8 @@
         let unitChartInstance = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                initCharts();
-                await loadDataFromSupabase();
-            } catch (err) {
-                console.error("Initialization error:", err);
-                database = JSON.parse(JSON.stringify(defaultDatabase));
-                incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
-                sortDatabase();
-                updateDeleteSelectOptions();
-                setQuickFilter('7');
-                renderIncidentTable();
-                updateLastUpdatedDisplay(new Date().toISOString());
-            }
+            initCharts();
+            await loadDataFromSupabase();
         });
 
         function formatDisplayTimestamp(isoString) {
@@ -586,101 +575,85 @@
             const utc_days = Math.floor(serial - 25569);
             const utc_value = utc_days * 86400;
             const date_info = new Date(utc_value * 1000);
-            
-            const day = String(date_info.getDate()).padStart(2, '0');
-            const month = String(date_info.getMonth() + 1).padStart(2, '0');
-            const year = date_info.getFullYear();
-            
-            return `${day}/${month}/${year}`;
+            return `${String(date_info.getDate()).padStart(2, '0')}/${String(date_info.getMonth() + 1).padStart(2, '0')}/${date_info.getFullYear()}`;
         }
 
-        function sanitizeDatabaseDates(data) {
-            let hasChanged = false;
-            data.forEach(item => {
-                let dStr = String(item.date).trim();
-                if (!isNaN(dStr) && Number(dStr) > 30000) {
-                    item.date = excelSerialToDate(Number(dStr));
-                    hasChanged = true;
+        async function loadDataFromSupabase() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records?id=eq.1`, {
+                    method: "GET",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result && result.length > 0 && result[0].payload && result[0].payload.length > 0) {
+                        database = result[0].payload;
+                        incidentsList = result[0].incidents || JSON.parse(JSON.stringify(defaultIncidents));
+                        sortDatabase();
+                        updateLastUpdatedDisplay(result[0].updated_at);
+                        document.getElementById('syncDotclassName = "inline-block w-2 h-2 rounded-full bg-emerald-500';
+                        document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
+                        document.getElementById('statusBannerText').innerText = "Đã kết nối và đồng bộ dữ liệu thành công từ Supabase Cloud.";
+                    } else {
+                        // Nếu payload trên cloud đang rỗng, nạp dữ liệu mặc định lên
+                        database = JSON.parse(JSON.stringify(defaultDatabase));
+                        incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
+                        sortDatabase();
+                        await saveDataToSupabase();
+                    }
+                } else {
+                    throw new Error("Lỗi phản hồi từ Supabase API");
                 }
-            });
-            return hasChanged;
-        }
-
-       // Hàm đọc dữ liệu từ Supabase
-async function loadDataFromSupabase() {
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records?id=eq.1`, {
-            method: "GET",
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            if (result && result.length > 0 && result[0].payload) {
-                database = result[0].payload;
-                incidentsList = result[0].incidents || defaultIncidents;
-                sortDatabase();
-                updateLastUpdatedDisplay(result[0].updated_at);
-                document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
-                document.getElementById('statusBannerText').innerText = "Đã kết nối và đồng bộ dữ liệu thành công!";
-            } else {
-                // Nếu chưa có dữ liệu trên Cloud, lưu dữ liệu mặc định lên
+            } catch (err) {
+                console.warn("Sử dụng dữ liệu mặc định do lỗi kết nối:", err);
                 database = JSON.parse(JSON.stringify(defaultDatabase));
                 incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
-                await saveDataToSupabase();
+                sortDatabase();
+                document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-amber-500";
+                document.getElementById('statusBannerText').innerText = "Đang chạy chế độ dữ liệu mặc định (Kiểm tra kết nối Cloud).";
+                updateLastUpdatedDisplay(new Date().toISOString());
             }
-        } else {
-            throw new Error("Không lấy được dữ liệu");
+
+            updateDeleteSelectOptions();
+            setQuickFilter('7');
+            renderIncidentTable();
         }
-    } catch (err) {
-        console.warn("Dùng dữ liệu mặc định nội bộ do lỗi kết nối:", err);
-        database = JSON.parse(JSON.stringify(defaultDatabase));
-        incidentsList = JSON.parse(JSON.stringify(defaultIncidents));
-        document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-amber-500";
-        document.getElementById('statusBannerText').innerText = "Đang chạy chế độ dữ liệu nội bộ (Chờ kết nối Cloud)...";
-    }
 
-    updateDeleteSelectOptions();
-    setQuickFilter('7');
-    renderIncidentTable();
-}
+        async function saveDataToSupabase() {
+            sortDatabase();
+            const currentIsoTime = new Date().toISOString();
+            try {
+                const payload = { 
+                    id: 1, 
+                    payload: database, 
+                    incidents: incidentsList,
+                    updated_at: currentIsoTime 
+                };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates"
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-// Hàm ghi dữ liệu lên Supabase
-async function saveDataToSupabase() {
-    sortDatabase();
-    const currentIsoTime = new Date().toISOString();
-    try {
-        const payload = { 
-            id: 1, 
-            payload: database, 
-            incidents: incidentsList,
-            updated_at: currentIsoTime 
-        };
-        
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records`, {
-            method: "POST",
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`,
-                "Content-Type": "application/json",
-                "Prefer": "resolution=merge-duplicates"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            updateLastUpdatedDisplay(currentIsoTime);
-            document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
-            document.getElementById('statusBannerText').innerText = "Đã đồng bộ dữ liệu lên Supabase Cloud!";
+                if (response.ok) {
+                    updateLastUpdatedDisplay(currentIsoTime);
+                    document.getElementById('syncDot').className = "inline-block w-2 h-2 rounded-full bg-emerald-500";
+                    document.getElementById('statusBannerText').innerText = "Đã đồng bộ dữ liệu lên Supabase Cloud thành công.";
+                }
+            } catch (err) {
+                console.error("Lỗi khi lưu Supabase:", err);
+            }
         }
-    } catch (err) {
-        console.error("Lỗi khi lưu Supabase:", err);
-    }
-}
 
         function updateDeleteSelectOptions() {
             const select = document.getElementById('deleteDateSelect');
@@ -706,9 +679,7 @@ async function saveDataToSupabase() {
             }
 
             const passwordInput = prompt("Vui lòng nhập mật khẩu xác thực bảo mật để xóa dữ liệu:");
-            if (passwordInput === null) {
-                return;
-            }
+            if (passwordInput === null) return;
             if (passwordInput !== "6868") {
                 alert("Mật khẩu không chính xác! Thao tác xóa đã bị hủy.");
                 return;
@@ -720,7 +691,7 @@ async function saveDataToSupabase() {
                 await saveDataToSupabase();
                 updateDeleteSelectOptions();
                 applyDateFilter();
-                alert(`Đã xóa thành công ngày ${dateToDelete} trên Supabase Cloud.`);
+                alert(`Đã xóa thành công ngày ${dateToDelete}.`);
             }
         }
 
@@ -838,9 +809,7 @@ async function saveDataToSupabase() {
                 if (curr.surveys && curr.surveys.webScore) {
                     let scoreStr = String(curr.surveys.webScore).split('/')[0];
                     let scoreVal = parseFloat(scoreStr);
-                    if (!isNaN(scoreVal) && scoreVal > 0) {
-                        webScoresList.push(scoreVal);
-                    }
+                    if (!isNaN(scoreVal) && scoreVal > 0) webScoresList.push(scoreVal);
                 }
             });
             let avgWebScore = webScoresList.length > 0 ? (webScoresList.reduce((a, b) => a + b, 0) / webScoresList.length).toFixed(1) : 0;
@@ -851,9 +820,7 @@ async function saveDataToSupabase() {
             let csatList = [];
             filteredData.forEach(curr => {
                 let csatVal = curr.zaloDetails && curr.zaloDetails.csat !== undefined ? Number(curr.zaloDetails.csat) : 0;
-                if (csatVal > 0) {
-                    csatList.push(csatVal);
-                }
+                if (csatVal > 0) csatList.push(csatVal);
             });
             let avgCsat = csatList.length > 0 ? (csatList.reduce((a, b) => a + b, 0) / csatList.length) : 0;
             document.getElementById('kpiCsatZalo').innerText = `CSAT Zalo: ${Math.round(avgCsat * 100)}%`;
@@ -915,7 +882,6 @@ async function saveDataToSupabase() {
             });
         }
 
-        /* --- LOGIC QUẢN LÝ NHẬT KÝ SỰ CỐ & MODAL --- */
         function openIncidentModal(id = null) {
             const modal = document.getElementById('incidentModal');
             const form = document.getElementById('incidentForm');
@@ -935,10 +901,8 @@ async function saveDataToSupabase() {
                 }
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành Mới';
-                const todayIso = new Date().toISOString().split('T')[0];
-                document.getElementById('incDate').value = todayIso;
+                document.getElementById('incDate').value = new Date().toISOString().split('T')[0];
             }
-
             modal.classList.remove('hidden');
         }
 
@@ -957,19 +921,9 @@ async function saveDataToSupabase() {
 
             if (id) {
                 const index = incidentsList.findIndex(i => i.id === id);
-                if (index >= 0) {
-                    incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
-                }
+                if (index >= 0) incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
             } else {
-                const newInc = {
-                    id: 'inc-' + Date.now(),
-                    date,
-                    resolvedDate,
-                    totalHours,
-                    content,
-                    unit
-                };
-                incidentsList.push(newInc);
+                incidentsList.push({ id: 'inc-' + Date.now(), date, resolvedDate, totalHours, content, unit });
             }
 
             closeIncidentModal();
@@ -999,7 +953,6 @@ async function saveDataToSupabase() {
             const endStr = document.getElementById('incidentFilterEnd').value;
 
             let filteredIncidents = [...incidentsList];
-
             if (startStr || endStr) {
                 const startDate = startStr ? new Date(startStr) : null;
                 const endDate = endStr ? new Date(endStr) : null;
@@ -1029,8 +982,7 @@ async function saveDataToSupabase() {
                 const formatDateDisplay = (dStr) => {
                     if (!dStr) return '<span class="text-slate-500">--</span>';
                     const parts = dStr.split('-');
-                    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                    return dStr;
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dStr;
                 };
 
                 html += `
@@ -1045,12 +997,8 @@ async function saveDataToSupabase() {
                             </span>
                         </td>
                         <td class="p-3 text-center space-x-1">
-                            <button onclick="openIncidentModal('${inc.id}')" class="px-2 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-xs transition" title="Sửa">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="deleteIncident('${inc.id}')" class="px-2 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs transition" title="Xóa">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                            <button onclick="openIncidentModal('${inc.id}')" class="px-2 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-xs transition" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteIncident('${inc.id}')" class="px-2 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs transition" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -1109,11 +1057,7 @@ async function saveDataToSupabase() {
             ['bar', 'line', 'area'].forEach(t => {
                 const btn = document.getElementById(`btn-unit-${t}`);
                 if (!btn) return;
-                if (t === type) {
-                    btn.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition";
-                } else {
-                    btn.className = "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition";
-                }
+                btn.className = t === type ? "px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition" : "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-xs font-medium transition";
             });
             updateCharts();
         }
@@ -1127,45 +1071,16 @@ async function saveDataToSupabase() {
 
             trendChartInstance.config.type = currentChartType;
             trendChartInstance.data.labels = dates;
-
             trendChartInstance.data.datasets = [
-                {
-                    label: 'Yêu Cầu CRM',
-                    data: crmRequests,
-                    backgroundColor: '#ef4444',
-                    borderColor: '#ef4444',
-                    borderWidth: currentChartType === 'line' ? 3 : 1,
-                    borderRadius: currentChartType === 'bar' ? 4 : 0,
-                    type: currentChartType,
-                    yAxisID: 'y'
-                },
-                {
-                    label: 'Tin Nhắn Zalo',
-                    data: zaloMsgs,
-                    backgroundColor: '#3b82f6',
-                    borderColor: '#3b82f6',
-                    borderWidth: currentChartType === 'line' ? 3 : 1,
-                    borderRadius: currentChartType === 'bar' ? 4 : 0,
-                    type: currentChartType,
-                    yAxisID: 'y1'
-                },
-                {
-                    label: 'Cuộc Gọi Đến',
-                    data: calls,
-                    backgroundColor: '#f59e0b',
-                    borderColor: '#f59e0b',
-                    borderWidth: currentChartType === 'line' ? 3 : 1,
-                    borderRadius: currentChartType === 'bar' ? 4 : 0,
-                    type: currentChartType,
-                    yAxisID: 'y1'
-                }
+                { label: 'Yêu Cầu CRM', data: crmRequests, backgroundColor: '#ef4444', borderColor: '#ef4444', borderWidth: currentChartType === 'line' ? 3 : 1, type: currentChartType, yAxisID: 'y' },
+                { label: 'Tin Nhắn Zalo', data: zaloMsgs, backgroundColor: '#3b82f6', borderColor: '#3b82f6', borderWidth: currentChartType === 'line' ? 3 : 1, type: currentChartType, yAxisID: 'y1' },
+                { label: 'Cuộc Gọi Đến', data: calls, backgroundColor: '#f59e0b', borderColor: '#f59e0b', borderWidth: currentChartType === 'line' ? 3 : 1, type: currentChartType, yAxisID: 'y1' }
             ];
             trendChartInstance.update();
 
             if (filteredData.length > 0) {
                 const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
                 const shortUnitNames = ["Cảng Tân Vũ", "Cảng HDCV"];
-
                 const unitColors = [
                     { call: '#f97316', callArea: 'rgba(249, 115, 22, 0.25)', crm: '#38bdf8', crmArea: 'rgba(56, 189, 248, 0.25)' },
                     { call: '#a855f7', callArea: 'rgba(168, 85, 247, 0.25)', crm: '#10b981', crmArea: 'rgba(16, 185, 129, 0.25)' }
@@ -1175,33 +1090,17 @@ async function saveDataToSupabase() {
                 const isLineOrArea = currentUnitChartType === 'line' || currentUnitChartType === 'area';
 
                 unitNames.forEach((u, idx) => {
-                    let callDataByDate = filteredData.map(d => (d.units && d.units.calls && d.units.calls[u]) || 0);
-                    let crmDataByDate = filteredData.map(d => (d.units && d.units.crm && d.units.crm[u]) || 0);
-
                     unitDatasets.push({
                         label: `[Cuộc Gọi] ${shortUnitNames[idx]}`,
-                        data: callDataByDate,
+                        data: filteredData.map(d => (d.units?.calls?.[u]) || 0),
                         backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].callArea : unitColors[idx].call,
-                        borderColor: unitColors[idx].call,
-                        borderWidth: isLineOrArea ? 2.5 : 1,
-                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
-                        fill: currentUnitChartType === 'area',
-                        tension: 0.3,
-                        type: isLineOrArea ? 'line' : 'bar',
-                        hidden: false
+                        borderColor: unitColors[idx].call, borderWidth: isLineOrArea ? 2.5 : 1, fill: currentUnitChartType === 'area', tension: 0.3, type: isLineOrArea ? 'line' : 'bar', hidden: false
                     });
-
                     unitDatasets.push({
                         label: `[CRM] ${shortUnitNames[idx]}`,
-                        data: crmDataByDate,
+                        data: filteredData.map(d => (d.units?.crm?.[u]) || 0),
                         backgroundColor: currentUnitChartType === 'area' ? unitColors[idx].crmArea : unitColors[idx].crm,
-                        borderColor: unitColors[idx].crm,
-                        borderWidth: isLineOrArea ? 2.5 : 1,
-                        borderRadius: currentUnitChartType === 'bar' ? 4 : 0,
-                        fill: currentUnitChartType === 'area',
-                        tension: 0.3,
-                        type: isLineOrArea ? 'line' : 'bar',
-                        hidden: true
+                        borderColor: unitColors[idx].crm, borderWidth: isLineOrArea ? 2.5 : 1, fill: currentUnitChartType === 'area', tension: 0.3, type: isLineOrArea ? 'line' : 'bar', hidden: true
                     });
                 });
 
@@ -1210,7 +1109,6 @@ async function saveDataToSupabase() {
                 unitChartInstance.data.datasets = unitDatasets;
                 unitChartInstance.update();
             }
-
             updatePieChart();
         }
 
@@ -1218,58 +1116,45 @@ async function saveDataToSupabase() {
             if (!filteredData || filteredData.length === 0) return;
             const latest = filteredData[filteredData.length - 1];
             const limit = document.getElementById('pieLimitSelect').value;
-            const cats = (latest && latest.categories) || {};
+            const cats = latest?.categories || {};
 
-            let sorted = Object.keys(cats).map(k => ({ name: k, count: cats[k] })).sort((a,b) => b.count - a.count);
-
+            let sorted = Object.keys(cats).map(k => ({ name: k, count: cats[k] })).sort((a, b) => b.count - a.count);
             if (limit !== 'all') {
                 const n = parseInt(limit);
                 if (sorted.length > n) {
                     const topN = sorted.slice(0, n);
-                    const restSum = sorted.slice(n).reduce((acc, cur) => acc + cur.count, 0);
-                    topN.push({ name: 'Khác', count: restSum });
+                    topN.push({ name: 'Khác', count: sorted.slice(n).reduce((acc, cur) => acc + cur.count, 0) });
                     sorted = topN;
                 }
             }
 
             categoryChartInstance.data.labels = sorted.map(i => i.name);
-            categoryChartInstance.data.datasets = [{
-                data: sorted.map(i => i.count),
-                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b']
-            }];
+            categoryChartInstance.data.datasets = [{ data: sorted.map(i => i.count), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b'] }];
             categoryChartInstance.update();
         }
 
-        // Đã bổ sung tích hợp upload trực tiếp file Excel gốc lên Supabase Storage bucket
         async function handleExcelImport(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. Upload file gốc lên Supabase Storage bucket
             try {
                 const safeFileName = `CSKH_${Date.now()}_${file.name}`;
                 await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${safeFileName}`, {
                     method: "POST",
-                    headers: {
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": `Bearer ${SUPABASE_KEY}`,
-                        "Content-Type": file.type || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    },
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": file.type || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
                     body: file
                 });
             } catch (storageErr) {
-                console.warn("Cảnh báo khi upload file lên Storage:", storageErr);
+                console.warn("Storage upload warning:", storageErr);
             }
 
-            // 2. Đọc và bóc tách dữ liệu Excel để cập nhật vào Database dashboard
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const sheetName = workbook.SheetNames.includes("THNGAY") ? "THNGAY" : workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
 
                     let extractedDate = "";
                     let kpi = { crm: 0, zaloMsg: 0, zaloRate: 0, zaloTime: 0, calls: 0, callsMissed: 0, callsRate: 0, talkTime: 0, waitTime: 0 };
@@ -1278,7 +1163,6 @@ async function saveDataToSupabase() {
                     let unitCrm = {};
                     let zaloDetails = { totalFollowers: 0, newFollowers: 0, unfollowers: 0, replyRate: 0, csat: 0 };
                     let surveys = { webCount: 0, webScore: "0/50" };
-
                     let currentSection = "";
 
                     for (let i = 0; i < rows.length; i++) {
@@ -1292,26 +1176,8 @@ async function saveDataToSupabase() {
                         if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
                         if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
 
-                        if (col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Chỉ số Zalo OA" || col0 === "Danh mục Kênh" || col0 === "danh mục" || col0 === "Tên Đơn Vị") {
-                            if (col1 !== undefined && col1 !== null && col1 !== "" && !extractedDate) {
-                                if (typeof col1 === 'number') {
-                                    extractedDate = excelSerialToDate(col1);
-                                } else if (col1 instanceof Date) {
-                                    const day = String(col1.getDate()).padStart(2, '0');
-                                    const month = String(col1.getMonth() + 1).padStart(2, '0');
-                                    const year = col1.getFullYear();
-                                    extractedDate = `${day}/${month}/${year}`;
-                                } else {
-                                    let strVal = String(col1).trim();
-                                    if (!isNaN(strVal) && Number(strVal) > 30000) {
-                                        extractedDate = excelSerialToDate(Number(strVal));
-                                    } else if (strVal.includes('T')) {
-                                        extractedDate = strVal.split('T')[0].split('-').reverse().join('/');
-                                    } else if (strVal.includes('/')) {
-                                        extractedDate = strVal;
-                                    }
-                                }
-                            }
+                        if ((col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Tên Đơn Vị") && col1 !== undefined && !extractedDate) {
+                            extractedDate = typeof col1 === 'number' ? excelSerialToDate(col1) : String(col1).trim();
                         }
 
                         if (currentSection === "kpi") {
@@ -1324,3 +1190,83 @@ async function saveDataToSupabase() {
                             if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = Number(col1) || 0;
                             if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = Number(col1) || 0;
                             if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "categories" && col0 && col0 !== "Vấn đề phản ánh") {
+                            categories[col0] = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "units" && (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ")) {
+                            if (i < 36) unitCalls[col0] = Number(col1) || 0;
+                            else unitCrm[col0] = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "zalo") {
+                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = Number(col1) || 0;
+                            if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = Number(col1) || 0;
+                            if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ phản hồi (%)") zaloDetails.replyRate = Number(col1) || 0;
+                            if (col0 === "Tỷ lệ hài lòng CSAT") zaloDetails.csat = Number(col1) || 0;
+                        }
+
+                        if (currentSection === "surveys") {
+                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
+                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
+                        }
+                    }
+
+                    if (!extractedDate) {
+                        const now = new Date();
+                        extractedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+                    }
+
+                    const newRecord = { date: extractedDate, kpi, categories, units: { calls: unitCalls, crm: unitCrm }, zaloDetails, surveys };
+                    const existingIndex = database.findIndex(d => d.date === extractedDate);
+                    
+                    if (existingIndex >= 0) database[existingIndex] = newRecord;
+                    else database.push(newRecord);
+
+                    sortDatabase();
+                    await saveDataToSupabase();
+                    updateDeleteSelectOptions();
+                    applyDateFilter();
+                    alert(`Đã nạp file và đồng bộ thành công ngày ${extractedDate}!`);
+                } catch (err) {
+                    console.error("Excel read error:", err);
+                    alert("Lỗi khi đọc file Excel.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function exportToExcel() {
+            if (!database || database.length === 0) { alert("Không có dữ liệu!"); return; }
+            sortDatabase();
+            let aoa = [["1. Khối KPI Tổng hợp Chung"]];
+            let rowDate = ["Ngày"], rowCrm = ["Số yêu cầu (CRM)"], rowZaloMsg = ["Lượt tin nhắn Zalo"], rowCalls = ["Cuộc gọi đến"];
+            
+            database.forEach(item => {
+                rowDate.push(item.date);
+                rowCrm.push(item.kpi.crm || 0);
+                rowZaloMsg.push(item.kpi.zaloMsg || 0);
+                rowCalls.push(item.kpi.calls || 0);
+            });
+            aoa.push(rowDate, rowCrm, rowZaloMsg, rowCalls);
+
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "THNGAY");
+            XLSX.writeFile(wb, "Bao_Cao_CSKH_Cang_Hai_Phong.xlsx");
+        }
+
+        function filterTable() {
+            const query = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.getElementById('matrixTableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].style.display = rows[i].innerText.toLowerCase().includes(query) ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
