@@ -260,7 +260,7 @@
                             <i class="fa-solid fa-chart-column text-indigo-400"></i>
                             So Sánh Hiệu Suất Theo Đơn Vị
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Đối chiếu Cuộc gọi và Yêu cầu CRM giữa các cảng theo từng ngày</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Đối chiếu Cuộc gọi và Yêu cầu CRM giữa các cảng theo từng ngày (Click chú thích để bật/tắt)</p>
                     </div>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-1 flex gap-1">
                         <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium transition">Cột (Bar)</button>
@@ -894,11 +894,6 @@
             let unitDatasets = [];
             const isLineArea = currentUnitChartType === 'line' || currentUnitChartType === 'area';
 
-            // PHÂN MÀU RÕ RÀNG CHO ĐƠN VỊ VÀ CHỈ SỐ:
-            // 1. Cuộc Gọi Tân Vũ: Cam rực (#f97316)
-            // 2. CRM Tân Vũ: Xanh dương (#38bdf8)
-            // 3. Cuộc Gọi HDCV: Tím sáng (#c084fc)
-            // 4. CRM HDCV: Xanh ngọc (#2dd4bf)
             const unitColors = [
                 { call: '#f97316', crm: '#38bdf8' }, // Tân Vũ
                 { call: '#c084fc', crm: '#2dd4bf' }  // HDCV
@@ -906,14 +901,17 @@
 
             unitNames.forEach((u, idx) => {
                 const colors = unitColors[idx];
+                // Chỉ số 1: Cuộc gọi (mặc định hiển thị)
                 unitDatasets.push({
                     label: `[Cuộc Gọi] ${shortUnits[idx]}`,
                     data: filteredData.map(d => d.units?.calls?.[u] || 0),
                     backgroundColor: currentUnitChartType === 'area' ? `${colors.call}40` : colors.call,
                     borderColor: colors.call, 
                     fill: currentUnitChartType === 'area', 
-                    type: isLineArea ? 'line' : 'bar'
+                    type: isLineArea ? 'line' : 'bar',
+                    hidden: false // Hiển thị mặc định
                 });
+                // Chỉ số 2: Yêu cầu CRM (mặc định ẩn/phải mở mới lên bằng cách click vào chú thích)
                 unitDatasets.push({
                     label: `[CRM] ${shortUnits[idx]}`,
                     data: filteredData.map(d => d.units?.crm?.[u] || 0),
@@ -921,7 +919,7 @@
                     borderColor: colors.crm, 
                     fill: currentUnitChartType === 'area', 
                     type: isLineArea ? 'line' : 'bar', 
-                    hidden: false
+                    hidden: true // Ẩn mặc định theo yêu cầu
                 });
             });
 
