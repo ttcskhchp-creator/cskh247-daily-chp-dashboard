@@ -409,7 +409,7 @@
         <p>Trung Tâm Khai Thác & Dịch Vụ Khách Hàng - Cảng Hải Phòng © 2026</p>
     </footer>
 
-    <!-- CỬA SỔ MODAL (MESSENGER PHỤ) NHẬP/SỬA SỰ CỐ -->
+    <!-- CỬA SỔ MODAL NHẬP/SỬA SỰ CỐ -->
     <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
             <!-- Modal Header -->
@@ -470,6 +470,7 @@
     <script>
         const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
+        const STORAGE_BUCKET = "cskh-excel-files"; // Tên bucket bạn đã tạo trên Supabase
 
         const defaultDatabase = [
             {
@@ -944,7 +945,6 @@
                 }
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành Mới';
-                // Đặt mặc định ngày sự cố là ngày hiện tại
                 const todayIso = new Date().toISOString().split('T')[0];
                 document.getElementById('incDate').value = todayIso;
             }
@@ -966,13 +966,11 @@
             const unit = document.getElementById('incUnit').value.trim();
 
             if (id) {
-                // Sửa
                 const index = incidentsList.findIndex(i => i.id === id);
                 if (index >= 0) {
                     incidentsList[index] = { id, date, resolvedDate, totalHours, content, unit };
                 }
             } else {
-                // Thêm mới
                 const newInc = {
                     id: 'inc-' + Date.now(),
                     date,
@@ -1029,7 +1027,6 @@
                 });
             }
 
-            // Sắp xếp sự cố mới nhất lên trên
             filteredIncidents.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filteredIncidents.length === 0) {
@@ -1253,10 +1250,28 @@
             categoryChartInstance.update();
         }
 
-        function handleExcelImport(event) {
+        // Đã bổ sung tích hợp upload trực tiếp file Excel gốc lên Supabase Storage bucket
+        async function handleExcelImport(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            // 1. Upload file gốc lên Supabase Storage bucket
+            try {
+                const safeFileName = `CSKH_${Date.now()}_${file.name}`;
+                await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${safeFileName}`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": file.type || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    },
+                    body: file
+                });
+            } catch (storageErr) {
+                console.warn("Cảnh báo khi upload file lên Storage:", storageErr);
+            }
+
+            // 2. Đọc và bóc tách dữ liệu Excel để cập nhật vào Database dashboard
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
@@ -1319,216 +1334,3 @@
                             if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = Number(col1) || 0;
                             if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = Number(col1) || 0;
                             if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = Number(col1) || 0;
-                        }
-
-                        if (currentSection === "categories") {
-                            if (col0 && col0 !== "Vấn đề phản ánh" && col1 !== undefined && col0 !== "") {
-                                categories[col0] = Number(col1) || 0;
-                            }
-                        }
-
-                        if (currentSection === "units") {
-                            if (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ") {
-                                if (i < 36) unitCalls[col0] = Number(col1) || 0;
-                                else unitCrm[col0] = Number(col1) || 0;
-                            }
-                        }
-
-                        if (currentSection === "zalo") {
-                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = Number(col1) || 0;
-                            if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = Number(col1) || 0;
-                            if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ phản hồi (%)") zaloDetails.replyRate = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ hài lòng CSAT") zaloDetails.csat = Number(col1) || 0;
-                        }
-
-                        if (currentSection === "surveys") {
-                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
-                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
-                        }
-                    }
-
-                    if (!extractedDate) {
-                        const now = new Date();
-                        extractedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-                    }
-
-                    const newRecord = {
-                        date: extractedDate,
-                        kpi: kpi,
-                        categories: categories,
-                        units: { calls: unitCalls, crm: unitCrm },
-                        zaloDetails: zaloDetails,
-                        surveys: surveys
-                    };
-
-                    const existingIndex = database.findIndex(d => d.date === extractedDate);
-                    if (existingIndex >= 0) {
-                        database[existingIndex] = newRecord;
-                        alert(`Đã nạp lại thành công dữ liệu cho ngày ${extractedDate} và đồng bộ lên Supabase Cloud!`);
-                    } else {
-                        database.push(newRecord);
-                        alert(`Đã thêm thành công ngày mới: ${extractedDate} và đồng bộ lên Supabase Cloud!`);
-                    }
-
-                    sortDatabase();
-                    await saveDataToSupabase();
-                    updateDeleteSelectOptions();
-                    applyDateFilter();
-                } catch (err) {
-                    console.error(err);
-                    alert("Lỗi khi đọc file Excel.");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-            event.target.value = '';
-        }
-
-        function exportToExcel() {
-            if (!database || database.length === 0) {
-                alert("Không có dữ liệu để xuất!");
-                return;
-            }
-
-            sortDatabase();
-            let aoa = [];
-
-            aoa.push(["1. Khối KPI Tổng hợp Chung"]);
-            let rowDate = ["Ngày"];
-            let rowCrm = ["Số yêu cầu (CRM)"];
-            let rowZaloMsg = ["Lượt tin nhắn Zalo"];
-            let rowZaloRate = ["Tỷ lệ phản hồi Zalo (%)"];
-            let rowZaloTime = ["Thời gian phản hồi Zalo (Phút)"];
-            let rowCalls = ["Cuộc gọi đến"];
-            let rowCallsMissed = ["Số cuộc lỡ"];
-            let rowCallsRate = ["Tỷ lệ nhấc máy (%)"];
-            let rowTalkTime = ["Thời gian thoại TB (giây)"];
-            let rowWaitTime = ["Thời gian chờ TB (giây)"];
-
-            database.forEach(item => {
-                rowDate.push(item.date);
-                rowCrm.push(item.kpi.crm || 0);
-                rowZaloMsg.push(item.kpi.zaloMsg || 0);
-                rowZaloRate.push(item.kpi.zaloRate || 0);
-                rowZaloTime.push(item.kpi.zaloTime || 0);
-                rowCalls.push(item.kpi.calls || 0);
-                rowCallsMissed.push(item.kpi.callsMissed || 0);
-                rowCallsRate.push(item.kpi.callsRate || 0);
-                rowTalkTime.push(item.kpi.talkTime || 0);
-                rowWaitTime.push(item.kpi.waitTime || 0);
-            });
-
-            aoa.push(rowDate, rowCrm, rowZaloMsg, rowZaloRate, rowZaloTime, rowCalls, rowCallsMissed, rowCallsRate, rowTalkTime, rowWaitTime);
-            aoa.push([]);
-
-            aoa.push(["2. Khối Phân loại Các Vấn Đề Tiếp Nhận (Dùng vẽ Biểu đồ Tròn TOP)"]);
-            let catHeader = ["Vấn đề phản ánh"];
-            database.forEach(item => catHeader.push(item.date));
-            aoa.push(catHeader);
-
-            let allCategories = new Set();
-            database.forEach(d => {
-                if (d.categories) Object.keys(d.categories).forEach(k => allCategories.add(k));
-            });
-
-            Array.from(allCategories).forEach(cat => {
-                let catRow = [cat];
-                database.forEach(item => {
-                    let val = (item.categories && item.categories[cat] !== undefined) ? item.categories[cat] : 0;
-                    catRow.push(val);
-                });
-                aoa.push(catRow);
-            });
-            aoa.push([]);
-
-            aoa.push(["3. Khối So sánh Hiệu suất theo Đơn vị / Phòng ban (Biểu đồ Cột)"]);
-            aoa.push(["Cuộc gọi đến"]);
-            let unitCallHeader = ["Tên Đơn Vị"];
-            database.forEach(item => unitCallHeader.push(item.date));
-            aoa.push(unitCallHeader);
-
-            const unitNames = ["Chi nhánh Cảng Tân Vũ", "Cảng Hoàng Diệu Chùa Vẽ"];
-            unitNames.forEach(u => {
-                let uRow = [u];
-                database.forEach(item => {
-                    let val = (item.units && item.units.calls && item.units.calls[u] !== undefined) ? item.units.calls[u] : 0;
-                    uRow.push(val);
-                });
-                aoa.push(uRow);
-            });
-
-            aoa.push([]);
-            aoa.push(["CRM Ghi nhận"]);
-            let unitCrmHeader = ["Tên Đơn Vị"];
-            database.forEach(item => unitCrmHeader.push(item.date));
-            aoa.push(unitCrmHeader);
-
-            unitNames.forEach(u => {
-                let uRow = [u];
-                database.forEach(item => {
-                    let val = (item.units && item.units.crm && item.units.crm[u] !== undefined) ? item.units.crm[u] : 0;
-                    uRow.push(val);
-                });
-                aoa.push(uRow);
-            });
-            aoa.push([]);
-
-            aoa.push(["4. Khối Chỉ số Chi tiết Kênh Zalo OA"]);
-            let zaloHeader = ["Chỉ số Zalo OA"];
-            database.forEach(item => zaloHeader.push(item.date));
-            aoa.push(zaloHeader);
-
-            let rowTotalF = ["Người quan tâm"];
-            let rowNewF = ["Người quan tâm mới"];
-            let rowUnf = ["Người dùng bỏ quan tâm"];
-            let rowMsgSend = ["Lượt gửi tin nhắn"];
-            let rowMsgReply = ["Lượt trả lời, phản hồi"];
-            let rowReplyRate = ["Tỷ lệ phản hồi (%)"];
-            let rowFirstTime = ["Thời gian phản hồi đầu tiên (phút)"];
-            let rowCsat = ["Tỷ lệ hài lòng CSAT"];
-
-            database.forEach(item => {
-                rowTotalF.push(item.zaloDetails ? item.zaloDetails.totalFollowers || 0 : 0);
-                rowNewF.push(item.zaloDetails ? item.zaloDetails.newFollowers || 0 : 0);
-                rowUnf.push(item.zaloDetails ? item.zaloDetails.unfollowers || 0 : 0);
-                rowMsgSend.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
-                rowMsgReply.push(item.kpi ? item.kpi.zaloMsg || 0 : 0);
-                rowReplyRate.push(item.zaloDetails ? item.zaloDetails.replyRate || 0 : 0);
-                rowFirstTime.push(item.kpi ? item.kpi.zaloTime || 0 : 0);
-                rowCsat.push(item.zaloDetails ? item.zaloDetails.csat || 0 : 0);
-            });
-
-            aoa.push(rowTotalF, rowNewF, rowUnf, rowMsgSend, rowMsgReply, rowReplyRate, rowFirstTime, rowCsat);
-            aoa.push([]);
-
-            aoa.push(["5. LƯỢT KHẢO SÁT WebSite"]);
-            let surveyHeader = ["danh mục"];
-            database.forEach(item => surveyHeader.push(item.date));
-            aoa.push(surveyHeader);
-
-            let rowWebCount = ["Số lượt"];
-            let rowWebScore = ["Điểm đánh giá"];
-            database.forEach(item => {
-                rowWebCount.push(item.surveys ? item.surveys.webCount || 0 : 0);
-                rowWebScore.push(item.surveys ? item.surveys.webScore || "0/50" : "0/50");
-            });
-
-            aoa.push(rowWebCount, rowWebScore);
-
-            const ws = XLSX.utils.aoa_to_sheet(aoa);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "THNGAY");
-            XLSX.writeFile(wb, "Bao_Cao_CSKH_Cang_Hai_Phong_Tong_Hop.xlsx");
-        }
-
-        function filterTable() {
-            const query = document.getElementById('tableSearch').value.toLowerCase();
-            const rows = document.getElementById('matrixTableBody').getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                const text = rows[i].innerText.toLowerCase();
-                rows[i].style.display = text.includes(query) ? '' : 'none';
-            }
-        }
-    </script>
-</body>
-</html>
