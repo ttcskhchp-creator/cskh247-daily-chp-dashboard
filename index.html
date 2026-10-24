@@ -225,14 +225,14 @@
                 </div>
             </div>
 
-            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT -->
-            <div id="cardSurvey" class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between transition-all duration-300">
+            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT (Không Cài Cảnh Báo) -->
+            <div id="cardSurvey" class="glass-card p-4 rounded-2xl relative overflow-hidden flex flex-col justify-between transition-all duration-300 border border-emerald-500/30">
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                             ⭐ WEB & CSAT
                         </span>
-                        <span id="badgeSurvey" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold">✅ Chuẩn</span>
+                        <span id="badgeSurvey" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 font-bold">✅ Chuẩn</span>
                     </div>
                     <div id="kpiSurveyValue" class="text-3xl font-extrabold text-white mt-2">-- lượt</div>
                 </div>
@@ -453,7 +453,7 @@
         <p class="text-[11px] text-slate-500 mt-1">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-400 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
     </footer>
 
-    <!-- MODAL THIẾT LẬP CẢNH BÁO TIÊU CHUẨN -->
+    <!-- MODAL THIẾT LẬP CẢNH BÁO TIÊU CHUẨN (ĐÃ LOẠI BỎ WEB & CSAT) -->
     <div id="alertSetupModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-2xl rounded-2xl border border-amber-500/30 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
@@ -464,7 +464,7 @@
             </div>
 
             <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
-                <p class="text-slate-400">Điền giá trị ngưỡng tiêu chuẩn (Điểm khảo sát Web nhập dạng số để so sánh với mẫu <span class="text-amber-300 font-semibold">xxx/50</span>):</p>
+                <p class="text-slate-400">Điền giá trị ngưỡng tiêu chuẩn để hệ thống tự động kiểm tra cảnh báo:</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     
@@ -573,51 +573,9 @@
                         </div>
                     </div>
 
-                    <!-- 6. Điểm CSAT Zalo -->
+                    <!-- 6. Thời gian thoại TB -->
                     <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">⭐ 6. Điểm CSAT Zalo (%)</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <span class="text-[10px] text-amber-400">Mức Vàng</span>
-                                <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_csat_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_csat_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
-                                </div>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-rose-400">Mức Đỏ</span>
-                                <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_csat_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_csat_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 7. Điểm khảo sát Web (Nhập giá trị xxx để so sánh với xxx/50) -->
-                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">🌐 7. Khảo Sát Web (Nhập số xxx/50)</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <span class="text-[10px] text-amber-400">Mức Vàng</span>
-                                <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_webScore_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_webScore_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
-                                </div>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-rose-400">Mức Đỏ</span>
-                                <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_webScore_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_webScore_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 8. Thời gian thoại TB -->
-                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">⏱️ 8. Thời Gian Thoại TB (Giây)</div>
+                        <div class="font-bold text-slate-200">⏱️ 6. Thời Gian Thoại TB (Giây)</div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
@@ -636,9 +594,9 @@
                         </div>
                     </div>
 
-                    <!-- 9. Thời gian chờ bắt máy -->
+                    <!-- 7. Thời gian chờ bắt máy -->
                     <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">⏳ 9. TG Chờ Bắt Máy (Giây)</div>
+                        <div class="font-bold text-slate-200">⏳ 7. TG Chờ Bắt Máy (Giây)</div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
@@ -657,9 +615,9 @@
                         </div>
                     </div>
 
-                    <!-- 10. Lượt bỏ quan tâm Zalo -->
+                    <!-- 8. Lượt bỏ quan tâm Zalo -->
                     <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">💔 10. Lượt Bỏ Quan Tâm Zalo</div>
+                        <div class="font-bold text-slate-200">💔 8. Lượt Bỏ Quan Tâm Zalo</div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
@@ -741,15 +699,13 @@
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
         const STORAGE_BUCKET = "cskh-excel-files";
 
-        // Cấu hình Cảnh Báo (Tất cả đều để trống giá trị ban đầu theo yêu cầu)
+        // Cấu hình Cảnh Báo (Đã loại bỏ webScore và csat)
         let alertThresholds = {
             crm: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             zaloRate: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
             zaloTime: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             callRate: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
             missed: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
-            csat: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
-            webScore: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
             talkTime: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             waitTime: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             unfollow: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null }
@@ -830,7 +786,7 @@
 
         /* Quản Lý & Lưu Trữ Cảnh Báo */
         function openAlertSetupModal() {
-            const fields = ['crm', 'zaloRate', 'zaloTime', 'callRate', 'missed', 'csat', 'webScore', 'talkTime', 'waitTime', 'unfollow'];
+            const fields = ['crm', 'zaloRate', 'zaloTime', 'callRate', 'missed', 'talkTime', 'waitTime', 'unfollow'];
             fields.forEach(f => {
                 const conf = alertThresholds[f] || {};
                 const elemYCond = document.getElementById(`cfg_${f}_y_cond`);
@@ -851,7 +807,7 @@
         }
 
         async function saveAlertSettings() {
-            const fields = ['crm', 'zaloRate', 'zaloTime', 'callRate', 'missed', 'csat', 'webScore', 'talkTime', 'waitTime', 'unfollow'];
+            const fields = ['crm', 'zaloRate', 'zaloTime', 'callRate', 'missed', 'talkTime', 'waitTime', 'unfollow'];
             fields.forEach(f => {
                 const elemYCond = document.getElementById(`cfg_${f}_y_cond`);
                 const elemYVal = document.getElementById(`cfg_${f}_y_val`);
@@ -887,13 +843,6 @@
             const zaloTimeVal = latest.kpi?.zaloTime || 0;
             const callRateVal = latest.kpi?.callsRate || 0;
             const missedVal = latest.kpi?.callsMissed || 0;
-
-            const csatVal = Math.round((latest.zaloDetails?.csat || 0) * 100);
-            
-            // Xử lý trích xuất điểm số khảo sát web dạng xxx/50 (Ví dụ: "45/50" -> 45)
-            const webScoreRaw = String(latest.surveys?.webScore || '0').split('/')[0];
-            const webScoreVal = parseFloat(webScoreRaw) || 0;
-
             const talkTimeVal = latest.kpi?.talkTime || 0;
             const waitTimeVal = latest.kpi?.waitTime || 0;
             const unfollowVal = latest.zaloDetails?.unfollowers || 0;
@@ -913,19 +862,13 @@
                 { val: missedVal, rule: alertThresholds.missed }
             ]);
 
-            // 4. Survey Card (Kiểm tra độc lập CSAT Zalo và Điểm Web xxx/50 - chỉ cần 1 trong 2 vi phạm là báo động)
-            applyCardAlertStyle('cardSurvey', 'badgeSurvey', [
-                { val: csatVal, rule: alertThresholds.csat },
-                { val: webScoreVal, rule: alertThresholds.webScore }
-            ]);
-
-            // 5. Time Card
+            // 4. Time Card
             applyCardAlertStyle('cardTime', 'badgeTime', [
                 { val: talkTimeVal, rule: alertThresholds.talkTime },
                 { val: waitTimeVal, rule: alertThresholds.waitTime }
             ]);
 
-            // 6. Zalo Detail Card
+            // 5. Zalo Detail Card
             applyCardAlertStyle('cardZaloDetail', 'badgeZaloDetail', [
                 { val: unfollowVal, rule: alertThresholds.unfollow }
             ]);
