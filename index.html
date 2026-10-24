@@ -464,7 +464,7 @@
             </div>
 
             <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
-                <p class="text-slate-400">Điền giá trị ngưỡng tiêu chuẩn và chọn toán tử so sánh để kích hoạt phát cảnh báo tự động trên Thẻ KPI:</p>
+                <p class="text-slate-400">Điền giá trị ngưỡng tiêu chuẩn (Điểm khảo sát Web nhập dạng số so sánh với mẫu <span class="text-amber-300 font-semibold">xxx/50</span>):</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     
@@ -473,17 +473,17 @@
                         <div class="font-bold text-slate-200">🎧 1. Trung Bình CRM / Ngày</div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <span class="text-[10px] text-amber-400">Mức Vàng (Chú ý)</span>
+                                <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_crm_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_crm_y_val" placeholder="Ví dụ: 3000" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_crm_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Mức Đỏ (Báo động)</span>
+                                <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_crm_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_crm_r_val" placeholder="Ví dụ: 4000" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_crm_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -497,14 +497,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_zaloRate_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_zaloRate_y_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_zaloRate_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_zaloRate_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_zaloRate_r_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_zaloRate_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -518,14 +518,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_zaloTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Phút..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_zaloTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Phút..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -539,14 +539,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_callRate_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_callRate_y_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_callRate_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_callRate_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_callRate_r_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_callRate_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -560,14 +560,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_missed_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_missed_y_val" placeholder="Số cuộc..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_missed_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_missed_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_missed_r_val" placeholder="Số cuộc..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_missed_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -581,22 +581,22 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_csat_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_csat_y_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_csat_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_csat_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_csat_r_val" placeholder="Nhập %..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_csat_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 7. Điểm khảo sát Web -->
+                    <!-- 7. Điểm khảo sát Web (Nhập giá trị xxx để so sánh với xxx/50) -->
                     <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
-                        <div class="font-bold text-slate-200">🌐 7. Điểm Khảo Sát Web (Điểm)</div>
+                        <div class="font-bold text-slate-200">🌐 7. Khảo Sát Web (Nhập số xxx/50)</div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
@@ -623,14 +623,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_talkTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_talkTime_y_val" placeholder="Giây..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_talkTime_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_talkTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_talkTime_r_val" placeholder="Giây..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_talkTime_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -644,14 +644,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_waitTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_waitTime_y_val" placeholder="Giây..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_waitTime_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_waitTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_waitTime_r_val" placeholder="Giây..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_waitTime_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -665,14 +665,14 @@
                                 <span class="text-[10px] text-amber-400">Mức Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_unfollow_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_unfollow_y_val" placeholder="Lượt..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_unfollow_y_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                             <div>
                                 <span class="text-[10px] text-rose-400">Mức Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
                                     <select id="cfg_unfollow_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-1"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_unfollow_r_val" placeholder="Lượt..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
+                                    <input type="number" id="cfg_unfollow_r_val" placeholder="Để trống..." class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-1">
                                 </div>
                             </div>
                         </div>
@@ -741,7 +741,7 @@
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
         const STORAGE_BUCKET = "cskh-excel-files";
 
-        // Cấu hình Cảnh Báo Mặc Định (Để trống giá trị để người dùng tự thiết lập)
+        // Cấu hình Cảnh Báo Mặc Định
         let alertThresholds = {
             crm: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             zaloRate: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
@@ -758,7 +758,7 @@
         const defaultDatabase = [
             {
                 date: "14/09/2026",
-                kpi: { crm: 2992, zaloMsg: 388, zaloRate: 99.74, zaloTime: 0.6, calls: 19, callsMissed: 0, callsRate: 100, talkTime: 70.123, waitTime: 4.12 },
+                kpi: { crm: 2992, zaloMsg: 388, zaloRate: 99.74, zaloTime: 0.6, calls: 19, callsMissed: 0, callsRate: 100, talkTime: 70.12, waitTime: 4.12 },
                 categories: {
                     "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052
                 },
@@ -767,7 +767,7 @@
                     crm: { "Chi nhánh Cảng Tân Vũ": 2971, "Cảng Hoàng Diệu Chùa Vẽ": 21 }
                 },
                 zaloDetails: { totalFollowers: 3324, newFollowers: 3, unfollowers: 0, replyRate: 99.74, csat: 0.99 },
-                surveys: { webCount: 0, webScore: "0/50" }
+                surveys: { webCount: 0, webScore: "45/50" }
             },
             {
                 date: "15/09/2026",
@@ -780,7 +780,7 @@
                     crm: { "Chi nhánh Cảng Tân Vũ": 3500, "Cảng Hoàng Diệu Chùa Vẽ": 20 }
                 },
                 zaloDetails: { totalFollowers: 3350, newFollowers: 10, unfollowers: 0, replyRate: 100, csat: 1.0 },
-                surveys: { webCount: 1, webScore: "45/50" }
+                surveys: { webCount: 1, webScore: "42/50" }
             }
         ];
 
@@ -889,15 +889,17 @@
             const missedVal = latest.kpi?.callsMissed || 0;
 
             const csatVal = Math.round((latest.zaloDetails?.csat || 0) * 100);
-            const webScoreVal = parseFloat(String(latest.surveys?.webScore || '0').split('/')[0]);
+            
+            // Xử lý trích xuất điểm số khảo sát web từ chuỗi "xxx/50" (Ví dụ: "45/50" -> 45)
+            const webScoreRaw = String(latest.surveys?.webScore || '0').split('/')[0];
+            const webScoreVal = parseFloat(webScoreRaw) || 0;
+
             const talkTimeVal = latest.kpi?.talkTime || 0;
             const waitTimeVal = latest.kpi?.waitTime || 0;
             const unfollowVal = latest.zaloDetails?.unfollowers || 0;
 
             // 1. CRM Card
-            applyCardAlertStyle('cardCrm', 'badgeCrm', [
-                { val: crmVal, rule: alertThresholds.crm }
-            ]);
+            applyCardAlertStyle('cardCrm', 'badgeCrm', [{ val: crmVal, rule: alertThresholds.crm }]);
 
             // 2. Zalo Card
             applyCardAlertStyle('cardZalo', 'badgeZalo', [
@@ -911,7 +913,7 @@
                 { val: missedVal, rule: alertThresholds.missed }
             ]);
 
-            // 4. Survey Card
+            // 4. Survey Card (Kiểm tra đồng thời cả CSAT và Điểm Web xxx/50)
             applyCardAlertStyle('cardSurvey', 'badgeSurvey', [
                 { val: csatVal, rule: alertThresholds.csat },
                 { val: webScoreVal, rule: alertThresholds.webScore }
@@ -1147,7 +1149,6 @@
             let avgCsat = csatVals.length ? (csatVals.reduce((a,b)=>a+b,0)/csatVals.length) : 0;
             document.getElementById('kpiCsatZalo').innerText = `CSAT Zalo: ${Math.round(avgCsat * 100)}%`;
 
-            // Tinh chỉnh hiển thị số thập phân gọn cho Thời gian thoại và Thời gian chờ
             const talkTimeFormatted = Number(latest.kpi.talkTime || 0).toFixed(1);
             const waitTimeFormatted = Number(latest.kpi.waitTime || 0).toFixed(1);
             document.getElementById('kpiTalkTime').innerText = `${talkTimeFormatted}s`;
@@ -1419,7 +1420,6 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Upload file gốc lên Storage Bucket
             try {
                 const safeFileName = `CSKH_${Date.now()}_${file.name}`;
                 await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${safeFileName}`, {
