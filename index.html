@@ -228,11 +228,11 @@
             </div>
         </header>
 
-        <!-- KHỐI LỌC THỜI GIAN NHANH (Nút gạt Sáng/Tối được tích hợp tại đây) -->
+        <!-- KHỐI LỌC THỜI GIAN NHANH -->
         <div class="max-w-[1680px] mx-auto px-3 sm:px-6 pt-2.5">
             <div class="glass-panel p-2.5 sm:p-3 rounded-xl flex flex-wrap items-center justify-between gap-2.5">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <!-- Nút gạt chuyển chế độ Sáng/Tối đặt cạnh ô chọn ngày -->
+                    <!-- Nút gạt chuyển chế độ Sáng/Tối -->
                     <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white rounded-lg px-2.5 py-1 border border-slate-700/80 shadow-sm" title="Chuyển đổi giao diện Sáng / Tối">
                         <i class="fa-regular fa-sun text-[11px] text-amber-500"></i>
                         <button onclick="toggleTheme()" id="themeToggleBtn" type="button" aria-label="Toggle Theme" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
@@ -896,8 +896,8 @@
                     "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052
                 },
                 units: {
-                    calls: { "Chi nhánh Cảng Tân Vũ": 17, "Cảng Hoàng Diệu Chùa Vẽ": 2 },
-                    crm: { "Chi nhánh Cảng Tân Vũ": 2971, "Cảng Hoàng Diệu Chùa Vẽ": 21 }
+                    calls: { "Chi nhánh Cảng Tân Vũ": 17, "Cảng Hoàng Diệu Chùa Vẽ": 2, "VP8a": 0 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 2971, "Cảng Hoàng Diệu Chùa Vẽ": 21, "VP8a": 0 }
                 },
                 zaloDetails: { totalFollowers: 3324, newFollowers: 3, unfollowers: 0, replyRate: 99.74, csat: 0.99 },
                 surveys: { webCount: 0, webScore: "45/50" }
@@ -909,8 +909,8 @@
                     "Thông tin liên hệ, Mã số thuế": 224, "Thao tác sử dụng Eport/Smartgate": 179, "Duyệt lệnh Eport": 2052
                 },
                 units: {
-                    calls: { "Chi nhánh Cảng Tân Vũ": 20, "Cảng Hoàng Diệu Chùa Vẽ": 5 },
-                    crm: { "Chi nhánh Cảng Tân Vũ": 3500, "Cảng Hoàng Diệu Chùa Vẽ": 20 }
+                    calls: { "Chi nhánh Cảng Tân Vũ": 20, "Cảng Hoàng Diệu Chùa Vẽ": 5, "VP8a": 0 },
+                    crm: { "Chi nhánh Cảng Tân Vũ": 3500, "Cảng Hoàng Diệu Chùa Vẽ": 20, "VP8a": 0 }
                 },
                 zaloDetails: { totalFollowers: 3350, newFollowers: 10, unfollowers: 0, replyRate: 100, csat: 1.0 },
                 surveys: { webCount: 1, webScore: "42/50" }
@@ -1171,8 +1171,8 @@
                 const payload = { 
                     id: 1, 
                     payload: database, 
-                    incidents: incidentsList,
-                    alert_rules: alertThresholds,
+                    incidents: incidentsList, 
+                    alert_rules: alertThresholds, 
                     updated_at: currentIsoTime 
                 };
                 await fetch(`${SUPABASE_URL}/rest/v1/cskh_daily_records`, {
@@ -1259,20 +1259,24 @@
             if (!filteredData || filteredData.length === 0) return;
             const latest = filteredData[filteredData.length - 1];
 
+            // 1. KPI CRM
             let totalCrm = filteredData.reduce((a, c) => a + (c.kpi.crm || 0), 0);
             document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString('vi-VN');
             document.getElementById('kpiCrmAvg').innerText = `TB: ${(totalCrm / filteredData.length).toFixed(1)}/ngày`;
 
+            // 2. KPI Zalo OA
             let totalZalo = filteredData.reduce((a, c) => a + (c.kpi.zaloMsg || 0), 0);
             document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString('vi-VN');
             document.getElementById('kpiZaloRate').innerText = `${latest.kpi.zaloRate}%`;
             document.getElementById('kpiZaloTime').innerText = `${latest.kpi.zaloTime} phút`;
 
+            // 3. KPI Cuộc gọi
             let totalCalls = filteredData.reduce((a, c) => a + (c.kpi.calls || 0), 0);
             document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString('vi-VN');
             document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi.callsMissed}`;
             document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${latest.kpi.callsRate}%`;
 
+            // 4. Khảo sát & CSAT (Chuẩn hóa CSAT đảm bảo đúng thang 100%)
             let totalWebSurvey = filteredData.reduce((a, c) => a + (c.surveys?.webCount || 0), 0);
             let webScores = filteredData.map(c => parseFloat(String(c.surveys?.webScore || '0').split('/')[0])).filter(s => s > 0);
             let avgWeb = webScores.length ? (webScores.reduce((a,b)=>a+b,0)/webScores.length).toFixed(1) : 0;
@@ -1283,11 +1287,13 @@
             let avgCsat = csatVals.length ? (csatVals.reduce((a,b)=>a+b,0)/csatVals.length) : 0;
             document.getElementById('kpiCsatZalo').innerText = `CSAT: ${Math.round(avgCsat * 100)}%`;
 
+            // 5. Thời gian thoại & chờ
             const talkTimeFormatted = Number(latest.kpi.talkTime || 0).toFixed(1);
             const waitTimeFormatted = Number(latest.kpi.waitTime || 0).toFixed(1);
             document.getElementById('kpiTalkTime').innerText = `${talkTimeFormatted}s`;
             document.getElementById('kpiWaitTime').innerText = `${waitTimeFormatted}s`;
 
+            // Khối chi tiết Zalo
             document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
             document.getElementById('zaloNewFollowers').innerText = `+${latest.zaloDetails?.newFollowers || 0}`;
             document.getElementById('zaloUnfollow').innerText = `${latest.zaloDetails?.unfollowers || 0} người`;
@@ -1553,6 +1559,7 @@
             }
         }
 
+        // HÀM ĐỌC EXCEL ĐÃ SỬA LỖI ĐỌC CUỘC GỌI VÀ CSAT ZALO
         async function handleExcelImportWithAuth(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1583,55 +1590,88 @@
                     let unitCrm = {};
                     let zaloDetails = { totalFollowers: 0, newFollowers: 0, unfollowers: 0, replyRate: 0, csat: 0 };
                     let surveys = { webCount: 0, webScore: "0/50" };
+                    
                     let currentSection = "";
+                    let subUnitSection = ""; // Nhận diện phân nhóm cuộc gọi vs CRM trong Khối Đơn vị
+
+                    // Chuyển đổi dữ liệu số an toàn
+                    const parseNum = (val) => {
+                        if (val === undefined || val === null || val === "") return 0;
+                        if (typeof val === 'number') return val;
+                        let s = String(val).trim().replace('%', '').replace(',', '.');
+                        let n = parseFloat(s);
+                        return isNaN(n) ? 0 : n;
+                    };
 
                     for (let i = 0; i < rows.length; i++) {
                         let r = rows[i];
-                        let col0 = r[0] ? String(r[0]).trim() : "";
+                        if (!r || r.length === 0) continue;
+
+                        let col0 = r[0] !== undefined && r[0] !== null ? String(r[0]).trim() : "";
                         let col1 = r[1];
 
+                        // Nhận diện khối
                         if (col0.includes("1. Khối KPI")) { currentSection = "kpi"; continue; }
                         if (col0.includes("2. Khối Phân loại")) { currentSection = "categories"; continue; }
-                        if (col0.includes("3. Khối So sánh")) { currentSection = "units"; continue; }
+                        if (col0.includes("3. Khối So sánh")) { currentSection = "units"; subUnitSection = ""; continue; }
                         if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
                         if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
 
-                        if ((col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Tên Đơn Vị") && col1 !== undefined && !extractedDate) {
+                        // Lấy ngày báo cáo
+                        if ((col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Tên Đơn Vị" || col0 === "Chỉ số Zalo OA") && col1 !== undefined && !extractedDate) {
                             extractedDate = typeof col1 === 'number' ? excelSerialToDate(col1) : String(col1).trim();
                         }
 
+                        // 1. Khối KPI: Kiểm tra chặt chẽ đúng section tránh bị ghi đè bởi ô con ở dòng 31
                         if (currentSection === "kpi") {
-                            if (col0 === "Số yêu cầu (CRM)") kpi.crm = Number(col1) || 0;
-                            if (col0 === "Lượt tin nhắn Zalo") kpi.zaloMsg = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ phản hồi Zalo (%)") kpi.zaloRate = Number(col1) || 0;
-                            if (col0 === "Thời gian phản hồi Zalo (Phút)") kpi.zaloTime = Number(col1) || 0;
-                            if (col0 === "Cuộc gọi đến") kpi.calls = Number(col1) || 0;
-                            if (col0 === "Số cuộc lỡ") kpi.callsMissed = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = Number(col1) || 0;
-                            if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = Number(col1) || 0;
-                            if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = Number(col1) || 0;
+                            if (col0 === "Số yêu cầu (CRM)") kpi.crm = parseNum(col1);
+                            else if (col0 === "Lượt tin nhắn Zalo") kpi.zaloMsg = parseNum(col1);
+                            else if (col0 === "Tỷ lệ phản hồi Zalo (%)") kpi.zaloRate = parseNum(col1);
+                            else if (col0 === "Thời gian phản hồi Zalo (Phút)") kpi.zaloTime = parseNum(col1);
+                            else if (col0 === "Cuộc gọi đến") kpi.calls = parseNum(col1);
+                            else if (col0 === "Số cuộc lỡ") kpi.callsMissed = parseNum(col1);
+                            else if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = parseNum(col1);
+                            else if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = parseNum(col1);
+                            else if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = parseNum(col1);
                         }
 
-                        if (currentSection === "categories" && col0 && col0 !== "Vấn đề phản ánh") {
-                            categories[col0] = Number(col1) || 0;
+                        // 2. Khối Phân loại vấn đề
+                        else if (currentSection === "categories") {
+                            if (col0 && col0 !== "Vấn đề phản ánh") {
+                                categories[col0] = parseNum(col1);
+                            }
                         }
 
-                        if (currentSection === "units" && (col0 === "Chi nhánh Cảng Tân Vũ" || col0 === "Cảng Hoàng Diệu Chùa Vẽ")) {
-                            if (i < 36) unitCalls[col0] = Number(col1) || 0;
-                            else unitCrm[col0] = Number(col1) || 0;
+                        // 3. Khối So sánh đơn vị
+                        else if (currentSection === "units") {
+                            if (col0.includes("Cuộc gọi đến")) { subUnitSection = "calls"; continue; }
+                            if (col0.includes("CRM Ghi nhận")) { subUnitSection = "crm"; continue; }
+                            if (col0 === "Tên Đơn Vị" || !col0) continue;
+
+                            if (subUnitSection === "calls") {
+                                unitCalls[col0] = parseNum(col1);
+                            } else if (subUnitSection === "crm") {
+                                unitCrm[col0] = parseNum(col1);
+                            }
                         }
 
-                        if (currentSection === "zalo") {
-                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = Number(col1) || 0;
-                            if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = Number(col1) || 0;
-                            if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ phản hồi (%)") zaloDetails.replyRate = Number(col1) || 0;
-                            if (col0 === "Tỷ lệ hài lòng CSAT") zaloDetails.csat = Number(col1) || 0;
+                        // 4. Khối Kênh Zalo OA & CSAT
+                        else if (currentSection === "zalo") {
+                            if (col0 === "Người quan tâm") zaloDetails.totalFollowers = parseNum(col1);
+                            else if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = parseNum(col1);
+                            else if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = parseNum(col1);
+                            else if (col0.includes("Tỷ lệ phản hồi")) zaloDetails.replyRate = parseNum(col1);
+                            else if (col0.includes("Tỷ lệ hài lòng CSAT") || col0.includes("CSAT")) {
+                                let rawCsat = parseNum(col1);
+                                // Chuẩn hóa về [0, 1] nếu Excel lưu dạng 99% hoặc 99
+                                zaloDetails.csat = rawCsat > 1 ? rawCsat / 100 : rawCsat;
+                            }
                         }
 
-                        if (currentSection === "surveys") {
-                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = Number(col1) || 0;
-                            if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50");
+                        // 5. Khối Khảo sát
+                        else if (currentSection === "surveys") {
+                            if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = parseNum(col1);
+                            else if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50").trim();
                         }
                     }
 
@@ -1640,7 +1680,15 @@
                         extractedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
                     }
 
-                    const newRecord = { date: extractedDate, kpi, categories, units: { calls: unitCalls, crm: unitCrm }, zaloDetails, surveys };
+                    const newRecord = { 
+                        date: extractedDate, 
+                        kpi, 
+                        categories, 
+                        units: { calls: unitCalls, crm: unitCrm }, 
+                        zaloDetails, 
+                        surveys 
+                    };
+
                     const idx = database.findIndex(d => d.date === extractedDate);
                     if (idx >= 0) database[idx] = newRecord;
                     else database.push(newRecord);
@@ -1651,7 +1699,8 @@
                     applyDateFilter();
                     alert(`Đã nạp file ngày ${extractedDate} thành công!`);
                 } catch (err) {
-                    alert("Lỗi đọc file Excel.");
+                    console.error(err);
+                    alert("Lỗi đọc file Excel: " + err.message);
                 }
             };
             reader.readAsArrayBuffer(file);
