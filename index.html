@@ -39,41 +39,107 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-num { font-family: 'JetBrains Mono', monospace; }
 
-        /* Dark Theme Glass */
-        .dark .glass-panel {
-            background: rgba(12, 19, 34, 0.78);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-        }
-        .dark .kpi-card {
-            background: linear-gradient(145deg, rgba(17, 26, 46, 0.85) 0%, rgba(10, 15, 29, 0.95) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Hiệu ứng nhấp nháy cho Icon chìm góc thẻ */
+        @keyframes floatBlink {
+            0%, 100% {
+                opacity: 0.18;
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                opacity: 0.38;
+                transform: scale(1.08) translateY(-3px);
+            }
         }
 
-        /* Light Theme Glass */
+        .kpi-watermark {
+            position: absolute;
+            right: -6px;
+            bottom: -8px;
+            font-size: 58px;
+            pointer-events: none;
+            user-select: none;
+            animation: floatBlink 3.2s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.25));
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover .kpi-watermark {
+            animation-play-state: paused;
+            opacity: 0.55 !important;
+            transform: scale(1.15) rotate(-8deg);
+        }
+
+        /* Dark Theme Glass */
+        .dark .glass-panel {
+            background: rgba(12, 19, 34, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .dark .kpi-card {
+            background: linear-gradient(145deg, rgba(17, 26, 46, 0.88) 0%, rgba(10, 15, 29, 0.96) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+        }
+        .dark .kpi-watermark {
+            opacity: 0.22;
+        }
+
+        /* Light Theme Glass & Khắc phục màu chữ hiển thị chuẩn */
         html:not(.dark) body {
             background-color: #f1f5f9;
-            color: #0f172a;
+            color: #1e293b;
         }
         html:not(.dark) .glass-panel {
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(226, 232, 240, 0.9);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
         }
         html:not(.dark) .kpi-card {
             background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid rgba(226, 232, 240, 0.9);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.04);
+        }
+        html:not(.dark) .kpi-watermark {
+            opacity: 0.28;
+            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.08));
         }
         html:not(.dark) header {
             background: rgba(255, 255, 255, 0.95) !important;
             border-bottom-color: #e2e8f0 !important;
         }
-        html:not(.dark) header h1 {
+        html:not(.dark) h1, 
+        html:not(.dark) h2, 
+        html:not(.dark) .text-white {
             color: #0f172a !important;
         }
+        html:not(.dark) .text-slate-300, 
+        html:not(.dark) .text-slate-200 {
+            color: #334155 !important;
+        }
+        html:not(.dark) .text-slate-400 {
+            color: #64748b !important;
+        }
         html:not(.dark) .kpi-card div.font-extrabold {
+            color: #0f172a !important;
+        }
+        html:not(.dark) .bg-slate-900,
+        html:not(.dark) .bg-slate-900\/90,
+        html:not(.dark) .bg-slate-900\/80,
+        html:not(.dark) .bg-slate-900\/60,
+        html:not(.dark) .bg-slate-900\/50,
+        html:not(.dark) .bg-slate-900\/40 {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html:not(.dark) .bg-slate-800,
+        html:not(.dark) .bg-slate-800\/80,
+        html:not(.dark) .bg-slate-800\/90 {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+        }
+        html:not(.dark) input,
+        html:not(.dark) select {
             color: #0f172a !important;
         }
 
@@ -82,40 +148,22 @@
             overflow: hidden;
         }
 
-        .kpi-watermark {
-            position: absolute;
-            right: -8px;
-            bottom: -10px;
-            font-size: 56px;
-            opacity: 0.08;
-            pointer-events: none;
-            user-select: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .kpi-card:hover .kpi-watermark {
-            opacity: 0.16;
-            transform: scale(1.12) rotate(-6deg);
-        }
-
         /* Thanh cuộn mảnh tối giản */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 9999px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         /* Trạng thái cảnh báo */
         .kpi-alert-red {
-            border: 1px solid #ef4444 !important;
+            border: 2px solid #ef4444 !important;
             box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
-            background: linear-gradient(145deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         }
         .kpi-alert-yellow {
-            border: 1px solid #f59e0b !important;
+            border: 2px solid #f59e0b !important;
             box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-            background: linear-gradient(145deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-        }
-        .kpi-alert-green {
-            border: 1px solid rgba(16, 185, 129, 0.28) !important;
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         }
     </style>
 </head>
@@ -132,7 +180,7 @@
                 <div class="flex items-center space-x-3 w-full lg:w-auto justify-between lg:justify-start">
                     <div class="flex items-center space-x-2.5">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-lg shadow-blue-500/20 flex-shrink-0">
-                            <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center text-lg text-white">
+                            <div class="w-full h-full bg-slate-900 dark:bg-slate-900 bg-white rounded-[10px] flex items-center justify-center text-lg">
                                 ⚓
                             </div>
                         </div>
@@ -141,12 +189,12 @@
                                 <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-white uppercase">
                                     TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG
                                 </h1>
-                                <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">Cảng Hải Phòng</span>
+                                <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-blue-500/15 text-blue-500 dark:text-blue-400 border border-blue-500/30">Cảng Hải Phòng</span>
                             </div>
                             <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                                 <span class="text-blue-500 font-semibold tracking-wider">OPERATIONS & CUSTOMER SERVICE CENTER</span>
                                 <span class="text-slate-500 hidden sm:inline">•</span>
-                                <a href="https://haiphongport.com.vn" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-slate-400 hover:text-cyan-400 transition">
+                                <a href="https://haiphongport.com.vn" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-slate-500 hover:text-cyan-500 transition">
                                     <span>haiphongport.com.vn</span> <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                                 </a>
                             </div>
@@ -158,8 +206,8 @@
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
                     
                     <!-- Nút gạt chuyển chế độ Sáng/Tối nhỏ gọn -->
-                    <div class="flex items-center gap-1.5 bg-slate-800/80 dark:bg-slate-800/80 rounded-full px-2 py-1 border border-slate-700/80">
-                        <i class="fa-regular fa-sun text-[10px] text-amber-400"></i>
+                    <div class="flex items-center gap-1.5 bg-slate-800/80 rounded-full px-2 py-1 border border-slate-700/80">
+                        <i class="fa-regular fa-sun text-[10px] text-amber-500"></i>
                         <button onclick="toggleTheme()" id="themeToggleBtn" type="button" aria-label="Toggle Theme" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
                             <span id="themeToggleThumb" class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-3.5"></span>
                         </button>
@@ -194,13 +242,13 @@
         <div class="max-w-[1680px] mx-auto px-3 sm:px-6 pt-2.5">
             <div class="glass-panel p-2.5 sm:p-3 rounded-xl flex flex-wrap items-center justify-between gap-2.5">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700/80 rounded-lg px-2.5 py-1">
+                    <div class="flex items-center gap-1.5 bg-slate-900/90 rounded-lg px-2.5 py-1 border border-slate-700/80">
                         <span class="text-xs text-slate-400">Từ</span>
-                        <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none cursor-pointer font-num">
+                        <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
                     </div>
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700/80 rounded-lg px-2.5 py-1">
+                    <div class="flex items-center gap-1.5 bg-slate-900/90 rounded-lg px-2.5 py-1 border border-slate-700/80">
                         <span class="text-xs text-slate-400">Đến</span>
-                        <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none cursor-pointer font-num">
+                        <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
                     </div>
                     <button onclick="clearDateFilter()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95">
                         <i class="fa-solid fa-rotate-left"></i>
@@ -239,7 +287,7 @@
     <!-- KHU VỰC NỘI DUNG CHÍNH -->
     <main class="max-w-[1680px] mx-auto px-3 sm:px-6 py-3.5 flex-1 w-full space-y-4">
 
-        <!-- 5 THẺ KPI CHÍNH -->
+        <!-- 5 THẺ KPI CHÍNH (Icon ngộ nghĩnh góc thẻ rõ & nhấp nháy) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
             
             <!-- Card 1: YÊU CẦU CRM -->
@@ -247,15 +295,15 @@
                 <div class="kpi-watermark">🎧</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-headset text-blue-400"></i> Yêu cầu CRM
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-headset text-blue-500"></i> Yêu cầu CRM
                         </span>
                         <span id="badgeCrm" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
                     </div>
                     <div id="kpiCrmValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--</div>
                 </div>
                 <div class="flex justify-between items-center mt-3 text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
-                    <span id="kpiCrmAvg" class="text-emerald-400 font-semibold font-num">TB: --/ngày</span>
+                    <span id="kpiCrmAvg" class="text-emerald-500 font-semibold font-num">TB: --/ngày</span>
                     <span class="text-slate-500">Lịch sử</span>
                 </div>
             </div>
@@ -265,8 +313,8 @@
                 <div class="kpi-watermark">💬</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-comment-dots text-cyan-400"></i> Tin Zalo OA
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-comment-dots text-cyan-500"></i> Tin Zalo OA
                         </span>
                         <span id="badgeZalo" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
                     </div>
@@ -275,11 +323,11 @@
                 <div class="space-y-0.5 mt-2.5 pt-2 border-t border-slate-800/80 text-[11px]">
                     <div class="flex justify-between">
                         <span class="text-slate-400">Tỷ lệ phản hồi</span>
-                        <span id="kpiZaloRate" class="text-cyan-400 font-semibold font-num">--%</span>
+                        <span id="kpiZaloRate" class="text-cyan-500 font-semibold font-num">--%</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-400">TG phản hồi đầu</span>
-                        <span id="kpiZaloTime" class="text-cyan-400 font-semibold font-num">-- phút</span>
+                        <span id="kpiZaloTime" class="text-cyan-500 font-semibold font-num">-- phút</span>
                     </div>
                 </div>
             </div>
@@ -289,16 +337,16 @@
                 <div class="kpi-watermark">📞</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-phone-volume text-amber-400"></i> Cuộc gọi đến
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-phone-volume text-amber-500"></i> Cuộc gọi đến
                         </span>
                         <span id="badgeCalls" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
                     </div>
                     <div id="kpiCallsValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--</div>
                 </div>
                 <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80 font-num">
-                    <span id="kpiCallsMissed" class="text-rose-400 font-semibold">Lỡ: --</span>
-                    <span id="kpiCallsAnswered" class="text-emerald-400 font-semibold">Nhấc: --%</span>
+                    <span id="kpiCallsMissed" class="text-rose-500 font-semibold">Lỡ: --</span>
+                    <span id="kpiCallsAnswered" class="text-emerald-500 font-semibold">Nhấc: --%</span>
                 </div>
             </div>
 
@@ -307,16 +355,16 @@
                 <div class="kpi-watermark">⭐</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-star text-yellow-400"></i> Web & CSAT
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-star text-yellow-500"></i> Web & CSAT
                         </span>
-                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">Chuẩn</span>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-bold">Chuẩn</span>
                     </div>
                     <div id="kpiSurveyValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">-- lượt</div>
                 </div>
                 <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80 font-num">
-                    <span id="kpiWebScore" class="text-amber-400 font-semibold">Web: --</span>
-                    <span id="kpiCsatZalo" class="text-emerald-400 font-semibold">CSAT: --%</span>
+                    <span id="kpiWebScore" class="text-amber-500 font-semibold">Web: --</span>
+                    <span id="kpiCsatZalo" class="text-emerald-500 font-semibold">CSAT: --%</span>
                 </div>
             </div>
 
@@ -325,8 +373,8 @@
                 <div class="kpi-watermark">⏱️</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-clock text-purple-400"></i> Thời gian thoại
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock text-purple-500"></i> Thời gian thoại
                         </span>
                         <span id="badgeTime" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
                     </div>
@@ -334,7 +382,7 @@
                 </div>
                 <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80">
                     <span class="text-slate-400">TG Chờ</span>
-                    <span id="kpiWaitTime" class="text-purple-400 font-semibold font-num">--s</span>
+                    <span id="kpiWaitTime" class="text-purple-500 font-semibold font-num">--s</span>
                 </div>
             </div>
         </div>
@@ -346,7 +394,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
                         <h2 class="text-sm font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-blue-400"></i> Xu Hướng Hiệu Suất Tổng Hợp
+                            <i class="fa-solid fa-chart-line text-blue-500"></i> Xu Hướng Hiệu Suất Tổng Hợp
                         </h2>
                         <p class="text-xs text-slate-400">Biến động lượt yêu cầu CRM, Zalo và cuộc gọi đến</p>
                     </div>
@@ -364,7 +412,7 @@
                 <div class="flex justify-between items-center mb-3">
                     <div>
                         <h2 class="text-sm font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-emerald-400"></i> Top Vấn Đề
+                            <i class="fa-solid fa-chart-pie text-emerald-500"></i> Top Vấn Đề
                         </h2>
                         <p class="text-xs text-slate-400">Tỷ trọng nhóm vấn đề phản ánh</p>
                     </div>
@@ -388,7 +436,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
                         <h2 class="text-sm font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-cubes-stacked text-indigo-400"></i> Hiệu Suất Theo Đơn Vị Cảng
+                            <i class="fa-solid fa-cubes-stacked text-indigo-500"></i> Hiệu Suất Theo Đơn Vị Cảng
                         </h2>
                         <p class="text-xs text-slate-400">Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
                     </div>
@@ -407,7 +455,7 @@
                 <div>
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-sm font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-mobile-screen-button text-cyan-400"></i> Kênh Zalo OA
+                            <i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> Kênh Zalo OA
                         </h2>
                         <span id="badgeZaloDetail" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-semibold">Live Sync</span>
                     </div>
@@ -415,30 +463,30 @@
                     <div class="grid grid-cols-2 gap-2.5 mb-3">
                         <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-lg">
                             <div class="text-[10px] text-slate-400 uppercase font-semibold">Người Quan Tâm</div>
-                            <div id="zaloTotalFollowers" class="text-xl sm:text-2xl font-black text-cyan-400 mt-0.5 font-num">--</div>
+                            <div id="zaloTotalFollowers" class="text-xl sm:text-2xl font-black text-cyan-500 mt-0.5 font-num">--</div>
                         </div>
 
                         <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-lg">
                             <div class="text-[10px] text-slate-400 uppercase font-semibold">Quan Tâm Mới</div>
-                            <div id="zaloNewFollowers" class="text-xl sm:text-2xl font-black text-emerald-400 mt-0.5 font-num">--</div>
+                            <div id="zaloNewFollowers" class="text-xl sm:text-2xl font-black text-emerald-500 mt-0.5 font-num">--</div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5 text-xs">
                         <div class="bg-slate-900/60 border border-slate-800/80 px-2.5 py-2 rounded-lg flex justify-between items-center">
-                            <span class="text-slate-300">Bỏ quan tâm</span>
-                            <span id="zaloUnfollow" class="font-bold text-rose-400 font-num">--</span>
+                            <span class="text-slate-400">Bỏ quan tâm</span>
+                            <span id="zaloUnfollow" class="font-bold text-rose-500 font-num">--</span>
                         </div>
                         <div class="bg-slate-900/60 border border-slate-800/80 px-2.5 py-2 rounded-lg flex justify-between items-center">
-                            <span class="text-slate-300">Tỷ lệ phản hồi</span>
-                            <span id="zaloReplyRate" class="font-bold text-blue-400 font-num">--%</span>
+                            <span class="text-slate-400">Tỷ lệ phản hồi</span>
+                            <span id="zaloReplyRate" class="font-bold text-blue-500 font-num">--%</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500 mt-3">
                     <span>Cloud Supabase Database</span>
-                    <span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> Hoạt động tốt</span>
+                    <span class="text-emerald-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Hoạt động tốt</span>
                 </div>
             </div>
         </div>
@@ -448,14 +496,14 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                     <h2 class="text-sm font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-table-list text-amber-400"></i> Chi Tiết Phản Ánh Theo Nhóm Vấn Đề
+                        <i class="fa-solid fa-table-list text-amber-500"></i> Chi Tiết Phản Ánh Theo Nhóm Vấn Đề
                     </h2>
                     <p class="text-xs text-slate-400">Ma trận biến đổi động theo khoảng ngày được lọc</p>
                 </div>
                 <div class="w-full sm:w-64">
                     <div class="relative">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none focus:border-blue-500 transition">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
             </div>
@@ -464,10 +512,10 @@
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr id="matrixTableHeader" class="bg-slate-900/90 text-slate-400 border-b border-slate-800 font-num">
-                            <th class="p-2.5 font-bold text-slate-200 min-w-[260px]">NHÓM VẤN ĐỀ</th>
+                            <th class="p-2.5 font-bold min-w-[260px]">NHÓM VẤN ĐỀ</th>
                         </tr>
                     </thead>
-                    <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 text-slate-300 font-num">
+                    <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 font-num">
                     </tbody>
                 </table>
             </div>
@@ -478,7 +526,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                     <h2 class="text-sm font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Nhật Ký Vận Hành Sự Cố & Khắc Phục
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Nhật Ký Vận Hành Sự Cố & Khắc Phục
                     </h2>
                     <p class="text-xs text-slate-400">Đồng bộ theo khoảng thời gian lọc chung của trang</p>
                 </div>
@@ -491,15 +539,15 @@
                 <table class="w-full text-left border-collapse text-xs">
                     <thead class="sticky top-0 z-10 bg-slate-900/95 font-num">
                         <tr class="text-slate-400 border-b border-slate-800">
-                            <th class="p-2.5 font-bold text-slate-200">NGÀY SỰ CỐ</th>
-                            <th class="p-2.5 font-bold text-slate-200">NGÀY KHẮC PHỤC</th>
-                            <th class="p-2.5 font-bold text-center text-rose-400">TỔNG GIỜ</th>
-                            <th class="p-2.5 font-bold text-slate-200 min-w-[280px]">NỘI DUNG SỰ CỐ</th>
-                            <th class="p-2.5 font-bold text-slate-200">ĐƠN VỊ / BỘ PHẬN</th>
-                            <th class="p-2.5 font-bold text-center text-slate-200">THAO TÁC</th>
+                            <th class="p-2.5 font-bold">NGÀY SỰ CỐ</th>
+                            <th class="p-2.5 font-bold">NGÀY KHẮC PHỤC</th>
+                            <th class="p-2.5 font-bold text-center text-rose-500">TỔNG GIỜ</th>
+                            <th class="p-2.5 font-bold min-w-[280px]">NỘI DUNG SỰ CỐ</th>
+                            <th class="p-2.5 font-bold">ĐƠN VỊ / BỘ PHẬN</th>
+                            <th class="p-2.5 font-bold text-center">THAO TÁC</th>
                         </tr>
                     </thead>
-                    <tbody id="incidentTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                    <tbody id="incidentTableBody" class="divide-y divide-slate-800/60">
                     </tbody>
                 </table>
             </div>
@@ -510,14 +558,14 @@
     <!-- FOOTER -->
     <footer class="bg-slate-900/40 border-t border-slate-800/80 py-3.5 mt-auto text-center text-xs text-slate-400">
         <p class="font-semibold text-xs">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
-        <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-400 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
+        <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-500 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
     </footer>
 
     <!-- MODAL XÁC THỰC MẬT KHẨU -->
     <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-5 space-y-4">
             <div class="text-center space-y-1">
-                <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-lg">
+                <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto text-lg">
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <h3 class="text-sm font-bold">Xác Thực Bảo Mật</h3>
@@ -535,7 +583,7 @@
     <div id="alertSetupModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xl rounded-2xl border border-amber-500/30 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-amber-500 flex items-center gap-2">
                     <i class="fa-solid fa-sliders"></i> Thiết Lập Ngưỡng Cảnh Báo Tiêu Chuẩn
                 </h3>
                 <button onclick="closeAlertSetupModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
@@ -548,20 +596,20 @@
                     
                     <!-- 1. TB CRM / ngày -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">1. TB CRM / Ngày</div>
+                        <div class="font-bold">1. TB CRM / Ngày</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_crm_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_crm_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_crm_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_crm_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_crm_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_crm_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_crm_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_crm_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -569,20 +617,20 @@
 
                     <!-- 2. Tỷ lệ phản hồi Zalo -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">2. Tỷ Lệ Phản Hồi Zalo (%)</div>
+                        <div class="font-bold">2. Tỷ Lệ Phản Hồi Zalo (%)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_zaloRate_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_zaloRate_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_zaloRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
+                                    <input type="number" id="cfg_zaloRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_zaloRate_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_zaloRate_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_zaloRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
+                                    <input type="number" id="cfg_zaloRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -590,20 +638,20 @@
 
                     <!-- 3. TG phản hồi đầu Zalo -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">3. TG Phản Hồi Zalo (Phút)</div>
+                        <div class="font-bold">3. TG Phản Hồi Zalo (Phút)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_zaloTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_zaloTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_zaloTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_zaloTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -611,20 +659,20 @@
 
                     <!-- 4. Tỷ lệ nhấc máy -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">4. Tỷ Lệ Nhấc Máy (%)</div>
+                        <div class="font-bold">4. Tỷ Lệ Nhấc Máy (%)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_callRate_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_callRate_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_callRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
+                                    <input type="number" id="cfg_callRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_callRate_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
-                                    <input type="number" id="cfg_callRate_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_callRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select>
+                                    <input type="number" id="cfg_callRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -632,20 +680,20 @@
 
                     <!-- 5. Số cuộc gọi lỡ -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">5. Cuộc Gọi Lỡ (Lượt)</div>
+                        <div class="font-bold">5. Cuộc Gọi Lỡ (Lượt)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_missed_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_missed_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_missed_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_missed_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_missed_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_missed_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_missed_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_missed_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -653,20 +701,20 @@
 
                     <!-- 6. Thời gian thoại TB -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">6. Thời Gian Thoại (Giây)</div>
+                        <div class="font-bold">6. Thời Gian Thoại (Giây)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_talkTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_talkTime_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_talkTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_talkTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_talkTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_talkTime_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_talkTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_talkTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -674,20 +722,20 @@
 
                     <!-- 7. Thời gian chờ -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">7. TG Chờ Bắt Máy (Giây)</div>
+                        <div class="font-bold">7. TG Chờ Bắt Máy (Giây)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_waitTime_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_waitTime_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_waitTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_waitTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_waitTime_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_waitTime_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_waitTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_waitTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -695,20 +743,20 @@
 
                     <!-- 8. Lượt bỏ quan tâm -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
-                        <div class="font-bold text-slate-200">8. Bỏ Quan Tâm Zalo</div>
+                        <div class="font-bold">8. Bỏ Quan Tâm Zalo</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
                             <div>
-                                <span class="text-[10px] text-amber-400">Vàng</span>
+                                <span class="text-[10px] text-amber-500">Vàng</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_unfollow_y_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_unfollow_y_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_unfollow_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_unfollow_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] text-rose-400">Đỏ</span>
+                                <span class="text-[10px] text-rose-500">Đỏ</span>
                                 <div class="flex gap-1 mt-0.5">
-                                    <select id="cfg_unfollow_r_cond" class="bg-slate-800 text-slate-200 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
-                                    <input type="number" id="cfg_unfollow_r_val" placeholder="Trống" class="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
+                                    <select id="cfg_unfollow_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select>
+                                    <input type="number" id="cfg_unfollow_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs">
                                 </div>
                             </div>
                         </div>
@@ -727,8 +775,8 @@
     <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-rose-400"></i> Thêm Sự Cố Vận Hành
+                <h3 id="modalTitle" class="text-sm font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-rose-500"></i> Thêm Sự Cố Vận Hành
                 </h3>
                 <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
             </div>
@@ -810,7 +858,7 @@
         }
 
         function updateChartsTheme(isDark) {
-            const textColor = isDark ? '#94a3b8' : '#475569';
+            const textColor = isDark ? '#94a3b8' : '#334155';
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)';
 
             if (trendChartInstance) {
@@ -1040,11 +1088,11 @@
             if (isRed) {
                 card.classList.add('kpi-alert-red');
                 badge.innerText = 'Báo Đỏ';
-                badge.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/50 font-bold animate-pulse';
+                badge.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-500 border border-rose-500/50 font-bold animate-pulse';
             } else if (isYellow) {
                 card.classList.add('kpi-alert-yellow');
                 badge.innerText = 'Báo Vàng';
-                badge.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold';
+                badge.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-500 border border-amber-500/50 font-bold';
             } else {
                 card.classList.remove('kpi-alert-red', 'kpi-alert-yellow');
                 badge.innerText = 'Chuẩn';
@@ -1257,7 +1305,7 @@
             const tbody = document.getElementById('matrixTableBody');
 
             let hHtml = '<th class="p-2.5 font-bold min-w-[260px]">NHÓM VẤN ĐỀ</th>';
-            hHtml += '<th class="p-2.5 font-bold text-center text-amber-400 min-w-[100px] border-r border-slate-800">TB/NGÀY</th>';
+            hHtml += '<th class="p-2.5 font-bold text-center text-amber-500 min-w-[100px] border-r border-slate-700/50">TB/NGÀY</th>';
             filteredData.forEach(i => hHtml += `<th class="p-2.5 font-bold text-center min-w-[100px]">${i.date}</th>`);
             headerRow.innerHTML = hHtml;
 
@@ -1276,8 +1324,8 @@
                 const avg = filteredData.length ? (sum / filteredData.length).toFixed(1) : 0;
 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
-                tr.innerHTML = `<td class="p-2.5 font-medium font-sans">${cat}</td><td class="p-2.5 text-center font-bold text-amber-400 border-r border-slate-800">${avg}</td>` + dHtml;
+                tr.className = 'hover:bg-slate-500/10 transition border-b border-slate-700/30';
+                tr.innerHTML = `<td class="p-2.5 font-medium font-sans">${cat}</td><td class="p-2.5 text-center font-bold text-amber-500 border-r border-slate-700/50">${avg}</td>` + dHtml;
                 tbody.appendChild(tr);
             });
         }
@@ -1402,7 +1450,7 @@
             document.getElementById('incidentForm').reset();
             document.getElementById('incidentId').value = '';
             if (id) {
-                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-rose-400"></i> Chỉnh Sửa Sự Cố';
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-rose-500"></i> Chỉnh Sửa Sự Cố';
                 const inc = incidentsList.find(i => i.id === id);
                 if (inc) {
                     document.getElementById('incidentId').value = inc.id;
@@ -1413,7 +1461,7 @@
                     document.getElementById('incUnit').value = inc.unit || '';
                 }
             } else {
-                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-400"></i> Thêm Sự Cố Vận Hành';
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus text-rose-500"></i> Thêm Sự Cố Vận Hành';
                 document.getElementById('incDate').value = new Date().toISOString().split('T')[0];
             }
             modal.classList.remove('hidden');
@@ -1474,7 +1522,7 @@
             filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
 
             if (!filtered.length) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Chưa ghi nhận sự cố nào trong khoảng thời gian này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Chưa ghi nhận sự cố nào trong khoảng thời gian này.</td></tr>`;
                 return;
             }
 
@@ -1482,15 +1530,15 @@
             filtered.forEach(inc => {
                 const fD = d => d ? d.split('-').reverse().join('/') : '--';
                 html += `
-                    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40 font-num">
+                    <tr class="hover:bg-slate-500/10 transition border-b border-slate-700/30 font-num">
                         <td class="p-2.5 font-medium">${fD(inc.date)}</td>
                         <td class="p-2.5 text-slate-400">${fD(inc.resolvedDate)}</td>
-                        <td class="p-2.5 text-center font-bold text-rose-400">${inc.totalHours || 0}h</td>
+                        <td class="p-2.5 text-center font-bold text-rose-500">${inc.totalHours || 0}h</td>
                         <td class="p-2.5 font-sans">${inc.content}</td>
-                        <td class="p-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-sans">${inc.unit}</span></td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-500/15 border border-slate-700/50 text-[10px] font-sans">${inc.unit}</span></td>
                         <td class="p-2.5 text-center space-x-1">
-                            <button onclick="requestPasswordAndAction('edit_inc_${inc.id}')" class="px-2 py-0.5 rounded bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-[11px] transition active:scale-95"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="requestPasswordAndAction('del_inc_${inc.id}')" class="px-2 py-0.5 rounded bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-[11px] transition active:scale-95"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="requestPasswordAndAction('edit_inc_${inc.id}')" class="px-2 py-0.5 rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-500 border border-blue-500/30 text-[11px] transition active:scale-95"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="requestPasswordAndAction('del_inc_${inc.id}')" class="px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-500 border border-rose-500/30 text-[11px] transition active:scale-95"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
