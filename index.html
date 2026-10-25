@@ -39,15 +39,45 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-num { font-family: 'JetBrains Mono', monospace; }
 
-        .glass-panel {
+        /* Dark Theme Glass */
+        .dark .glass-panel {
             background: rgba(12, 19, 34, 0.78);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.07);
         }
-        
-        .kpi-card {
+        .dark .kpi-card {
             background: linear-gradient(145deg, rgba(17, 26, 46, 0.85) 0%, rgba(10, 15, 29, 0.95) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Light Theme Glass */
+        html:not(.dark) body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        html:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+        html:not(.dark) .kpi-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        html:not(.dark) header {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        html:not(.dark) header h1 {
+            color: #0f172a !important;
+        }
+        html:not(.dark) .kpi-card div.font-extrabold {
+            color: #0f172a !important;
+        }
+
+        .kpi-card {
             position: relative;
             overflow: hidden;
         }
@@ -69,9 +99,9 @@
 
         /* Thanh cuộn mảnh tối giản */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #040711; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         /* Trạng thái cảnh báo */
         .kpi-alert-red {
@@ -89,20 +119,20 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
     <!-- CỤM HEADER & BỘ LỌC CÓ THỂ THU GỌN -->
     <div id="topCollapsibleArea" class="transition-all duration-300 ease-in-out overflow-hidden">
         
         <!-- HEADER CHÍNH -->
-        <header class="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-6 py-2.5">
+        <header class="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors duration-200">
             <div class="max-w-[1680px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-3">
                 
                 <!-- Nhận diện Đơn vị / Tổ chức -->
                 <div class="flex items-center space-x-3 w-full lg:w-auto justify-between lg:justify-start">
                     <div class="flex items-center space-x-2.5">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-lg shadow-blue-500/20 flex-shrink-0">
-                            <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center text-lg">
+                            <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center text-lg text-white">
                                 ⚓
                             </div>
                         </div>
@@ -114,8 +144,8 @@
                                 <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">Cảng Hải Phòng</span>
                             </div>
                             <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
-                                <span class="text-blue-400 font-semibold tracking-wider">OPERATIONS & CUSTOMER SERVICE CENTER</span>
-                                <span class="text-slate-600 hidden sm:inline">•</span>
+                                <span class="text-blue-500 font-semibold tracking-wider">OPERATIONS & CUSTOMER SERVICE CENTER</span>
+                                <span class="text-slate-500 hidden sm:inline">•</span>
                                 <a href="https://haiphongport.com.vn" target="_blank" class="hidden sm:inline-flex items-center gap-1 text-slate-400 hover:text-cyan-400 transition">
                                     <span>haiphongport.com.vn</span> <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                                 </a>
@@ -124,9 +154,19 @@
                     </div>
                 </div>
 
-                <!-- Thanh công cụ (Toolbar với xác thực PIN) -->
-                <div class="flex flex-wrap items-center gap-1.5 w-full lg:w-auto justify-start lg:justify-end">
-                    <button onclick="requestPasswordAndAction('alert')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
+                <!-- Thanh công cụ + Nút gạt sáng tối -->
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+                    
+                    <!-- Nút gạt chuyển chế độ Sáng/Tối nhỏ gọn -->
+                    <div class="flex items-center gap-1.5 bg-slate-800/80 dark:bg-slate-800/80 rounded-full px-2 py-1 border border-slate-700/80">
+                        <i class="fa-regular fa-sun text-[10px] text-amber-400"></i>
+                        <button onclick="toggleTheme()" id="themeToggleBtn" type="button" aria-label="Toggle Theme" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
+                            <span id="themeToggleThumb" class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-3.5"></span>
+                        </button>
+                        <i class="fa-regular fa-moon text-[10px] text-slate-400"></i>
+                    </div>
+
+                    <button onclick="requestPasswordAndAction('alert')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
                         <i class="fa-solid fa-sliders text-[11px]"></i> Cảnh báo
                     </button>
 
@@ -154,13 +194,13 @@
         <div class="max-w-[1680px] mx-auto px-3 sm:px-6 pt-2.5">
             <div class="glass-panel p-2.5 sm:p-3 rounded-xl flex flex-wrap items-center justify-between gap-2.5">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1">
+                    <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700/80 rounded-lg px-2.5 py-1">
                         <span class="text-xs text-slate-400">Từ</span>
-                        <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
+                        <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none cursor-pointer font-num">
                     </div>
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1">
+                    <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700/80 rounded-lg px-2.5 py-1">
                         <span class="text-xs text-slate-400">Đến</span>
-                        <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
+                        <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none cursor-pointer font-num">
                     </div>
                     <button onclick="clearDateFilter()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95">
                         <i class="fa-solid fa-rotate-left"></i>
@@ -207,7 +247,7 @@
                 <div class="kpi-watermark">🎧</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-headset text-blue-400"></i> Yêu cầu CRM
                         </span>
                         <span id="badgeCrm" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
@@ -225,7 +265,7 @@
                 <div class="kpi-watermark">💬</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-comment-dots text-cyan-400"></i> Tin Zalo OA
                         </span>
                         <span id="badgeZalo" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
@@ -249,7 +289,7 @@
                 <div class="kpi-watermark">📞</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-phone-volume text-amber-400"></i> Cuộc gọi đến
                         </span>
                         <span id="badgeCalls" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
@@ -267,7 +307,7 @@
                 <div class="kpi-watermark">⭐</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-star text-yellow-400"></i> Web & CSAT
                         </span>
                         <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">Chuẩn</span>
@@ -285,7 +325,7 @@
                 <div class="kpi-watermark">⏱️</div>
                 <div>
                     <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 flex items-center gap-1.5">
                             <i class="fa-solid fa-clock text-purple-400"></i> Thời gian thoại
                         </span>
                         <span id="badgeTime" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
@@ -305,7 +345,7 @@
             <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
-                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <h2 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-blue-400"></i> Xu Hướng Hiệu Suất Tổng Hợp
                         </h2>
                         <p class="text-xs text-slate-400">Biến động lượt yêu cầu CRM, Zalo và cuộc gọi đến</p>
@@ -323,7 +363,7 @@
             <div class="glass-panel p-4 rounded-xl flex flex-col">
                 <div class="flex justify-between items-center mb-3">
                     <div>
-                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <h2 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa-solid fa-chart-pie text-emerald-400"></i> Top Vấn Đề
                         </h2>
                         <p class="text-xs text-slate-400">Tỷ trọng nhóm vấn đề phản ánh</p>
@@ -347,15 +387,15 @@
             <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
-                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <h2 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa-solid fa-cubes-stacked text-indigo-400"></i> Hiệu Suất Theo Đơn Vị Cảng
                         </h2>
                         <p class="text-xs text-slate-400">Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
                     </div>
                     <div class="bg-slate-900 border border-slate-800 rounded-lg p-0.5 flex gap-1">
-                        <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2 py-1 rounded bg-blue-600 text-white text-xs font-medium transition active:scale-95">Cột</button>
-                        <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-2 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Đường</button>
-                        <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-2 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Vùng</button>
+                        <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded bg-blue-600 text-white text-xs font-medium transition active:scale-95">Cột</button>
+                        <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-2.5 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Đường</button>
+                        <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-2.5 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Vùng</button>
                     </div>
                 </div>
                 <div class="relative flex-1 w-full min-h-[250px]">
@@ -366,7 +406,7 @@
             <div id="cardZaloDetail" class="glass-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
                 <div>
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <h2 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa-solid fa-mobile-screen-button text-cyan-400"></i> Kênh Zalo OA
                         </h2>
                         <span id="badgeZaloDetail" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-semibold">Live Sync</span>
@@ -407,7 +447,7 @@
         <div class="glass-panel p-4 rounded-xl space-y-3">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <h2 class="text-sm font-bold flex items-center gap-2">
                         <i class="fa-solid fa-table-list text-amber-400"></i> Chi Tiết Phản Ánh Theo Nhóm Vấn Đề
                     </h2>
                     <p class="text-xs text-slate-400">Ma trận biến đổi động theo khoảng ngày được lọc</p>
@@ -415,7 +455,7 @@
                 <div class="w-full sm:w-64">
                     <div class="relative">
                         <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900/90 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 dark:text-slate-200 text-slate-800 focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
             </div>
@@ -437,7 +477,7 @@
         <div class="glass-panel p-4 rounded-xl space-y-3">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                    <h2 class="text-sm font-bold flex items-center gap-2">
                         <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Nhật Ký Vận Hành Sự Cố & Khắc Phục
                     </h2>
                     <p class="text-xs text-slate-400">Đồng bộ theo khoảng thời gian lọc chung của trang</p>
@@ -469,18 +509,18 @@
 
     <!-- FOOTER -->
     <footer class="bg-slate-900/40 border-t border-slate-800/80 py-3.5 mt-auto text-center text-xs text-slate-400">
-        <p class="font-semibold text-slate-300 text-xs">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
+        <p class="font-semibold text-xs">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
         <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-400 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
     </footer>
 
-    <!-- MODAL XÁC THỰC MẬT KHẨU (Bảo mật tuyệt đối, không lộ PIN) -->
+    <!-- MODAL XÁC THỰC MẬT KHẨU -->
     <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-5 space-y-4">
             <div class="text-center space-y-1">
                 <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-lg">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-sm font-bold text-white">Xác Thực Bảo Mật</h3>
+                <h3 class="text-sm font-bold">Xác Thực Bảo Mật</h3>
                 <p class="text-xs text-slate-400">Vui lòng nhập mã PIN quản trị viên</p>
             </div>
             <input type="password" id="securePasswordInput" placeholder="••••" maxlength="8" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center text-white tracking-[6px] font-num focus:outline-none focus:border-blue-500 transition">
@@ -738,6 +778,58 @@
         const CORRECT_PIN = "6868";
         let pendingAction = null;
 
+        // Quản lý theme Sáng / Tối
+        function initTheme() {
+            const savedTheme = localStorage.getItem('cskh_theme') || 'dark';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeUI(savedTheme === 'dark');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('cskh_theme', isDark ? 'dark' : 'light');
+            updateThemeUI(isDark);
+            updateChartsTheme(isDark);
+        }
+
+        function updateThemeUI(isDark) {
+            const btn = document.getElementById('themeToggleBtn');
+            const thumb = document.getElementById('themeToggleThumb');
+            if (!btn || !thumb) return;
+            if (isDark) {
+                btn.className = "relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600";
+                thumb.className = "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-3.5";
+            } else {
+                btn.className = "relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-300";
+                thumb.className = "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0";
+            }
+        }
+
+        function updateChartsTheme(isDark) {
+            const textColor = isDark ? '#94a3b8' : '#475569';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)';
+
+            if (trendChartInstance) {
+                trendChartInstance.options.scales.y.grid.color = gridColor;
+                trendChartInstance.options.scales.y.ticks = { color: textColor };
+                trendChartInstance.options.scales.x.ticks = { color: textColor };
+                trendChartInstance.update();
+            }
+            if (categoryChartInstance) {
+                categoryChartInstance.options.plugins.legend.labels.color = textColor;
+                categoryChartInstance.update();
+            }
+            if (unitChartInstance) {
+                unitChartInstance.options.scales = unitChartInstance.options.scales || {};
+                if (unitChartInstance.options.scales.y) unitChartInstance.options.scales.y.grid.color = gridColor;
+                unitChartInstance.update();
+            }
+        }
+
         let alertThresholds = {
             crm: { y_cond: 'gt', y_val: null, r_cond: 'gt', r_val: null },
             zaloRate: { y_cond: 'lt', y_val: null, r_cond: 'lt', r_val: null },
@@ -790,6 +882,7 @@
         let unitChartInstance = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
+            initTheme();
             initCharts();
             try {
                 await loadDataFromSupabase();
@@ -1163,9 +1256,9 @@
             const headerRow = document.getElementById('matrixTableHeader');
             const tbody = document.getElementById('matrixTableBody');
 
-            let hHtml = '<th class="p-2.5 font-bold text-slate-200 min-w-[260px]">NHÓM VẤN ĐỀ</th>';
-            hHtml += '<th class="p-2.5 font-bold text-center text-amber-400 min-w-[100px] bg-slate-900/90 border-r border-slate-800">TB/NGÀY</th>';
-            filteredData.forEach(i => hHtml += `<th class="p-2.5 font-bold text-center text-slate-300 min-w-[100px]">${i.date}</th>`);
+            let hHtml = '<th class="p-2.5 font-bold min-w-[260px]">NHÓM VẤN ĐỀ</th>';
+            hHtml += '<th class="p-2.5 font-bold text-center text-amber-400 min-w-[100px] border-r border-slate-800">TB/NGÀY</th>';
+            filteredData.forEach(i => hHtml += `<th class="p-2.5 font-bold text-center min-w-[100px]">${i.date}</th>`);
             headerRow.innerHTML = hHtml;
 
             let cats = new Set();
@@ -1178,26 +1271,31 @@
                 filteredData.forEach(item => {
                     const val = item.categories?.[cat] || 0;
                     sum += val;
-                    dHtml += `<td class="p-2.5 text-center font-medium text-slate-300">${val}</td>`;
+                    dHtml += `<td class="p-2.5 text-center font-medium">${val}</td>`;
                 });
                 const avg = filteredData.length ? (sum / filteredData.length).toFixed(1) : 0;
 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
-                tr.innerHTML = `<td class="p-2.5 font-medium text-slate-200 font-sans">${cat}</td><td class="p-2.5 text-center font-bold text-amber-400 bg-slate-900/50 border-r border-slate-800">${avg}</td>` + dHtml;
+                tr.innerHTML = `<td class="p-2.5 font-medium font-sans">${cat}</td><td class="p-2.5 text-center font-bold text-amber-400 border-r border-slate-800">${avg}</td>` + dHtml;
                 tbody.appendChild(tr);
             });
         }
 
         function initCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#475569';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)';
+
             trendChartInstance = new Chart(document.getElementById('trendChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: [], datasets: [] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     scales: {
-                        y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: textColor } },
+                        x: { ticks: { color: textColor } }
                     }
                 }
             });
@@ -1205,13 +1303,19 @@
             categoryChartInstance = new Chart(document.getElementById('categoryChart').getContext('2d'), {
                 type: 'doughnut',
                 data: { labels: [], datasets: [] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10 } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 10 } } } }
             });
 
             unitChartInstance = new Chart(document.getElementById('unitChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: [], datasets: [] },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: gridColor }, ticks: { color: textColor } },
+                        x: { ticks: { color: textColor } }
+                    }
+                }
             });
         }
 
@@ -1379,10 +1483,10 @@
                 const fD = d => d ? d.split('-').reverse().join('/') : '--';
                 html += `
                     <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40 font-num">
-                        <td class="p-2.5 font-medium text-slate-200">${fD(inc.date)}</td>
+                        <td class="p-2.5 font-medium">${fD(inc.date)}</td>
                         <td class="p-2.5 text-slate-400">${fD(inc.resolvedDate)}</td>
                         <td class="p-2.5 text-center font-bold text-rose-400">${inc.totalHours || 0}h</td>
-                        <td class="p-2.5 text-slate-200 font-sans">${inc.content}</td>
+                        <td class="p-2.5 font-sans">${inc.content}</td>
                         <td class="p-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-sans">${inc.unit}</span></td>
                         <td class="p-2.5 text-center space-x-1">
                             <button onclick="requestPasswordAndAction('edit_inc_${inc.id}')" class="px-2 py-0.5 rounded bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 text-[11px] transition active:scale-95"><i class="fa-solid fa-pen"></i></button>
