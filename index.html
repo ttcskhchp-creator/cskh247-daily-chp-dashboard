@@ -39,7 +39,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-num { font-family: 'JetBrains Mono', monospace; }
 
-        /* Hiệu ứng nhấp nháy cho Icon chìm góc thẻ */
         @keyframes floatBlink {
             0%, 100% {
                 opacity: 0.18;
@@ -69,7 +68,6 @@
             transform: scale(1.15) rotate(-8deg);
         }
 
-        /* Dark Theme Glass */
         .dark .glass-panel {
             background: rgba(12, 19, 34, 0.85);
             backdrop-filter: blur(16px);
@@ -83,7 +81,6 @@
             opacity: 0.22;
         }
 
-        /* Light Theme Glass & Khắc phục màu chữ hiển thị chuẩn */
         html:not(.dark) body {
             background-color: #f1f5f9;
             color: #1e293b;
@@ -148,13 +145,11 @@
             overflow: hidden;
         }
 
-        /* Thanh cuộn mảnh tối giản */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 9999px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Trạng thái cảnh báo */
         .kpi-alert-red {
             border: 2px solid #ef4444 !important;
             box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
@@ -176,7 +171,7 @@
         <header class="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors duration-200">
             <div class="max-w-[1680px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-3">
                 
-                <!-- Nhận diện Đơn vị / Tổ chức -->
+                <!-- Nhận diện Đơn vị / Tổ chức[cite: 4] -->
                 <div class="flex items-center space-x-3 w-full lg:w-auto justify-between lg:justify-start">
                     <div class="flex items-center space-x-2.5">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-lg shadow-blue-500/20 flex-shrink-0">
@@ -202,7 +197,7 @@
                     </div>
                 </div>
 
-                <!-- Thanh công cụ -->
+                <!-- Thanh công cụ[cite: 4] -->
                 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
                     <button onclick="requestPasswordAndAction('alert')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
                         <i class="fa-solid fa-sliders text-[11px]"></i> Cảnh báo
@@ -228,11 +223,11 @@
             </div>
         </header>
 
-        <!-- KHỐI LỌC THỜI GIAN NHANH -->
+        <!-- KHỐI LỌC THỜI GIAN NHANH[cite: 4] -->
         <div class="max-w-[1680px] mx-auto px-3 sm:px-6 pt-2.5">
             <div class="glass-panel p-2.5 sm:p-3 rounded-xl flex flex-wrap items-center justify-between gap-2.5">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <!-- Nút gạt chuyển chế độ Sáng/Tối -->
+                    <!-- Nút gạt chuyển chế độ Sáng/Tối[cite: 4] -->
                     <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white rounded-lg px-2.5 py-1 border border-slate-700/80 shadow-sm" title="Chuyển đổi giao diện Sáng / Tối">
                         <i class="fa-regular fa-sun text-[11px] text-amber-500"></i>
                         <button onclick="toggleTheme()" id="themeToggleBtn" type="button" aria-label="Toggle Theme" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
@@ -262,7 +257,7 @@
             </div>
         </div>
 
-        <!-- STATUS BAR -->
+        <!-- STATUS BAR[cite: 4] -->
         <div class="max-w-[1680px] mx-auto px-3 sm:px-6 py-1.5">
             <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg py-1 px-3 text-xs text-slate-400 flex justify-between items-center">
                 <div class="flex items-center gap-2 truncate">
@@ -276,7 +271,7 @@
         </div>
     </div>
 
-    <!-- NÚT GẠT THU GỌN / MỞ RỘNG HEADER -->
+    <!-- NÚT GẠT THU GỌN / MỞ RỘNG HEADER[cite: 4] -->
     <div class="w-full flex justify-center -mt-1.5 z-30">
         <button onclick="toggleTopArea()" id="toggleTopBtn" class="px-3.5 py-0.5 rounded-b-lg bg-slate-800/90 hover:bg-blue-600 text-slate-400 hover:text-white border border-t-0 border-slate-700 text-[10px] font-semibold transition flex items-center gap-1.5 shadow-lg active:scale-95">
             <i id="toggleTopIcon" class="fa-solid fa-chevron-up text-[9px]"></i> <span id="toggleTopText">Thu gọn</span>
@@ -286,10 +281,10 @@
     <!-- KHU VỰC NỘI DUNG CHÍNH -->
     <main class="max-w-[1680px] mx-auto px-3 sm:px-6 py-3.5 flex-1 w-full space-y-4">
 
-        <!-- 5 THẺ KPI CHÍNH -->
+        <!-- 5 THẺ KPI CHÍNH[cite: 4] -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
             
-            <!-- Card 1: YÊU CẦU CRM -->
+            <!-- Card 1: YÊU CẦU CRM[cite: 4] -->
             <div id="cardCrm" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
                 <div class="kpi-watermark">🎧</div>
                 <div>
@@ -307,7 +302,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: TIN NHẮN ZALO OA -->
+            <!-- Card 2: TIN NHẮN ZALO OA[cite: 4] -->
             <div id="cardZalo" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
                 <div class="kpi-watermark">💬</div>
                 <div>
@@ -331,7 +326,7 @@
                 </div>
             </div>
 
-            <!-- Card 3: CUỘC GỌI TỔNG ĐÀI -->
+            <!-- Card 3: CUỘC GỌI TỔNG ĐÀI[cite: 4] -->
             <div id="cardCalls" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
                 <div class="kpi-watermark">📞</div>
                 <div>
@@ -349,7 +344,7 @@
                 </div>
             </div>
 
-            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT -->
+            <!-- Card 4: KHẢO SÁT WEBSITE & CSAT[cite: 4] -->
             <div id="cardSurvey" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300 border border-emerald-500/25">
                 <div class="kpi-watermark">⭐</div>
                 <div>
@@ -367,7 +362,7 @@
                 </div>
             </div>
 
-            <!-- Card 5: THOẠI & CHỜ TB -->
+            <!-- Card 5: THOẠI & CHỜ TB[cite: 4] -->
             <div id="cardTime" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
                 <div class="kpi-watermark">⏱️</div>
                 <div>
@@ -386,7 +381,7 @@
             </div>
         </div>
 
-        <!-- ROW 1: BIỂU ĐỒ XU HƯỚNG & PHÂN LOẠI VẤN ĐỀ -->
+        <!-- ROW 1: BIỂU ĐỒ XU HƯỚNG & PHÂN LOẠI VẤN ĐỀ[cite: 4] -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
             <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
@@ -428,7 +423,7 @@
             </div>
         </div>
 
-        <!-- ROW 2: SO SÁNH ĐƠN VỊ CẢNG & KÊNH ZALO -->
+        <!-- ROW 2: SO SÁNH ĐƠN VỊ CẢNG & KÊNH ZALO[cite: 4] -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
             <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
@@ -490,7 +485,7 @@
             </div>
         </div>
 
-        <!-- BẢNG MA TRẬN NHÓM VẤN ĐỀ -->
+        <!-- BẢNG MA TRẬN NHÓM VẤN ĐỀ[cite: 4] -->
         <div class="glass-panel p-4 rounded-xl space-y-3">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
@@ -520,7 +515,7 @@
             </div>
         </div>
 
-        <!-- BẢNG NHẬT KÝ SỰ CỐ VẬN HÀNH -->
+        <!-- BẢNG NHẬT KÝ SỰ CỐ VẬN HÀNH[cite: 4] -->
         <div class="glass-panel p-4 rounded-xl space-y-3">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
@@ -554,13 +549,13 @@
 
     </main>
 
-    <!-- FOOTER -->
+    <!-- FOOTER[cite: 4] -->
     <footer class="bg-slate-900/40 border-t border-slate-800/80 py-3.5 mt-auto text-center text-xs text-slate-400">
         <p class="font-semibold text-xs">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
         <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-500 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
     </footer>
 
-    <!-- MODAL XÁC THỰC MẬT KHẨU -->
+    <!-- MODAL XÁC THỰC MẬT KHẨU[cite: 4] -->
     <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-5 space-y-4">
             <div class="text-center space-y-1">
@@ -578,7 +573,7 @@
         </div>
     </div>
 
-    <!-- MODAL CẤU HÌNH CẢNH BÁO TIÊU CHUẨN -->
+    <!-- MODAL CẤU HÌNH CẢNH BÁO TIÊU CHUẨN[cite: 4] -->
     <div id="alertSetupModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xl rounded-2xl border border-amber-500/30 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
@@ -593,7 +588,6 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     
-                    <!-- 1. TB CRM / ngày -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">1. TB CRM / Ngày</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -614,7 +608,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. Tỷ lệ phản hồi Zalo -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">2. Tỷ Lệ Phản Hồi Zalo (%)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -635,7 +628,6 @@
                         </div>
                     </div>
 
-                    <!-- 3. TG phản hồi đầu Zalo -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">3. TG Phản Hồi Zalo (Phút)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -656,7 +648,6 @@
                         </div>
                     </div>
 
-                    <!-- 4. Tỷ lệ nhấc máy -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">4. Tỷ Lệ Nhấc Máy (%)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -677,7 +668,6 @@
                         </div>
                     </div>
 
-                    <!-- 5. Số cuộc gọi lỡ -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">5. Cuộc Gọi Lỡ (Lượt)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -698,7 +688,6 @@
                         </div>
                     </div>
 
-                    <!-- 6. Thời gian thoại TB -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">6. Thời Gian Thoại (Giây)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -719,7 +708,6 @@
                         </div>
                     </div>
 
-                    <!-- 7. Thời gian chờ -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">7. TG Chờ Bắt Máy (Giây)</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -740,7 +728,6 @@
                         </div>
                     </div>
 
-                    <!-- 8. Lượt bỏ quan tâm -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                         <div class="font-bold">8. Bỏ Quan Tâm Zalo</div>
                         <div class="grid grid-cols-2 gap-1.5 font-num">
@@ -770,7 +757,7 @@
         </div>
     </div>
 
-    <!-- MODAL NHẬP / SỬA SỰ CỐ -->
+    <!-- MODAL NHẬP / SỬA SỰ CỐ[cite: 4] -->
     <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
@@ -825,7 +812,6 @@
         const CORRECT_PIN = "6868";
         let pendingAction = null;
 
-        // Quản lý theme Sáng / Tối
         function initTheme() {
             const savedTheme = localStorage.getItem('cskh_theme') || 'dark';
             if (savedTheme === 'dark') {
@@ -942,7 +928,6 @@
             }
         });
 
-        // Quản lý xác thực mã PIN an toàn
         function requestPasswordAndAction(action) {
             pendingAction = action;
             document.getElementById('securePasswordInput').value = '';
@@ -1111,22 +1096,35 @@
             if (el) el.innerText = `Cập nhật: ${formatDisplayTimestamp(isoString)}`;
         }
 
-        function sortDatabase() {
-            database.sort((a, b) => (parseDateStandard(a.date) || 0) - (parseDateStandard(b.date) || 0));
-        }
-
-        function parseDateStandard(dateStr) {
-            if (!dateStr) return null;
-            let str = String(dateStr).trim();
+        // =========================================================================
+        // CHUẨN HÓA CHUỖI NGÀY VỀ YYYY-MM-DD ĐỂ SO SÁNH CHÍNH XÁC 100%
+        // =========================================================================
+        function toYMDString(dateStr) {
+            if (!dateStr) return "";
+            const str = String(dateStr).trim();
             if (str.includes('/')) {
                 const p = str.split('/');
-                return new Date(p[2], p[1] - 1, p[0]);
-            }
-            if (str.includes('-')) {
+                if (p.length === 3) {
+                    const d = p[0].padStart(2, '0');
+                    const m = p[1].padStart(2, '0');
+                    const y = p[2];
+                    return `${y}-${m}-${d}`;
+                }
+            } else if (str.includes('-')) {
                 const p = str.split('-');
-                return new Date(p[0], p[1] - 1, p[2]);
+                if (p.length === 3) {
+                    if (p[0].length === 4) {
+                        return `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
+                    } else {
+                        return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                    }
+                }
             }
-            return null;
+            return str;
+        }
+
+        function sortDatabase() {
+            database.sort((a, b) => toYMDString(a.date).localeCompare(toYMDString(b.date)));
         }
 
         async function loadDataFromSupabase() {
@@ -1236,19 +1234,21 @@
             });
         }
 
+        // =========================================================================
+        // HÀM LỌC NGÀY ĐÃ SỬA LỖI MÚI GIỜ
+        // =========================================================================
         function applyDateFilter() {
-            const startStr = document.getElementById('filterStartDate').value;
-            const endStr = document.getElementById('filterEndDate').value;
+            const startStr = document.getElementById('filterStartDate').value; // dạng YYYY-MM-DD
+            const endStr = document.getElementById('filterEndDate').value;     // dạng YYYY-MM-DD
+
             if (!startStr && !endStr) {
                 filteredData = [...database];
             } else {
-                const sDate = startStr ? new Date(startStr) : null;
-                const eDate = endStr ? new Date(endStr) : null;
                 filteredData = database.filter(item => {
-                    const d = parseDateStandard(item.date);
-                    if (!d) return true;
-                    if (sDate && d < sDate) return false;
-                    if (eDate && d > new Date(eDate.setHours(23,59,59))) return false;
+                    const itemYMD = toYMDString(item.date);
+                    if (!itemYMD) return true;
+                    if (startStr && itemYMD < startStr) return false;
+                    if (endStr && itemYMD > endStr) return false;
                     return true;
                 });
             }
@@ -1256,27 +1256,56 @@
         }
 
         function updateDashboard() {
-            if (!filteredData || filteredData.length === 0) return;
+            // Xử lý khi không có dữ liệu nào khớp với khoảng ngày
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('kpiCrmValue').innerText = "0";
+                document.getElementById('kpiCrmAvg').innerText = "TB: 0/ngày";
+                document.getElementById('kpiZaloMsgValue').innerText = "0";
+                document.getElementById('kpiZaloRate').innerText = "--%";
+                document.getElementById('kpiZaloTime').innerText = "-- phút";
+                document.getElementById('kpiCallsValue').innerText = "0";
+                document.getElementById('kpiCallsMissed').innerText = "Lỡ: 0";
+                document.getElementById('kpiCallsAnswered').innerText = "Nhấc: --%";
+                document.getElementById('kpiSurveyValue').innerText = "0 lượt";
+                document.getElementById('kpiWebScore').innerText = "Web: --";
+                document.getElementById('kpiCsatZalo').innerText = "CSAT: --%";
+                document.getElementById('kpiTalkTime').innerText = "--s";
+                document.getElementById('kpiWaitTime').innerText = "--s";
+                document.getElementById('zaloTotalFollowers').innerText = "--";
+                document.getElementById('zaloNewFollowers').innerText = "--";
+                document.getElementById('zaloUnfollow').innerText = "--";
+                document.getElementById('zaloReplyRate').innerText = "--%";
+
+                renderMatrixTable();
+                renderIncidentTable();
+                
+                // Xóa biểu đồ trống
+                if (trendChartInstance) { trendChartInstance.data.labels = []; trendChartInstance.data.datasets = []; trendChartInstance.update(); }
+                if (categoryChartInstance) { categoryChartInstance.data.labels = []; categoryChartInstance.data.datasets = []; categoryChartInstance.update(); }
+                if (unitChartInstance) { unitChartInstance.data.labels = []; unitChartInstance.data.datasets = []; unitChartInstance.update(); }
+                return;
+            }
+
             const latest = filteredData[filteredData.length - 1];
 
-            // 1. KPI CRM
-            let totalCrm = filteredData.reduce((a, c) => a + (c.kpi.crm || 0), 0);
+            // 1. KPI CRM[cite: 4]
+            let totalCrm = filteredData.reduce((a, c) => a + (c.kpi?.crm || 0), 0);
             document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString('vi-VN');
             document.getElementById('kpiCrmAvg').innerText = `TB: ${(totalCrm / filteredData.length).toFixed(1)}/ngày`;
 
-            // 2. KPI Zalo OA
-            let totalZalo = filteredData.reduce((a, c) => a + (c.kpi.zaloMsg || 0), 0);
+            // 2. KPI Zalo OA[cite: 4]
+            let totalZalo = filteredData.reduce((a, c) => a + (c.kpi?.zaloMsg || 0), 0);
             document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString('vi-VN');
-            document.getElementById('kpiZaloRate').innerText = `${latest.kpi.zaloRate}%`;
-            document.getElementById('kpiZaloTime').innerText = `${latest.kpi.zaloTime} phút`;
+            document.getElementById('kpiZaloRate').innerText = `${latest.kpi?.zaloRate || 0}%`;
+            document.getElementById('kpiZaloTime').innerText = `${latest.kpi?.zaloTime || 0} phút`;
 
-            // 3. KPI Cuộc gọi
-            let totalCalls = filteredData.reduce((a, c) => a + (c.kpi.calls || 0), 0);
+            // 3. KPI Cuộc gọi[cite: 4]
+            let totalCalls = filteredData.reduce((a, c) => a + (c.kpi?.calls || 0), 0);
             document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString('vi-VN');
-            document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi.callsMissed}`;
-            document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${latest.kpi.callsRate}%`;
+            document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi?.callsMissed || 0}`;
+            document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${latest.kpi?.callsRate || 0}%`;
 
-            // 4. Khảo sát & CSAT (Chuẩn hóa CSAT đảm bảo đúng thang 100%)
+            // 4. Khảo sát & CSAT[cite: 4]
             let totalWebSurvey = filteredData.reduce((a, c) => a + (c.surveys?.webCount || 0), 0);
             let webScores = filteredData.map(c => parseFloat(String(c.surveys?.webScore || '0').split('/')[0])).filter(s => s > 0);
             let avgWeb = webScores.length ? (webScores.reduce((a,b)=>a+b,0)/webScores.length).toFixed(1) : 0;
@@ -1287,13 +1316,13 @@
             let avgCsat = csatVals.length ? (csatVals.reduce((a,b)=>a+b,0)/csatVals.length) : 0;
             document.getElementById('kpiCsatZalo').innerText = `CSAT: ${Math.round(avgCsat * 100)}%`;
 
-            // 5. Thời gian thoại & chờ
-            const talkTimeFormatted = Number(latest.kpi.talkTime || 0).toFixed(1);
-            const waitTimeFormatted = Number(latest.kpi.waitTime || 0).toFixed(1);
+            // 5. Thời gian thoại & chờ[cite: 4]
+            const talkTimeFormatted = Number(latest.kpi?.talkTime || 0).toFixed(1);
+            const waitTimeFormatted = Number(latest.kpi?.waitTime || 0).toFixed(1);
             document.getElementById('kpiTalkTime').innerText = `${talkTimeFormatted}s`;
             document.getElementById('kpiWaitTime').innerText = `${waitTimeFormatted}s`;
 
-            // Khối chi tiết Zalo
+            // Khối chi tiết Zalo[cite: 4]
             document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
             document.getElementById('zaloNewFollowers').innerText = `+${latest.zaloDetails?.newFollowers || 0}`;
             document.getElementById('zaloUnfollow').innerText = `${latest.zaloDetails?.unfollowers || 0} người`;
@@ -1395,9 +1424,9 @@
             trendChartInstance.config.type = currentChartType;
             trendChartInstance.data.labels = dates;
             trendChartInstance.data.datasets = [
-                { label: 'CRM', data: filteredData.map(d => d.kpi.crm), backgroundColor: '#ef4444', borderColor: '#ef4444', type: currentChartType, yAxisID: 'y' },
-                { label: 'Zalo', data: filteredData.map(d => d.kpi.zaloMsg), backgroundColor: '#3b82f6', borderColor: '#3b82f6', type: currentChartType, yAxisID: 'y1' },
-                { label: 'Cuộc gọi', data: filteredData.map(d => d.kpi.calls), backgroundColor: '#f59e0b', borderColor: '#f59e0b', type: currentChartType, yAxisID: 'y1' }
+                { label: 'CRM', data: filteredData.map(d => d.kpi?.crm || 0), backgroundColor: '#ef4444', borderColor: '#ef4444', type: currentChartType, yAxisID: 'y' },
+                { label: 'Zalo', data: filteredData.map(d => d.kpi?.zaloMsg || 0), backgroundColor: '#3b82f6', borderColor: '#3b82f6', type: currentChartType, yAxisID: 'y1' },
+                { label: 'Cuộc gọi', data: filteredData.map(d => d.kpi?.calls || 0), backgroundColor: '#f59e0b', borderColor: '#f59e0b', type: currentChartType, yAxisID: 'y1' }
             ];
             trendChartInstance.update();
 
@@ -1506,6 +1535,9 @@
             }
         }
 
+        // =========================================================================
+        // LỌC SỰ CỐ VẬN HÀNH ĐỒNG BỘ CHUỖI YYYY-MM-DD
+        // =========================================================================
         function renderIncidentTable() {
             const tbody = document.getElementById('incidentTableBody');
             if (!tbody) return;
@@ -1514,17 +1546,15 @@
 
             let filtered = [...incidentsList];
             if (startStr || endStr) {
-                const sD = startStr ? new Date(startStr) : null;
-                const eD = endStr ? new Date(endStr) : null;
                 filtered = incidentsList.filter(i => {
                     if (!i.date) return true;
-                    const d = new Date(i.date);
-                    if (sD && d < sD) return false;
-                    if (eD && d > new Date(eD.setHours(23,59,59))) return false;
+                    const iDate = toYMDString(i.date);
+                    if (startStr && iDate < startStr) return false;
+                    if (endStr && iDate > endStr) return false;
                     return true;
                 });
             }
-            filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+            filtered.sort((a,b) => toYMDString(b.date).localeCompare(toYMDString(a.date)));
 
             if (!filtered.length) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Chưa ghi nhận sự cố nào trong khoảng thời gian này.</td></tr>`;
@@ -1533,7 +1563,12 @@
 
             let html = '';
             filtered.forEach(inc => {
-                const fD = d => d ? d.split('-').reverse().join('/') : '--';
+                const fD = d => {
+                    if (!d) return '--';
+                    const ymd = toYMDString(d);
+                    const parts = ymd.split('-');
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d;
+                };
                 html += `
                     <tr class="hover:bg-slate-500/10 transition border-b border-slate-700/30 font-num">
                         <td class="p-2.5 font-medium">${fD(inc.date)}</td>
@@ -1559,7 +1594,6 @@
             }
         }
 
-        // HÀM ĐỌC EXCEL ĐÃ SỬA LỖI ĐỌC CUỘC GỌI VÀ CSAT ZALO
         async function handleExcelImportWithAuth(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1592,9 +1626,8 @@
                     let surveys = { webCount: 0, webScore: "0/50" };
                     
                     let currentSection = "";
-                    let subUnitSection = ""; // Nhận diện phân nhóm cuộc gọi vs CRM trong Khối Đơn vị
+                    let subUnitSection = "";
 
-                    // Chuyển đổi dữ liệu số an toàn
                     const parseNum = (val) => {
                         if (val === undefined || val === null || val === "") return 0;
                         if (typeof val === 'number') return val;
@@ -1610,19 +1643,16 @@
                         let col0 = r[0] !== undefined && r[0] !== null ? String(r[0]).trim() : "";
                         let col1 = r[1];
 
-                        // Nhận diện khối
                         if (col0.includes("1. Khối KPI")) { currentSection = "kpi"; continue; }
                         if (col0.includes("2. Khối Phân loại")) { currentSection = "categories"; continue; }
                         if (col0.includes("3. Khối So sánh")) { currentSection = "units"; subUnitSection = ""; continue; }
                         if (col0.includes("4. Khối Chỉ số Chi tiết Kênh Zalo")) { currentSection = "zalo"; continue; }
                         if (col0.includes("5. LƯỢT KHẢO SÁT")) { currentSection = "surveys"; continue; }
 
-                        // Lấy ngày báo cáo
                         if ((col0 === "Ngày" || col0 === "Vấn đề phản ánh" || col0 === "Tên Đơn Vị" || col0 === "Chỉ số Zalo OA") && col1 !== undefined && !extractedDate) {
                             extractedDate = typeof col1 === 'number' ? excelSerialToDate(col1) : String(col1).trim();
                         }
 
-                        // 1. Khối KPI: Kiểm tra chặt chẽ đúng section tránh bị ghi đè bởi ô con ở dòng 31
                         if (currentSection === "kpi") {
                             if (col0 === "Số yêu cầu (CRM)") kpi.crm = parseNum(col1);
                             else if (col0 === "Lượt tin nhắn Zalo") kpi.zaloMsg = parseNum(col1);
@@ -1633,17 +1663,11 @@
                             else if (col0 === "Tỷ lệ nhấc máy (%)") kpi.callsRate = parseNum(col1);
                             else if (col0 === "Thời gian thoại TB (giây)") kpi.talkTime = parseNum(col1);
                             else if (col0 === "Thời gian chờ TB (giây)") kpi.waitTime = parseNum(col1);
-                        }
-
-                        // 2. Khối Phân loại vấn đề
-                        else if (currentSection === "categories") {
+                        } else if (currentSection === "categories") {
                             if (col0 && col0 !== "Vấn đề phản ánh") {
                                 categories[col0] = parseNum(col1);
                             }
-                        }
-
-                        // 3. Khối So sánh đơn vị
-                        else if (currentSection === "units") {
+                        } else if (currentSection === "units") {
                             if (col0.includes("Cuộc gọi đến")) { subUnitSection = "calls"; continue; }
                             if (col0.includes("CRM Ghi nhận")) { subUnitSection = "crm"; continue; }
                             if (col0 === "Tên Đơn Vị" || !col0) continue;
@@ -1653,23 +1677,16 @@
                             } else if (subUnitSection === "crm") {
                                 unitCrm[col0] = parseNum(col1);
                             }
-                        }
-
-                        // 4. Khối Kênh Zalo OA & CSAT
-                        else if (currentSection === "zalo") {
+                        } else if (currentSection === "zalo") {
                             if (col0 === "Người quan tâm") zaloDetails.totalFollowers = parseNum(col1);
                             else if (col0 === "Người quan tâm mới") zaloDetails.newFollowers = parseNum(col1);
                             else if (col0 === "Người dùng bỏ quan tâm") zaloDetails.unfollowers = parseNum(col1);
                             else if (col0.includes("Tỷ lệ phản hồi")) zaloDetails.replyRate = parseNum(col1);
                             else if (col0.includes("Tỷ lệ hài lòng CSAT") || col0.includes("CSAT")) {
                                 let rawCsat = parseNum(col1);
-                                // Chuẩn hóa về [0, 1] nếu Excel lưu dạng 99% hoặc 99
                                 zaloDetails.csat = rawCsat > 1 ? rawCsat / 100 : rawCsat;
                             }
-                        }
-
-                        // 5. Khối Khảo sát
-                        else if (currentSection === "surveys") {
+                        } else if (currentSection === "surveys") {
                             if (col0 === "WebSite" || col0 === "Số lượt") surveys.webCount = parseNum(col1);
                             else if (col0 === "Điểm đánh giá") surveys.webScore = String(col1 || "0/50").trim();
                         }
