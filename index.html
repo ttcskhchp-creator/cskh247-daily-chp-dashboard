@@ -326,7 +326,7 @@
                             <span class="text-[11px] font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-star text-yellow-500 text-sm"></i> Web & CSAT</span>
                             <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-bold shadow-sm">Chuẩn</span>
                         </div>
-                        <div id="kpiSurveyValue" class="text-4xl sm:text-5xl font-extrabold text-white mt-3 font-num drop-shadow-md">--</div>
+                        <div id="kpiSurveyValue" class="text-4xl sm:text-5xl font-extrabold text-white mt-3 font-num drop-shadow-md">-- lượt</div>
                     </div>
                     <div class="flex justify-between items-center mt-5 text-xs pt-3 border-t border-slate-800/80 font-num">
                         <span id="kpiWebScore" class="text-amber-500 font-bold text-[13px]">Web: --</span>
@@ -909,14 +909,12 @@
                     document.getElementById('syncDot').className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
                     document.getElementById('statusBannerText').innerText = "Đã đồng bộ trực tiếp từ Cloud Supabase.";
                     
-                    // MẶC ĐỊNH CHỈ HIỂN THỊ NGÀY MỚI NHẤT TRONG DATABASE
                     const latestDateStr = database[database.length - 1].date;
                     const convertedDate = toYMDString(latestDateStr);
                     
                     document.getElementById('filterStartDate').value = convertedDate;
                     document.getElementById('filterEndDate').value = convertedDate;
                     
-                    // Gán tạm vào các ô input khác để đồng bộ
                     document.getElementById('botStartDate').value = convertedDate;
                     document.getElementById('botEndDate').value = convertedDate;
                     document.getElementById('delStartDate').value = convertedDate;
@@ -1007,7 +1005,6 @@
             } else {
                 const days = parseInt(type);
                 filteredData = database.slice(-days);
-                // Cập nhật lại thanh hiển thị ngày tháng ở bộ lọc
                 if (filteredData.length > 0) {
                     document.getElementById('filterStartDate').value = toYMDString(filteredData[0].date);
                     document.getElementById('filterEndDate').value = toYMDString(filteredData[filteredData.length - 1].date);
@@ -1044,7 +1041,9 @@
                 if (trendChartInstance) { trendChartInstance.data.labels = []; trendChartInstance.update(); categoryChartInstance.data.labels = []; categoryChartInstance.update(); unitChartInstance.data.labels = []; unitChartInstance.update(); }
                 renderMatrixTable(); renderIncidentTable(); document.getElementById('downloadRawBtn').classList.add('hidden'); return;
             }
+            
             const latest = filteredData[filteredData.length - 1];
+            const days = filteredData.length;
 
             if (latest.bucketPath) {
                 const btn = document.getElementById('downloadRawBtn');
@@ -1054,21 +1053,43 @@
                 document.getElementById('downloadRawBtn').classList.add('hidden');
             }
 
-            let totalCrm = filteredData.reduce((a, c) => a + (c.kpi?.crm || 0), 0);
+            // 1. CRM
+            let totalCrm = filteredData.reduce((a, c) => a + (Number(c.kpi?.crm) || 0), 0);
             document.getElementById('kpiCrmValue').innerText = totalCrm.toLocaleString('vi-VN');
-            document.getElementById('kpiCrmAvg').innerText = `TB: ${(totalCrm / filteredData.length).toFixed(1)}/ngày`;
+            document.getElementById('kpiCrmAvg').innerText = `TB: ${(totalCrm / days).toFixed(1)}/ngày`;
 
-            let totalZalo = filteredData.reduce((a, c) => a + (c.kpi?.zaloMsg || 0), 0);
+            // 2. Zalo
+            let totalZalo = filteredData.reduce((a, c) => a + (Number(c.kpi?.zaloMsg) || 0), 0);
+            let avgZaloRate = filteredData.reduce((a, c) => a + Number(c.kpi?.zaloRate || 0), 0) / days;
+            let avgZaloTime = filteredData.reduce((a, c) => a + Number(c.kpi?.zaloTime || 0), 0) / days;
             document.getElementById('kpiZaloMsgValue').innerText = totalZalo.toLocaleString('vi-VN');
-            document.getElementById('kpiZaloRate').innerText = `${latest.kpi?.zaloRate || 0}%`;
-            document.getElementById('kpiZaloTime').innerText = `${latest.kpi?.zaloTime || 0} phút`;
+            document.getElementById('kpiZaloRate').innerText = `${avgZaloRate.toFixed(1)}%`;
+            document.getElementById('kpiZaloTime').innerText = `${avgZaloTime.toFixed(1)} phút`;
 
-            let totalCalls = filteredData.reduce((a, c) => a + (c.kpi?.calls || 0), 0);
+            // 3. Cuộc gọi (VCC) - Đã sửa lỗi cộng dồn gọi lỡ & tỷ lệ nhấc máy
+            let totalCalls = 0;
+            let totalMissed = 0;
+            let totalAcceptedCalculated = 0;
+            
+            filteredData.forEach(c => {
+                let cCalls = Number(c.kpi?.calls || 0);
+                let cMissed = Number(c.kpi?.callsMissed || 0);
+                let cRate = Number(c.kpi?.callsRate || 0);
+                
+                totalCalls += cCalls;
+                totalMissed += cMissed;
+                // Khôi phục lại số cuộc gọi tiếp nhận để tính tỷ lệ trung bình chuẩn
+                totalAcceptedCalculated += cCalls * (cRate / 100); 
+            });
+            
+            let aggregateAnswerRate = totalCalls > 0 ? (totalAcceptedCalculated / totalCalls) * 100 : 0;
+
             document.getElementById('kpiCallsValue').innerText = totalCalls.toLocaleString('vi-VN');
-            document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${latest.kpi?.callsMissed || 0}`;
-            document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${latest.kpi?.callsRate || 0}%`;
+            document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${totalMissed.toLocaleString('vi-VN')}`;
+            document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${aggregateAnswerRate.toFixed(1)}%`;
 
-            let totalWebSurvey = filteredData.reduce((a, c) => a + (c.surveys?.webCount || 0), 0);
+            // 4. Survey
+            let totalWebSurvey = filteredData.reduce((a, c) => a + (Number(c.surveys?.webCount) || 0), 0);
             let webScores = filteredData.map(c => parseFloat(String(c.surveys?.webScore || '0').split('/')[0])).filter(s => s > 0);
             document.getElementById('kpiSurveyValue').innerText = `${totalWebSurvey.toLocaleString('vi-VN')} lượt`;
             document.getElementById('kpiWebScore').innerText = `Web: ${webScores.length ? (webScores.reduce((a,b)=>a+b,0)/webScores.length).toFixed(1) : 0}/50`;
@@ -1076,19 +1097,26 @@
             let csatVals = filteredData.map(c => Number(c.zaloDetails?.csat || 0)).filter(v => v > 0);
             document.getElementById('kpiCsatZalo').innerText = `CSAT: ${Math.round(csatVals.length ? (csatVals.reduce((a,b)=>a+b,0)/csatVals.length)*100 : 0)}%`;
 
-            // YÊU CẦU: Thời gian chờ cuộc gọi và thời gian thoại trung bình lấy trung bình các ngày nạp vào theo khoảng thời gian lọc
-            let avgTalkTime = filteredData.reduce((a, c) => a + Number(c.kpi?.talkTime || 0), 0) / filteredData.length;
-            let avgWaitTime = filteredData.reduce((a, c) => a + Number(c.kpi?.waitTime || 0), 0) / filteredData.length;
-
+            // 5. Thời gian thoại TB
+            let avgTalkTime = filteredData.reduce((a, c) => a + Number(c.kpi?.talkTime || 0), 0) / days;
+            let avgWaitTime = filteredData.reduce((a, c) => a + Number(c.kpi?.waitTime || 0), 0) / days;
             document.getElementById('kpiTalkTime').innerText = `${avgTalkTime.toFixed(1)}s`;
             document.getElementById('kpiWaitTime').innerText = `${avgWaitTime.toFixed(1)}s`;
             
-            document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
-            document.getElementById('zaloNewFollowers').innerText = `+${(latest.zaloDetails?.newFollowers || 0).toLocaleString('vi-VN')}`;
-            document.getElementById('zaloUnfollow').innerText = `${(latest.zaloDetails?.unfollowers || 0).toLocaleString('vi-VN')} người`;
-            document.getElementById('zaloReplyRate').innerText = `${latest.zaloDetails?.replyRate || 0}%`;
+            // 6. Chi tiết Zalo
+            let totalZaloNewFollowers = filteredData.reduce((a, c) => a + Number(c.zaloDetails?.newFollowers || 0), 0);
+            let totalZaloUnfollow = filteredData.reduce((a, c) => a + Number(c.zaloDetails?.unfollowers || 0), 0);
+            let avgZaloReplyRate = filteredData.reduce((a, c) => a + Number(c.zaloDetails?.replyRate || 0), 0) / days;
 
-            evaluateAlerts(latest); renderMatrixTable(); renderIncidentTable(); updateCharts();
+            document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
+            document.getElementById('zaloNewFollowers').innerText = `+${totalZaloNewFollowers.toLocaleString('vi-VN')}`;
+            document.getElementById('zaloUnfollow').innerText = `${totalZaloUnfollow.toLocaleString('vi-VN')} người`;
+            document.getElementById('zaloReplyRate').innerText = `${avgZaloReplyRate.toFixed(1)}%`;
+
+            evaluateAlerts(latest); 
+            renderMatrixTable(); 
+            renderIncidentTable(); 
+            updateCharts();
         }
 
         function renderMatrixTable() {
@@ -1130,7 +1158,6 @@
             updatePieChart();
         }
 
-        // YÊU CẦU: Khắc phục biểu đồ tròn Top Vấn Đề (Tổng hợp toàn bộ các ngày trong khoảng lọc)
         function updatePieChart() {
             if (!filteredData || !filteredData.length) return;
             
