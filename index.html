@@ -506,7 +506,7 @@
                 <div class="space-y-2">
                     <h4 class="font-bold text-white text-base">Phần 2: Tải và Giải nén Dữ liệu Bot</h4>
                     <ul class="list-disc pl-5 space-y-1.5">
-                        <li>Tải file nén dữ liệu bot (file .rar) tại đây: <a href="https://drive.google.com/file/d/1rykN5fF-n_FcwgemGnnh59pi2WxSxDyR/view?usp=drive_link" target="_blank" class="text-blue-400 hover:underline font-semibold">Link tải</a></li>
+                        <li>Tải file nén dữ liệu bot (file .rar) tại đây: <a href="https://drive.google.com/file/d/1RGFHHWv7mLu0t1wF3_PCjWMS2WrIoQDY/view?usp=drive_link">Link tải</a></li>
                         <li>Copy file nén vừa tải vào thẳng ổ C (hoặc ổ D).</li>
                         <li><span class="text-rose-400 font-semibold">Giải nén trực tiếp ngay tại đó.</span> Lưu ý: Tuyệt đối không tạo thêm thư mục con. Sau khi giải nén, anh phải thấy ngay thư mục chứa code ở ổ đĩa, ví dụ: <code>C:\bot_baocao</code>.</li>
                     </ul>
@@ -515,11 +515,9 @@
                 <div class="space-y-3">
                     <h4 class="font-bold text-amber-400 text-base">Phần 3: Thiết lập Thư viện (Chỉ làm ở lần đầu tiên cài máy)</h4>
                     <ul class="list-decimal pl-5 space-y-2.5">
-                        <li>Ấn tổ hợp phím <strong>Windows + R</strong>, gõ <code>cmd</code> rồi bấm Enter để mở cửa sổ dòng lệnh màu đen.</li>
+                        <li> Chạy file PhanMem_CSKH.bat <strong>trong thu mục giải nén</strong>, gõ <code>số 3</code> để mở cửa sổ dòng lệnh màu đen và chạy môi trường khởi tạo Bot.</li>
                         <li>Điều hướng vào thư mục con Bot. Cần đảm bảo con trỏ nhấp nháy đang ở đúng dòng: <code>C:\bot_baocao></code> (hoặc D:\bot_baocao nếu để ở ổ D).<br> <span class="text-xs italic text-slate-400">(Nếu CMD đang ở ổ khác ví dụ c:\users\admin>, hãy gõ <code>cd C:\bot_baocao</code> hoặc gõ <code>D:</code> rồi <code>cd D:\bot_baocao</code> và Enter để di chuyển tới).</span></li>
-                        <li>Gõ lệnh sau và bấm Enter để khởi tạo cấu hình quản lý:<br><code class="bg-slate-800 border border-slate-700 px-2 py-1 rounded text-emerald-400 mt-1 block w-max font-num shadow-inner">npm init -y</code></li>
-                        <li>Gõ tiếp lệnh sau và bấm Enter để tải các thư viện bắt buộc (cần có mạng Internet):<br><code class="bg-slate-800 border border-slate-700 px-2 py-1 rounded text-emerald-400 mt-1 block w-max font-num shadow-inner">npm install puppeteer @supabase/supabase-js keypress</code></li>
-                        <li>Gõ lệnh sau và bấm Enter để tải trình duyệt Chrome ẩn:<br><code class="bg-slate-800 border border-slate-700 px-2 py-1 rounded text-emerald-400 mt-1 block w-max font-num shadow-inner">npx puppeteer browsers install chrome</code></li>
+        
                     </ul>
                 </div>
 
@@ -527,7 +525,7 @@
                     <h4 class="font-bold text-indigo-300 text-base flex items-center gap-2"><i class="fa-solid fa-robot text-lg"></i> Phần 4: Cách Chạy Bot Báo Cáo Hàng Ngày</h4>
                     <ul class="list-decimal pl-5 space-y-2.5">
                         <li>Trên Dashboard, mở menu bên trái. Chọn <strong>Từ ngày - Đến ngày</strong> cần quét dữ liệu ở mục "Cào Dữ Liệu Bot".</li>
-                        <li>Bấm nút <strong>Cào Dữ Liệu Bot</strong> và nhập mã PIN <span class="font-num text-amber-400 border border-amber-500/50 bg-amber-500/10 px-1 rounded">6868</span>. Hệ thống sẽ tự động tạo lệnh và Copy vào bộ nhớ máy.</li>
+                        <li>Bấm nút <strong>Cào Dữ Liệu Bot</strong> và nhập mã PIN <span class="font-num text-amber-400 border border-amber-500/50 bg-amber-500/10 px-1 rounded">6xxx</span>. Hệ thống sẽ tự động tạo lệnh và Copy vào bộ nhớ máy.</li>
                         <li>Mở cửa sổ CMD (phải đang ở dòng <code>C:\bot_baocao></code>). Ấn <strong>Ctrl + V</strong> để dán lệnh vừa lấy và ấn <strong>Enter</strong>.</li>
                         <li><span class="text-rose-400 font-semibold underline">Lưu ý quan trọng về Chrome:</span> Bot sẽ tự động mở Chrome và ép cấu hình màn hình rộng 1920x1080 kết hợp thu nhỏ (zoom out) 75% để nhìn thấy bao quát toàn bộ trang web mà không bị che lấp nút bấm. <strong>Tuyệt đối không tự ý bấm thu nhỏ cửa sổ Chrome xuống thanh Taskbar</strong> trong lúc bot đang chạy.</li>
                         <li><span class="text-emerald-400 font-semibold">Mẹo:</span> Ấn tổ hợp phím <strong>Ctrl + P</strong> tại màn hình đen CMD bất kỳ lúc nào để Tạm Dừng hoặc Chạy Tiếp bot.</li>
