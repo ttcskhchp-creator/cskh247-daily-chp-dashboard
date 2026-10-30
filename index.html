@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .font-num { font-family: 'JetBrains Mono', monospace; }
         @keyframes floatBlink { 0%, 100% { opacity: 0.18; transform: scale(1) translateY(0); } 50% { opacity: 0.38; transform: scale(1.08) translateY(-3px); } }
         .kpi-watermark { position: absolute; right: -6px; bottom: -8px; font-size: 58px; pointer-events: none; user-select: none; animation: floatBlink 3.2s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.25)); transition: all 0.3s ease; }
@@ -45,360 +45,478 @@
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         .kpi-alert-red { border: 2px solid #ef4444 !important; box-shadow: 0 0 25px rgba(239, 68, 68, 0.25); background: linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%) !important; }
         .kpi-alert-yellow { border: 2px solid #f59e0b !important; box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%) !important; }
+        
+        /* Sidebar Styling */
+        .sidebar { transition: width 0.3s ease; width: 64px; overflow: hidden; z-index: 50; }
+        .sidebar:hover { width: 260px; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+        .sidebar .btn-text { opacity: 0; transition: opacity 0.2s ease, transform 0.3s ease; white-space: nowrap; transform: translateX(-10px); }
+        .sidebar:hover .btn-text { opacity: 1; transform: translateX(0); }
+        .main-content { margin-left: 64px; transition: margin-left 0.3s ease; width: calc(100% - 64px); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
-    <div id="topCollapsibleArea" class="transition-all duration-300 ease-in-out overflow-hidden">
-        <header class="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors duration-200">
-            <div class="max-w-[1680px] mx-auto flex flex-col xl:flex-row justify-between items-center gap-3">
-                <div class="flex items-center space-x-3 w-full xl:w-auto justify-between xl:justify-start">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-lg shadow-blue-500/20 flex-shrink-0 relative">
-                            <div class="w-full h-full bg-slate-900 dark:bg-slate-900 bg-white rounded-[10px] flex items-center justify-center text-lg text-blue-500 relative">
-                                <i class="fa-solid fa-ship"></i>
-                                <i class="fa-brands fa-earlybirds absolute -top-1 -right-1 text-[11px] text-cyan-400"></i>
-                            </div>
-                        </div>
+    <!-- SIDEBAR BÊN TRÁI -->
+    <nav class="sidebar fixed top-0 left-0 h-full bg-slate-900/95 border-r border-slate-800/80 backdrop-blur-md flex flex-col justify-between py-6">
+        
+        <!-- Logo khu vực Sidebar -->
+        <div class="px-4 flex items-center gap-4 mb-8">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-lg shadow-blue-500/20 flex-shrink-0 relative">
+                <div class="w-full h-full bg-slate-900 dark:bg-slate-900 bg-white rounded-[10px] flex items-center justify-center text-sm text-blue-500 relative">
+                    <i class="fa-solid fa-ship"></i>
+                    <i class="fa-brands fa-earlybirds absolute -top-1 -right-1 text-[8px] text-cyan-400"></i>
+                </div>
+            </div>
+            <div class="btn-text">
+                <h2 class="text-xs font-extrabold tracking-tight text-white uppercase leading-tight">Cảng Hải Phòng</h2>
+                <span class="text-[9px] text-blue-500 font-semibold tracking-wider">SYSTEM TOOLS</span>
+            </div>
+        </div>
+
+        <!-- Các Nút Công Cụ -->
+        <div class="flex flex-col gap-2 px-3">
+            
+            <!-- Bot Section -->
+            <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl mb-2 flex flex-col gap-2 group">
+                <button onclick="requestPasswordAndAction('bot')" class="flex items-center gap-4 px-2 py-2 w-full text-left rounded-lg text-indigo-400 hover:bg-indigo-500/20 transition group-hover:text-indigo-300">
+                    <i class="fa-solid fa-robot text-lg text-center w-6"></i>
+                    <span class="btn-text font-bold text-xs uppercase tracking-wide">Cào Dữ Liệu Bot</span>
+                </button>
+                <div class="btn-text flex flex-col gap-1.5 px-1 mt-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-indigo-300/70 w-8">Từ:</span>
+                        <input type="date" id="botStartDate" class="w-full bg-slate-900 border border-indigo-500/30 text-xs rounded-lg px-2 py-1 text-indigo-200 focus:outline-none focus:border-indigo-400 font-num h-7">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-indigo-300/70 w-8">Đến:</span>
+                        <input type="input" type="date" id="botEndDate" class="w-full bg-slate-900 border border-indigo-500/30 text-xs rounded-lg px-2 py-1 text-indigo-200 focus:outline-none focus:border-indigo-400 font-num h-7">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Các chức năng khác -->
+            <button onclick="requestPasswordAndAction('survey')" class="flex items-center gap-4 px-2 py-2.5 w-full text-left rounded-xl text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 transition">
+                <i class="fa-solid fa-square-poll-vertical text-lg text-center w-6 text-blue-500"></i>
+                <span class="btn-text font-semibold text-xs tracking-wide">Nhập Khảo Sát Web</span>
+            </button>
+
+            <button onclick="requestPasswordAndAction('alert')" class="flex items-center gap-4 px-2 py-2.5 w-full text-left rounded-xl text-slate-300 hover:bg-amber-500/20 hover:text-amber-400 transition">
+                <i class="fa-solid fa-sliders text-lg text-center w-6 text-amber-500"></i>
+                <span class="btn-text font-semibold text-xs tracking-wide">Cấu Hình Cảnh Báo</span>
+            </button>
+
+            <div class="h-px bg-slate-800/80 my-2 mx-2 btn-text"></div>
+
+            <button id="downloadRawBtn" class="hidden flex items-center gap-4 px-2 py-2.5 w-full text-left rounded-xl text-emerald-400 hover:bg-emerald-600/20 transition">
+                <i class="fa-solid fa-cloud-arrow-down text-lg text-center w-6"></i>
+                <span class="btn-text font-semibold text-xs tracking-wide">Tải Dữ Liệu Gốc (.json)</span>
+            </button>
+
+            <button onclick="requestPasswordAndAction('export')" class="flex items-center gap-4 px-2 py-2.5 w-full text-left rounded-xl text-emerald-500 hover:bg-emerald-600/20 hover:text-emerald-400 transition">
+                <i class="fa-solid fa-file-excel text-lg text-center w-6"></i>
+                <span class="btn-text font-semibold text-xs tracking-wide">Xuất Báo Cáo Excel</span>
+            </button>
+
+            <div class="p-2 bg-rose-950/20 border border-rose-900/30 rounded-xl mt-2 flex flex-col gap-2 group">
+                <button onclick="requestPasswordAndAction('delete')" class="flex items-center gap-4 px-2 py-2 w-full text-left rounded-lg text-rose-500 hover:bg-rose-500/20 transition group-hover:text-rose-400">
+                    <i class="fa-regular fa-trash-can text-lg text-center w-6"></i>
+                    <span class="btn-text font-bold text-xs uppercase tracking-wide">Xóa Dữ Liệu</span>
+                </button>
+                <div class="btn-text flex flex-col gap-1.5 px-1 mt-1">
+                    <select id="deleteDateSelect" class="w-full bg-slate-900 border border-rose-800/40 text-[11px] rounded-lg px-2 py-1 text-slate-300 focus:outline-none focus:border-rose-500 font-num h-7"></select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="px-4 mt-auto mb-2 text-center text-slate-500 text-[10px] btn-text">
+            © 2026 Cảng HP
+        </div>
+    </nav>
+
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content flex flex-col min-h-screen">
+        
+        <!-- TOP AREA CŨ (Thu Gọn Lại Phần Tiêu Đề) -->
+        <div id="topCollapsibleArea" class="transition-all duration-300 ease-in-out overflow-hidden">
+            <header class="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-4 sm:px-8 py-3.5 transition-colors duration-200">
+                <div class="max-w-[1680px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+                    
+                    <div class="flex items-center space-x-3 w-full justify-between">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-white uppercase">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG</h1>
+                                <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white uppercase">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG</h1>
                                 <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30">Cảng Hải Phòng</span>
                             </div>
-                            <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                            <div class="flex items-center gap-2 text-[10px] sm:text-xs text-slate-400 mt-1">
                                 <span class="text-blue-500 font-semibold tracking-wider">OPERATIONS & CUSTOMER SERVICE CENTER</span>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-start xl:justify-end">
-                    
-                    <!-- THÊM KHỐI CHẠY BOT QUÉT HÀNG LOẠT -->
-                    <div class="flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg px-2 py-1 mr-2">
-                        <span class="text-[11px] text-indigo-400 font-bold hidden lg:inline"><i class="fa-solid fa-robot"></i> Bot:</span>
-                        <input type="date" id="botStartDate" class="bg-transparent text-xs text-indigo-200 focus:outline-none font-num" title="Từ ngày">
-                        <span class="text-indigo-400 text-[10px]">-</span>
-                        <input type="date" id="botEndDate" class="bg-transparent text-xs text-indigo-200 focus:outline-none font-num" title="Đến ngày">
-                        <button onclick="triggerLocalBot()" class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold shadow transition active:scale-95">Lấy Lệnh</button>
-                    </div>
-
-                    <button onclick="requestPasswordAndAction('alert')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
-                        <i class="fa-solid fa-sliders text-[11px]"></i> Cảnh báo
-                    </button>
-
-                    <button id="downloadRawBtn" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
-                        <i class="fa-solid fa-cloud-arrow-down text-[11px]"></i> Tải File Gốc
-                    </button>
-
-                    <button onclick="requestPasswordAndAction('survey')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95">
-                        <i class="fa-solid fa-square-poll-vertical text-[11px]"></i> Nhập Khảo Sát
-                    </button>
-                    
-                    <div class="flex items-center gap-1 bg-slate-800/80 border border-slate-700/80 rounded-lg p-0.5">
-                        <select id="deleteDateSelect" class="bg-slate-900 text-slate-200 text-xs rounded px-2 py-1 focus:outline-none border border-slate-700/80 font-num"></select>
-                        <button onclick="requestPasswordAndAction('delete')" class="px-2 py-1 rounded bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/60 text-xs font-semibold transition active:scale-95">
-                            <i class="fa-regular fa-trash-can text-[11px]"></i> Xóa
+                        <!-- Nút Mở HDSD -->
+                        <button onclick="openGuideModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition flex items-center gap-2 shadow active:scale-95">
+                            <i class="fa-solid fa-circle-info"></i> <span class="hidden sm:inline">Hướng dẫn chạy Bot</span>
                         </button>
                     </div>
 
-                    <button onclick="requestPasswordAndAction('export')" class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium transition flex items-center gap-1.5 active:scale-95">
-                        <i class="fa-solid fa-file-excel text-[11px]"></i> Xuất Excel
-                    </button>
+                </div>
+            </header>
+
+            <div class="max-w-[1680px] mx-auto px-4 sm:px-8 pt-4">
+                <div class="glass-panel p-3 sm:p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                        <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white rounded-lg px-3 py-1.5 border border-slate-700/80 shadow-sm" title="Chuyển đổi giao diện Sáng / Tối">
+                            <i class="fa-regular fa-sun text-xs text-amber-500"></i>
+                            <button onclick="toggleTheme()" id="themeToggleBtn" type="button" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
+                                <span id="themeToggleThumb" class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-3.5"></span>
+                            </button>
+                            <i class="fa-regular fa-moon text-xs text-slate-400"></i>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900/90 rounded-lg px-3 py-1.5 border border-slate-700/80">
+                            <span class="text-xs text-slate-400">Từ</span>
+                            <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900/90 rounded-lg px-3 py-1.5 border border-slate-700/80">
+                            <span class="text-xs text-slate-400">Đến</span>
+                            <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
+                        </div>
+                        <button onclick="clearDateFilter()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95" title="Xóa bộ lọc ngày"><i class="fa-solid fa-rotate-left"></i></button>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <button onclick="setQuickFilter('7')" id="btn-quick-7" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold border border-blue-500 transition active:scale-95 shadow">7 ngày</button>
+                        <button onclick="setQuickFilter('14')" id="btn-quick-14" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95">14 ngày</button>
+                        <button onclick="setQuickFilter('all')" id="btn-quick-all" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95">Tất cả</button>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <div class="max-w-[1680px] mx-auto px-3 sm:px-6 pt-2.5">
-            <div class="glass-panel p-2.5 sm:p-3 rounded-xl flex flex-wrap items-center justify-between gap-2.5">
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 dark:bg-slate-900/90 bg-white rounded-lg px-2.5 py-1 border border-slate-700/80 shadow-sm" title="Chuyển đổi giao diện Sáng / Tối">
-                        <i class="fa-regular fa-sun text-[11px] text-amber-500"></i>
-                        <button onclick="toggleTheme()" id="themeToggleBtn" type="button" class="relative inline-flex h-4 w-7.5 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600">
-                            <span id="themeToggleThumb" class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-3.5"></span>
-                        </button>
-                        <i class="fa-regular fa-moon text-[11px] text-slate-400"></i>
+            <div class="max-w-[1680px] mx-auto px-4 sm:px-8 py-2">
+                <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg py-1.5 px-4 text-xs text-slate-400 flex justify-between items-center">
+                    <div class="flex items-center gap-2 truncate">
+                        <span id="syncDot" class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
+                        <span id="statusBannerText" class="truncate text-xs">Đang đồng bộ dữ liệu Supabase...</span>
                     </div>
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 rounded-lg px-2.5 py-1 border border-slate-700/80">
-                        <span class="text-xs text-slate-400">Từ</span>
-                        <input type="date" id="filterStartDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
-                    </div>
-                    <div class="flex items-center gap-1.5 bg-slate-900/90 rounded-lg px-2.5 py-1 border border-slate-700/80">
-                        <span class="text-xs text-slate-400">Đến</span>
-                        <input type="date" id="filterEndDate" onchange="applyCustomDateFilter()" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-num">
-                    </div>
-                    <button onclick="clearDateFilter()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95" title="Xóa bộ lọc ngày"><i class="fa-solid fa-rotate-left"></i></button>
-                </div>
-                <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end">
-                    <button onclick="setQuickFilter('7')" id="btn-quick-7" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium border border-blue-500 transition active:scale-95">7 ngày</button>
-                    <button onclick="setQuickFilter('14')" id="btn-quick-14" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95">14 ngày</button>
-                    <button onclick="setQuickFilter('all')" id="btn-quick-all" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95">Tất cả</button>
+                    <div id="lastUpdatedText" class="text-slate-500 font-num text-[11px] flex-shrink-0 ml-2">--</div>
                 </div>
             </div>
         </div>
 
-        <div class="max-w-[1680px] mx-auto px-3 sm:px-6 py-1.5">
-            <div class="bg-slate-900/40 border border-slate-800/60 rounded-lg py-1 px-3 text-xs text-slate-400 flex justify-between items-center">
-                <div class="flex items-center gap-2 truncate">
-                    <span id="syncDot" class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
-                    <span id="statusBannerText" class="truncate text-[11px]">Đang đồng bộ dữ liệu Supabase...</span>
+        <div class="w-full flex justify-center -mt-1.5 z-30">
+            <button onclick="toggleTopArea()" id="toggleTopBtn" class="px-4 py-0.5 rounded-b-lg bg-slate-800/90 hover:bg-blue-600 text-slate-400 hover:text-white border border-t-0 border-slate-700 text-[10px] font-semibold transition flex items-center gap-1.5 shadow-lg active:scale-95">
+                <i id="toggleTopIcon" class="fa-solid fa-chevron-up text-[10px]"></i> <span id="toggleTopText">Thu gọn</span>
+            </button>
+        </div>
+
+        <main class="max-w-[1680px] mx-auto px-4 sm:px-8 py-4 flex-1 w-full space-y-5">
+            <!-- 5 THẺ KPI CHÍNH -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div id="cardCrm" class="kpi-card p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
+                    <div class="kpi-watermark">🎧</div>
+                    <div>
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-headset text-blue-500"></i> Yêu cầu CRM</span>
+                            <span id="badgeCrm" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
+                        </div>
+                        <div id="kpiCrmValue" class="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-num">--</div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 text-xs text-slate-400 pt-2.5 border-t border-slate-800/80">
+                        <span id="kpiCrmAvg" class="text-emerald-500 font-bold font-num">TB: --/ngày</span>
+                        <span class="text-slate-500 font-medium">Lịch sử</span>
+                    </div>
                 </div>
-                <div id="lastUpdatedText" class="text-slate-500 font-num text-[11px] flex-shrink-0 ml-2">--</div>
+
+                <div id="cardZalo" class="kpi-card p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
+                    <div class="kpi-watermark">💬</div>
+                    <div>
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-comment-dots text-cyan-500"></i> Tin Zalo OA</span>
+                            <span id="badgeZalo" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
+                        </div>
+                        <div id="kpiZaloMsgValue" class="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-num">--</div>
+                    </div>
+                    <div class="space-y-1 mt-3 pt-2.5 border-t border-slate-800/80 text-xs">
+                        <div class="flex justify-between"><span class="text-slate-400 font-medium">Tỷ lệ phản hồi</span><span id="kpiZaloRate" class="text-cyan-500 font-bold font-num">--%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400 font-medium">TG phản hồi đầu</span><span id="kpiZaloTime" class="text-cyan-500 font-bold font-num">-- phút</span></div>
+                    </div>
+                </div>
+
+                <div id="cardCalls" class="kpi-card p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
+                    <div class="kpi-watermark">📞</div>
+                    <div>
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-phone-volume text-amber-500"></i> Cuộc gọi đến</span>
+                            <span id="badgeCalls" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
+                        </div>
+                        <div id="kpiCallsValue" class="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-num">--</div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 text-xs pt-2.5 border-t border-slate-800/80 font-num">
+                        <span id="kpiCallsMissed" class="text-rose-500 font-bold">Lỡ: --</span>
+                        <span id="kpiCallsAnswered" class="text-emerald-500 font-bold">Nhấc: --%</span>
+                    </div>
+                </div>
+
+                <div id="cardSurvey" class="kpi-card p-4 rounded-xl flex flex-col justify-between transition-all duration-300 border border-emerald-500/25">
+                    <div class="kpi-watermark">⭐</div>
+                    <div>
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-star text-yellow-500"></i> Web & CSAT</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-bold">Chuẩn</span>
+                        </div>
+                        <div id="kpiSurveyValue" class="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-num">-- lượt</div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 text-xs pt-2.5 border-t border-slate-800/80 font-num">
+                        <span id="kpiWebScore" class="text-amber-500 font-bold">Web: --</span>
+                        <span id="kpiCsatZalo" class="text-emerald-500 font-bold">CSAT: --%</span>
+                    </div>
+                </div>
+
+                <div id="cardTime" class="kpi-card p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
+                    <div class="kpi-watermark">⏱️</div>
+                    <div>
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-clock text-purple-500"></i> Thời gian thoại</span>
+                            <span id="badgeTime" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
+                        </div>
+                        <div id="kpiTalkTime" class="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-num">--s</div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 text-xs pt-2.5 border-t border-slate-800/80">
+                        <span class="text-slate-400 font-medium">TG Chờ TB</span>
+                        <span id="kpiWaitTime" class="text-purple-500 font-bold font-num">--s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="glass-panel p-5 rounded-xl lg:col-span-2 flex flex-col">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-chart-line text-blue-500"></i> Xu Hướng Hiệu Suất Tổng Hợp</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Biến động lượt yêu cầu CRM, Zalo và cuộc gọi đến</p>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-1 flex gap-1 shadow-inner">
+                            <button onclick="setChartType('bar')" id="btn-chart-bar" class="px-3 py-1.5 rounded bg-blue-600 text-white text-xs font-semibold transition active:scale-95">Cột</button>
+                            <button onclick="setChartType('line')" id="btn-chart-line" class="px-3 py-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition active:scale-95">Đường</button>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 w-full min-h-[300px]"><canvas id="trendChart"></canvas></div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-xl flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-chart-pie text-emerald-500"></i> Top Vấn Đề</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Tỷ trọng nhóm vấn đề phản ánh</p>
+                        </div>
+                        <select id="pieLimitSelect" onchange="updatePieChart()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 transition shadow">
+                            <option value="3">Top 3</option><option value="5" selected>Top 5</option><option value="7">Top 7</option><option value="all">Tất cả</option>
+                        </select>
+                    </div>
+                    <div class="relative flex-1 w-full min-h-[280px] flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="glass-panel p-5 rounded-xl lg:col-span-2 flex flex-col">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-cubes-stacked text-indigo-500"></i> Hiệu Suất Theo Đơn Vị Cảng</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Số cuộc gọi vào Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-1 flex gap-1 shadow-inner">
+                            <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-3 py-1.5 rounded bg-blue-600 text-white text-xs font-semibold transition active:scale-95">Cột</button>
+                            <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-3 py-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition active:scale-95">Đường</button>
+                            <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-3 py-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition active:scale-95">Vùng</button>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 w-full min-h-[280px]"><canvas id="unitChart"></canvas></div>
+                </div>
+
+                <div id="cardZaloDetail" class="glass-panel p-5 rounded-xl flex flex-col justify-between transition-all duration-300">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> Kênh Zalo OA</h2>
+                            <span id="badgeZaloDetail" class="px-2.5 py-1 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold tracking-wide">Live Sync</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl shadow-sm">
+                                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Người Quan Tâm</div>
+                                <div id="zaloTotalFollowers" class="text-2xl sm:text-3xl font-black text-cyan-500 mt-1 font-num">--</div>
+                            </div>
+                            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl shadow-sm">
+                                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Quan Tâm Mới</div>
+                                <div id="zaloNewFollowers" class="text-2xl sm:text-3xl font-black text-emerald-500 mt-1 font-num">--</div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-lg flex justify-between items-center shadow-sm"><span class="text-slate-400 font-medium">Bỏ quan tâm</span><span id="zaloUnfollow" class="font-bold text-rose-500 font-num">--</span></div>
+                            <div class="bg-slate-900/60 border border-slate-800/80 px-3 py-2.5 rounded-lg flex justify-between items-center shadow-sm"><span class="text-slate-400 font-medium">Tỷ lệ phản hồi</span><span id="zaloReplyRate" class="font-bold text-blue-500 font-num">--%</span></div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500 mt-4">
+                        <span class="font-medium">Cloud Supabase Database</span>
+                        <span class="text-emerald-500 font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block shadow-[0_0_8px_#10b981]"></span> Hoạt động tốt</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-xl space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-table-list text-amber-500"></i> Chi Tiết Phản Ánh Theo Nhóm Vấn Đề</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Ma trận biến đổi động theo khoảng ngày được lọc</p>
+                    </div>
+                    <div class="w-full sm:w-72">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl pl-9 pr-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 transition shadow-inner">
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-800 shadow-sm">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr id="matrixTableHeader" class="bg-slate-900/95 text-slate-400 border-b border-slate-800 font-num tracking-wide">
+                                <th class="p-3 font-bold min-w-[280px]">NHÓM VẤN ĐỀ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 font-num"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 rounded-xl space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-base font-bold flex items-center gap-2.5"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Nhật Ký Vận Hành Sự Cố & Khắc Phục</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Đồng bộ theo khoảng thời gian lọc chung của trang</p>
+                    </div>
+                    <button onclick="requestPasswordAndAction('add_incident')" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-rose-600/25 active:scale-95">
+                        <i class="fa-solid fa-plus text-sm"></i> Thêm sự cố
+                    </button>
+                </div>
+                <div class="overflow-x-auto max-h-[400px] overflow-y-auto rounded-xl border border-slate-800 shadow-sm custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="sticky top-0 z-10 bg-slate-900/95 font-num tracking-wide">
+                            <tr class="text-slate-400 border-b border-slate-800">
+                                <th class="p-3 font-bold">NGÀY SỰ CỐ</th><th class="p-3 font-bold">NGÀY KHẮC PHỤC</th>
+                                <th class="p-3 font-bold text-center text-rose-500">TỔNG GIỜ</th><th class="p-3 font-bold min-w-[300px]">NỘI DUNG SỰ CỐ</th>
+                                <th class="p-3 font-bold">ĐƠN VỊ / BỘ PHẬN</th><th class="p-3 font-bold text-center">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-900/40 border-t border-slate-800/80 py-4 mt-auto text-center text-xs text-slate-400">
+            <p class="font-bold text-xs tracking-wide">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
+            <p class="text-[11px] text-slate-500 mt-1 font-medium">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-500 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
+        </footer>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- DANH SÁCH CÁC MODAL (POPUP) -->
+    <!-- ========================================== -->
+
+    <!-- Modal HDSD Mới -->
+    <div id="guideModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-base font-bold flex items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-book-open"></i> Hướng Dẫn Sử Dụng Bot RPA
+                </h3>
+                <button onclick="closeGuideModal()" class="text-slate-400 hover:text-white text-lg transition">✕</button>
+            </div>
+            <div class="p-5 space-y-5 max-h-[75vh] overflow-y-auto text-sm text-slate-300">
+                
+                <div class="space-y-2">
+                    <h4 class="font-bold text-white text-base">Phần 1: Tải và Cài đặt Môi trường</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Tải file cài đặt môi trường Node.js tại đây: <a href="https://drive.google.com/file/d/1UztpkyWtzN1Gn9ByRpQ2_WLRkz_yQprN/view?usp=drive_link" target="_blank" class="text-blue-400 hover:underline font-semibold">Link tải</a></li>
+                        <li>Sau khi tải xong, mở file lên và bấm cài đặt (chỉ cần ấn Next đến khi hoàn tất).</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-white text-base">Phần 2: Tải và Giải nén Dữ liệu Bot</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Tải file nén dữ liệu bot (file .rar) tại đây: <a href="https://drive.google.com/file/d/1rykN5fF-n_FcwgemGnnh59pi2WxSxDyR/view?usp=drive_link" target="_blank" class="text-blue-400 hover:underline font-semibold">Link tải</a></li>
+                        <li>Copy file nén vừa tải vào thẳng ổ C (hoặc ổ D).</li>
+                        <li><span class="text-rose-400 font-semibold">Giải nén trực tiếp ngay tại đó.</span> Lưu ý: Tuyệt đối không tạo thêm thư mục con. Sau khi giải nén, anh phải thấy ngay thư mục chứa code ở ổ C, ví dụ: <code>C:\bot_baocao</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-amber-400 text-base">Phần 3: Thiết lập Thư viện (Chỉ làm ở lần đầu tiên cài máy)</h4>
+                    <ul class="list-decimal pl-5 space-y-2">
+                        <li>Ấn tổ hợp phím <strong>Windows + R</strong>, gõ <code>cmd</code> rồi bấm Enter để mở cửa sổ dòng lệnh màu đen.</li>
+                        <li>Điều hướng vào thư mục bot. Cần đảm bảo con trỏ nhấp nháy của anh đang ở đúng dòng: <code>C:\bot_baocao></code> (hoặc D:\ nếu để ở ổ D). (Nếu CMD đang ở ổ khác, hãy gõ <code>cd C:\bot_baocao</code> và Enter để di chuyển tới).</li>
+                        <li>Gõ lệnh sau và bấm Enter để khởi tạo file cấu hình quản lý thư viện:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npm init -y</code></li>
+                        <li>Gõ tiếp lệnh sau và bấm Enter để tải 2 thư viện bắt buộc. Bước này cần kết nối mạng, anh đợi một lúc cho tiến trình tải chạy đến 100%:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npm install puppeteer @supabase/supabase-js</code><br><span class="text-xs text-slate-400">(Nhận biết cài đặt thành công: Sau khi máy tải xong, trong thư mục bot_baocao sẽ xuất hiện thêm 1 thư mục vàng tên là node_modules).</span></li>
+                        <li>Gõ lệnh sau và bấm Enter để tải trình duyệt Chrome ẩn (rất quan trọng cho máy mới cài lần đầu):<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npx puppeteer browsers install chrome</code></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2 p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
+                    <h4 class="font-bold text-indigo-300 text-base"><i class="fa-solid fa-robot"></i> Phần 4: Cách Chạy Bot Báo Cáo Hàng Ngày</h4>
+                    <ul class="list-decimal pl-5 space-y-2">
+                        <li>Trên bảng điều khiển (Website HTML), mở thanh menu bên trái. Chọn <strong>Từ ngày - Đến ngày</strong> cần quét dữ liệu.</li>
+                        <li>Bấm nút <strong>Lấy Lệnh</strong> và nhập mã PIN. Hệ thống sẽ tự động tạo lệnh và Copy vào bộ nhớ máy tính.</li>
+                        <li>Chuyển qua màn hình đen CMD (phải đang ở dòng <code>C:\bot_baocao></code>).</li>
+                        <li>Ấn <strong>Ctrl + V</strong> (hoặc Click chuột phải) để dán đoạn lệnh vừa lấy.</li>
+                        <li>Ấn <strong>Enter</strong> để bot tự động bật trình duyệt và chạy.</li>
+                        <li><span class="text-indigo-200 italic">Lưu ý: Ở những ngày tiếp theo, anh bỏ qua toàn bộ Phần 1, 2, 3 và chỉ cần lặp lại thao tác tại Phần 4.</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-end">
+                <button onclick="closeGuideModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95 shadow">Đã hiểu và Đóng</button>
             </div>
         </div>
     </div>
 
-    <div class="w-full flex justify-center -mt-1.5 z-30">
-        <button onclick="toggleTopArea()" id="toggleTopBtn" class="px-3.5 py-0.5 rounded-b-lg bg-slate-800/90 hover:bg-blue-600 text-slate-400 hover:text-white border border-t-0 border-slate-700 text-[10px] font-semibold transition flex items-center gap-1.5 shadow-lg active:scale-95">
-            <i id="toggleTopIcon" class="fa-solid fa-chevron-up text-[9px]"></i> <span id="toggleTopText">Thu gọn</span>
-        </button>
-    </div>
-
-    <main class="max-w-[1680px] mx-auto px-3 sm:px-6 py-3.5 flex-1 w-full space-y-4">
-        <!-- 5 THẺ KPI CHÍNH -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-            <div id="cardCrm" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
-                <div class="kpi-watermark">🎧</div>
-                <div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-headset text-blue-500"></i> Yêu cầu CRM</span>
-                        <span id="badgeCrm" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
-                    </div>
-                    <div id="kpiCrmValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--</div>
-                </div>
-                <div class="flex justify-between items-center mt-3 text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
-                    <span id="kpiCrmAvg" class="text-emerald-500 font-semibold font-num">TB: --/ngày</span>
-                    <span class="text-slate-500">Lịch sử</span>
-                </div>
-            </div>
-
-            <div id="cardZalo" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
-                <div class="kpi-watermark">💬</div>
-                <div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-comment-dots text-cyan-500"></i> Tin Zalo OA</span>
-                        <span id="badgeZalo" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
-                    </div>
-                    <div id="kpiZaloMsgValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--</div>
-                </div>
-                <div class="space-y-0.5 mt-2.5 pt-2 border-t border-slate-800/80 text-[11px]">
-                    <div class="flex justify-between"><span class="text-slate-400">Tỷ lệ phản hồi</span><span id="kpiZaloRate" class="text-cyan-500 font-semibold font-num">--%</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">TG phản hồi đầu</span><span id="kpiZaloTime" class="text-cyan-500 font-semibold font-num">-- phút</span></div>
-                </div>
-            </div>
-
-            <div id="cardCalls" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
-                <div class="kpi-watermark">📞</div>
-                <div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-phone-volume text-amber-500"></i> Cuộc gọi đến</span>
-                        <span id="badgeCalls" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
-                    </div>
-                    <div id="kpiCallsValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--</div>
-                </div>
-                <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80 font-num">
-                    <span id="kpiCallsMissed" class="text-rose-500 font-semibold">Lỡ: --</span>
-                    <span id="kpiCallsAnswered" class="text-emerald-500 font-semibold">Nhấc: --%</span>
-                </div>
-            </div>
-
-            <div id="cardSurvey" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300 border border-emerald-500/25">
-                <div class="kpi-watermark">⭐</div>
-                <div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-star text-yellow-500"></i> Web & CSAT</span>
-                        <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-bold">Chuẩn</span>
-                    </div>
-                    <div id="kpiSurveyValue" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">-- lượt</div>
-                </div>
-                <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80 font-num">
-                    <span id="kpiWebScore" class="text-amber-500 font-semibold">Web: --</span>
-                    <span id="kpiCsatZalo" class="text-emerald-500 font-semibold">CSAT: --%</span>
-                </div>
-            </div>
-
-            <div id="cardTime" class="kpi-card p-3.5 rounded-xl flex flex-col justify-between transition-all duration-300">
-                <div class="kpi-watermark">⏱️</div>
-                <div>
-                    <div class="flex justify-between items-center text-slate-400">
-                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-clock text-purple-500"></i> Thời gian thoại</span>
-                        <span id="badgeTime" class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold">Chuẩn</span>
-                    </div>
-                    <div id="kpiTalkTime" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--s</div>
-                </div>
-                <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80">
-                    <span class="text-slate-400">TG Chờ TB</span>
-                    <span id="kpiWaitTime" class="text-purple-500 font-semibold font-num">--s</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                    <div>
-                        <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-chart-line text-blue-500"></i> Xu Hướng Hiệu Suất Tổng Hợp</h2>
-                        <p class="text-xs text-slate-400">Biến động lượt yêu cầu CRM, Zalo và cuộc gọi đến</p>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-0.5 flex gap-1">
-                        <button onclick="setChartType('bar')" id="btn-chart-bar" class="px-2.5 py-1 rounded bg-blue-600 text-white text-xs font-medium transition active:scale-95">Cột</button>
-                        <button onclick="setChartType('line')" id="btn-chart-line" class="px-2.5 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Đường</button>
-                    </div>
-                </div>
-                <div class="relative flex-1 w-full min-h-[270px]"><canvas id="trendChart"></canvas></div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-xl flex flex-col">
-                <div class="flex justify-between items-center mb-3">
-                    <div>
-                        <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-500"></i> Top Vấn Đề</h2>
-                        <p class="text-xs text-slate-400">Tỷ trọng nhóm vấn đề phản ánh</p>
-                    </div>
-                    <select id="pieLimitSelect" onchange="updatePieChart()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1 focus:outline-none">
-                        <option value="3">Top 3</option><option value="5" selected>Top 5</option><option value="7">Top 7</option><option value="all">Tất cả</option>
-                    </select>
-                </div>
-                <div class="relative flex-1 w-full min-h-[250px] flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="glass-panel p-4 rounded-xl lg:col-span-2 flex flex-col">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                    <div>
-                        <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-indigo-500"></i> Hiệu Suất Theo Đơn Vị Cảng</h2>
-                        <p class="text-xs text-slate-400">Số cuộc gọi vào Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-0.5 flex gap-1">
-                        <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded bg-blue-600 text-white text-xs font-medium transition active:scale-95">Cột</button>
-                        <button onclick="setUnitChartType('line')" id="btn-unit-line" class="px-2.5 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Đường</button>
-                        <button onclick="setUnitChartType('area')" id="btn-unit-area" class="px-2.5 py-1 rounded text-slate-400 hover:text-white text-xs font-medium transition active:scale-95">Vùng</button>
-                    </div>
-                </div>
-                <div class="relative flex-1 w-full min-h-[250px]"><canvas id="unitChart"></canvas></div>
-            </div>
-
-            <div id="cardZaloDetail" class="glass-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300">
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-mobile-screen-button text-cyan-500"></i> Kênh Zalo OA</h2>
-                        <span id="badgeZaloDetail" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[10px] font-semibold">Live Sync</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5 mb-3">
-                        <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-lg">
-                            <div class="text-[10px] text-slate-400 uppercase font-semibold">Người Quan Tâm</div>
-                            <div id="zaloTotalFollowers" class="text-xl sm:text-2xl font-black text-cyan-500 mt-0.5 font-num">--</div>
-                        </div>
-                        <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-lg">
-                            <div class="text-[10px] text-slate-400 uppercase font-semibold">Quan Tâm Mới</div>
-                            <div id="zaloNewFollowers" class="text-xl sm:text-2xl font-black text-emerald-500 mt-0.5 font-num">--</div>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 text-xs">
-                        <div class="bg-slate-900/60 border border-slate-800/80 px-2.5 py-2 rounded-lg flex justify-between items-center"><span class="text-slate-400">Bỏ quan tâm</span><span id="zaloUnfollow" class="font-bold text-rose-500 font-num">--</span></div>
-                        <div class="bg-slate-900/60 border border-slate-800/80 px-2.5 py-2 rounded-lg flex justify-between items-center"><span class="text-slate-400">Tỷ lệ phản hồi</span><span id="zaloReplyRate" class="font-bold text-blue-500 font-num">--%</span></div>
-                    </div>
-                </div>
-                <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500 mt-3">
-                    <span>Cloud Supabase Database</span>
-                    <span class="text-emerald-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Hoạt động tốt</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-panel p-4 rounded-xl space-y-3">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                    <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-table-list text-amber-500"></i> Chi Tiết Phản Ánh Theo Nhóm Vấn Đề</h2>
-                    <p class="text-xs text-slate-400">Ma trận biến đổi động theo khoảng ngày được lọc</p>
-                </div>
-                <div class="w-full sm:w-64">
-                    <div class="relative">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Tìm kiếm vấn đề..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 transition">
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto rounded-lg border border-slate-800">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr id="matrixTableHeader" class="bg-slate-900/90 text-slate-400 border-b border-slate-800 font-num">
-                            <th class="p-2.5 font-bold min-w-[260px]">NHÓM VẤN ĐỀ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="matrixTableBody" class="divide-y divide-slate-800/60 font-num"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="glass-panel p-4 rounded-xl space-y-3">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                    <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Nhật Ký Vận Hành Sự Cố & Khắc Phục</h2>
-                    <p class="text-xs text-slate-400">Đồng bộ theo khoảng thời gian lọc chung của trang</p>
-                </div>
-                <button onclick="requestPasswordAndAction('add_incident')" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-rose-600/25 active:scale-95">
-                    <i class="fa-solid fa-plus text-[11px]"></i> Thêm sự cố
-                </button>
-            </div>
-            <div class="overflow-x-auto max-h-[350px] overflow-y-auto rounded-lg border border-slate-800">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead class="sticky top-0 z-10 bg-slate-900/95 font-num">
-                        <tr class="text-slate-400 border-b border-slate-800">
-                            <th class="p-2.5 font-bold">NGÀY SỰ CỐ</th><th class="p-2.5 font-bold">NGÀY KHẮC PHỤC</th>
-                            <th class="p-2.5 font-bold text-center text-rose-500">TỔNG GIỜ</th><th class="p-2.5 font-bold min-w-[280px]">NỘI DUNG SỰ CỐ</th>
-                            <th class="p-2.5 font-bold">ĐƠN VỊ / BỘ PHẬN</th><th class="p-2.5 font-bold text-center">THAO TÁC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="incidentTableBody" class="divide-y divide-slate-800/60"></tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900/40 border-t border-slate-800/80 py-3.5 mt-auto text-center text-xs text-slate-400">
-        <p class="font-semibold text-xs">TT KHAI THÁC & DỊCH VỤ KHÁCH HÀNG - CÔNG TY CP CẢNG HẢI PHÒNG</p>
-        <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-500 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
-    </footer>
 
     <!-- Modal Xác Thực Mật Khẩu -->
     <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 hidden">
-        <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-5 space-y-4">
-            <div class="text-center space-y-1"><div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto text-lg"><i class="fa-solid fa-lock"></i></div><h3 class="text-sm font-bold">Xác Thực Bảo Mật</h3><p class="text-xs text-slate-400">Vui lòng nhập mã PIN quản trị viên</p></div>
-            <input type="password" id="securePasswordInput" placeholder="••••" maxlength="8" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center text-white tracking-[6px] font-num focus:outline-none focus:border-blue-500 transition">
-            <div class="flex gap-2"><button onclick="closePasswordModal()" class="w-1/2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button><button onclick="verifyPasswordAndExecute()" class="w-1/2 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition active:scale-95">Xác nhận</button></div>
+        <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-6 space-y-5">
+            <div class="text-center space-y-2"><div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto text-xl shadow-inner"><i class="fa-solid fa-lock"></i></div><h3 class="text-base font-bold">Xác Thực Bảo Mật</h3><p class="text-xs text-slate-400">Vui lòng nhập mã PIN quản trị viên</p></div>
+            <input type="password" id="securePasswordInput" placeholder="••••" maxlength="8" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-center text-white tracking-[8px] font-num focus:outline-none focus:border-blue-500 transition shadow-inner text-lg">
+            <div class="flex gap-3"><button onclick="closePasswordModal()" class="w-1/2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95">Hủy</button><button onclick="verifyPasswordAndExecute()" class="w-1/2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95">Xác nhận</button></div>
         </div>
     </div>
 
-    <!-- Modal Cập Nhật Khảo Sát Tự Trực Tiếp -->
+    <!-- Modal Cập Nhật Khảo Sát -->
     <div id="surveyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-md rounded-2xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
-            <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-sm font-bold flex items-center gap-2 text-blue-400">
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-base font-bold flex items-center gap-2 text-blue-400">
                     <i class="fa-solid fa-star"></i> Nhập Số Liệu Khảo Sát
                 </h3>
-                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-white text-lg transition">✕</button>
             </div>
-            <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-4 space-y-4 text-xs">
+            <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-5 space-y-5 text-xs">
                 <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Chọn Ngày Áp Dụng *</label>
-                    <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Chọn Ngày Áp Dụng *</label>
+                    <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
                     </select>
-                    <p class="text-[9px] text-amber-500 mt-1">* Hệ thống chỉ cho phép nạp số liệu khảo sát vào các ngày đã được Bot cào dữ liệu trước đó.</p>
+                    <p class="text-[10px] text-amber-500 mt-1.5 font-medium">* Hệ thống chỉ cho phép nạp số liệu khảo sát vào các ngày đã được Bot cào dữ liệu trước đó.</p>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Số Lượt Khảo Sát Web</label>
-                        <input type="number" id="surWebCount" placeholder="VD: 15" min="0" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Số Lượt KS Web</label>
+                        <input type="number" id="surWebCount" placeholder="VD: 15" min="0" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Điểm Đánh Giá Web</label>
-                        <input type="text" id="surWebScore" placeholder="VD: 45/50" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Điểm KS Web</label>
+                        <input type="text" id="surWebScore" placeholder="VD: 45/50" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
                     </div>
                 </div>
-                <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
-                    <button type="button" onclick="closeSurveyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition active:scale-95">Lưu Khảo Sát</button>
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closeSurveyModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95 shadow">Hủy</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95">Lưu Khảo Sát</button>
                 </div>
             </form>
         </div>
@@ -407,26 +525,26 @@
     <!-- Alert Setup Modal -->
     <div id="alertSetupModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xl rounded-2xl border border-amber-500/30 shadow-2xl overflow-hidden flex flex-col">
-            <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-sm font-bold text-amber-500 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Thiết Lập Ngưỡng Cảnh Báo Tiêu Chuẩn</h3>
-                <button onclick="closeAlertSetupModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-base font-bold text-amber-500 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Thiết Lập Ngưỡng Cảnh Báo</h3>
+                <button onclick="closeAlertSetupModal()" class="text-slate-400 hover:text-white text-lg transition">✕</button>
             </div>
-            <div class="p-4 space-y-3 max-h-[72vh] overflow-y-auto text-xs">
-                <p class="text-slate-400 text-xs">Thiết lập điều kiện & giá trị để kích hoạt cảnh báo tự động:</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">1. TB CRM / Ngày</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_crm_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_crm_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">2. Tỷ Lệ Phản Hồi Zalo (%)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">3. TG Phản Hồi Zalo (Phút)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">4. Tỷ Lệ Nhấc Máy (%)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_callRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_callRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_callRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_callRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">5. Cuộc Gọi Lỡ (Lượt)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_missed_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_missed_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_missed_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_missed_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">6. Thời Gian Thoại (Giây)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_talkTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_talkTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_talkTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_talkTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">7. TG Chờ Bắt Máy (Giây)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_waitTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_waitTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_waitTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_waitTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
-                    <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">8. Bỏ Quan Tâm Zalo</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_unfollow_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_unfollow_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_unfollow_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_unfollow_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
+            <div class="p-5 space-y-4 max-h-[72vh] overflow-y-auto text-xs custom-scrollbar">
+                <p class="text-slate-400 text-xs font-medium mb-2">Thiết lập điều kiện & giá trị để kích hoạt cảnh báo tự động trên Dashboard:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">1. TB CRM / Ngày</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_crm_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_crm_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">2. Tỷ Lệ Phản Hồi Zalo (%)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_zaloRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_zaloRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">3. TG Phản Hồi Zalo (Phút)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_zaloTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_zaloTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">4. Tỷ Lệ Nhấc Máy (%)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_callRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_callRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_callRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_callRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">5. Cuộc Gọi Lỡ (Lượt)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_missed_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_missed_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_missed_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_missed_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">6. Thời Gian Thoại (Giây)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_talkTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_talkTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_talkTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_talkTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">7. TG Chờ Bắt Máy (Giây)</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_waitTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_waitTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_waitTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_waitTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 shadow-sm"><div class="font-bold text-[11px] text-slate-300">8. Bỏ Quan Tâm Zalo</div><div class="grid grid-cols-2 gap-2 font-num"><div><span class="text-[10px] font-bold text-amber-500">Vàng</span><div class="flex gap-1 mt-1"><select id="cfg_unfollow_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_unfollow_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div><div><span class="text-[10px] font-bold text-rose-500">Đỏ</span><div class="flex gap-1 mt-1"><select id="cfg_unfollow_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_unfollow_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"></div></div></div></div>
                 </div>
             </div>
-            <div class="p-3.5 bg-slate-900 border-t border-slate-800 flex justify-end gap-2">
-                <button onclick="closeAlertSetupModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button>
-                <button onclick="saveAlertSettings()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition active:scale-95">Lưu cấu hình</button>
+            <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-end gap-3">
+                <button onclick="closeAlertSetupModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95 shadow">Hủy</button>
+                <button onclick="saveAlertSettings()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition active:scale-95">Lưu cấu hình</button>
             </div>
         </div>
     </div>
@@ -434,27 +552,30 @@
     <!-- Incident Modal -->
     <div id="incidentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
-            <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-rose-500"></i> Thêm Sự Cố Vận Hành</h3>
-                <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+            <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-base font-bold flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-rose-500"></i> Thêm Sự Cố Vận Hành</h3>
+                <button onclick="closeIncidentModal()" class="text-slate-400 hover:text-white text-lg transition">✕</button>
             </div>
-            <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" class="p-4 space-y-3 text-xs">
+            <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" class="p-5 space-y-4 text-xs">
                 <input type="hidden" id="incidentId">
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div><label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Ngày Sự Cố *</label><input type="date" id="incDate" required class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num"></div>
-                    <div><label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Ngày Khắc Phục</label><input type="date" id="incResolvedDate" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Ngày Sự Cố *</label><input type="date" id="incDate" required class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner"></div>
+                    <div><label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Ngày Khắc Phục</label><input type="date" id="incResolvedDate" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div><label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Tổng Giờ</label><input type="number" step="0.1" id="incTotalHours" placeholder="VD: 2.5" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num"></div>
-                    <div><label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Đơn Vị *</label><input type="text" id="incUnit" required placeholder="Cảng Tân Vũ" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Tổng Giờ</label><input type="number" step="0.1" id="incTotalHours" placeholder="VD: 2.5" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner"></div>
+                    <div><label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Đơn Vị *</label><input type="text" id="incUnit" required placeholder="Cảng Tân Vũ" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 shadow-inner"></div>
                 </div>
-                <div><label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Nội Dung Sự Cố *</label><textarea id="incContent" rows="3" required placeholder="Mô tả nguyên nhân và tiến độ khắc phục..." class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-blue-500 resize-none"></textarea></div>
-                <div class="pt-2 border-t border-slate-800 flex justify-end gap-2"><button type="button" onclick="closeIncidentModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button><button type="submit" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow transition active:scale-95">Lưu sự cố</button></div>
+                <div><label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Nội Dung Sự Cố *</label><textarea id="incContent" rows="3" required placeholder="Mô tả nguyên nhân và tiến độ khắc phục..." class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl p-3 text-slate-200 focus:outline-none focus:border-blue-500 resize-none shadow-inner"></textarea></div>
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-3"><button type="button" onclick="closeIncidentModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95 shadow">Hủy</button><button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow transition active:scale-95">Lưu sự cố</button></div>
             </form>
         </div>
     </div>
 
+
+    <!-- ========================================== -->
     <!-- JAVASCRIPT LOGIC -->
+    <!-- ========================================== -->
     <script>
         const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
@@ -545,9 +666,11 @@
         function closePasswordModal() { document.getElementById('passwordModal').classList.add('hidden'); pendingAction = null; }
 
         function verifyPasswordAndExecute() {
-            if (document.getElementById('securePasswordInput').value !== CORRECT_PIN) return alert("Mật khẩu sai!");
+            if (document.getElementById('securePasswordInput').value !== CORRECT_PIN) return alert("Mật khẩu không chính xác!");
             const act = pendingAction; closePasswordModal();
-            if (act === 'alert') openAlertSetupModal();
+            
+            if (act === 'bot') triggerLocalBot();
+            else if (act === 'alert') openAlertSetupModal();
             else if (act === 'survey') openSurveyModal();
             else if (act === 'delete') deleteSelectedDateConfirmed();
             else if (act === 'export') exportToExcel();
@@ -556,23 +679,23 @@
             else if (act && act.startsWith('edit_inc_')) openIncidentModal(act.replace('edit_inc_', ''));
         }
 
+        function openGuideModal() { document.getElementById('guideModal').classList.remove('hidden'); }
+        function closeGuideModal() { document.getElementById('guideModal').classList.add('hidden'); }
+
         function toggleTopArea() {
             const area = document.getElementById('topCollapsibleArea');
             isTopAreaCollapsed = !isTopAreaCollapsed;
             if (isTopAreaCollapsed) {
                 area.style.maxHeight = '0px';
                 document.getElementById('toggleTopText').innerText = 'Mở rộng';
-                document.getElementById('toggleTopIcon').className = 'fa-solid fa-chevron-down text-[9px]';
+                document.getElementById('toggleTopIcon').className = 'fa-solid fa-chevron-down text-[10px]';
             } else {
                 area.style.maxHeight = '1200px';
                 document.getElementById('toggleTopText').innerText = 'Thu gọn';
-                document.getElementById('toggleTopIcon').className = 'fa-solid fa-chevron-up text-[9px]';
+                document.getElementById('toggleTopIcon').className = 'fa-solid fa-chevron-up text-[10px]';
             }
         }
 
-        // ==========================================
-        // CƠ CHẾ POPUP KHẢO SÁT MỚI 
-        // ==========================================
         function openSurveyModal() {
             const select = document.getElementById('surveyDateSelect');
             select.innerHTML = '';
@@ -672,9 +795,9 @@
                 checks.forEach(c => { if(c.rule) { if (isAlertTriggered(c.val, c.rule.r_cond, c.rule.r_val)) r = true; else if (isAlertTriggered(c.val, c.rule.y_cond, c.rule.y_val)) y = true; }});
                 const cl = document.getElementById(card); const bl = document.getElementById(badge);
                 if (!cl || !bl) return;
-                if (r) { cl.classList.add('kpi-alert-red'); bl.innerText = 'Báo Đỏ'; bl.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-500 border border-rose-500/50 font-bold animate-pulse'; }
-                else if (y) { cl.classList.remove('kpi-alert-red'); cl.classList.add('kpi-alert-yellow'); bl.innerText = 'Báo Vàng'; bl.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-500 border border-amber-500/50 font-bold'; }
-                else { cl.classList.remove('kpi-alert-red', 'kpi-alert-yellow'); bl.innerText = 'Chuẩn'; bl.className = 'text-[9px] px-1.5 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold'; }
+                if (r) { cl.classList.add('kpi-alert-red'); bl.innerText = 'Báo Đỏ'; bl.className = 'text-[10px] px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-500 border border-rose-500/50 font-bold animate-pulse'; }
+                else if (y) { cl.classList.remove('kpi-alert-red'); cl.classList.add('kpi-alert-yellow'); bl.innerText = 'Báo Vàng'; bl.className = 'text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-500 border border-amber-500/50 font-bold'; }
+                else { cl.classList.remove('kpi-alert-red', 'kpi-alert-yellow'); bl.innerText = 'Chuẩn'; bl.className = 'text-[10px] px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-bold'; }
             };
 
             check('cardCrm', 'badgeCrm', [{ val: latest.kpi?.crm || 0, rule: alertThresholds.crm }]);
@@ -777,7 +900,7 @@
         function setQuickFilterUI(type) {
             ['7', '14', 'all'].forEach(t => {
                 const btn = document.getElementById(`btn-quick-${t}`);
-                if (btn) btn.className = t === type ? "px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-medium border border-blue-500 transition active:scale-95" : "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition active:scale-95";
+                if (btn) btn.className = t === type ? "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold border border-blue-500 transition active:scale-95 shadow" : "px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95";
             });
         }
 
@@ -847,15 +970,15 @@
 
         function renderMatrixTable() {
             const h = document.getElementById('matrixTableHeader'), b = document.getElementById('matrixTableBody');
-            let hHtml = '<th class="p-2.5 font-bold min-w-[260px]">NHÓM VẤN ĐỀ</th><th class="p-2.5 font-bold text-center text-amber-500 min-w-[100px] border-r border-slate-700/50">TB/NGÀY</th>';
-            filteredData.forEach(i => hHtml += `<th class="p-2.5 font-bold text-center min-w-[100px]">${i.date}</th>`);
+            let hHtml = '<th class="p-3 font-bold min-w-[280px]">NHÓM VẤN ĐỀ</th><th class="p-3 font-bold text-center text-amber-500 min-w-[100px] border-r border-slate-700/50">TB/NGÀY</th>';
+            filteredData.forEach(i => hHtml += `<th class="p-3 font-bold text-center min-w-[100px]">${i.date}</th>`);
             h.innerHTML = hHtml; b.innerHTML = '';
             let cats = new Set(); filteredData.forEach(d => { if (d.categories) Object.keys(d.categories).forEach(k => cats.add(k)); });
             cats.forEach(cat => {
                 let sum = 0; let dHtml = '';
-                filteredData.forEach(item => { const val = item.categories?.[cat] || 0; sum += val; dHtml += `<td class="p-2.5 text-center font-medium">${val}</td>`; });
+                filteredData.forEach(item => { const val = item.categories?.[cat] || 0; sum += val; dHtml += `<td class="p-3 text-center font-medium">${val}</td>`; });
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-500/10 transition border-b border-slate-700/30';
-                tr.innerHTML = `<td class="p-2.5 font-medium font-sans">${cat}</td><td class="p-2.5 text-center font-bold text-amber-500 border-r border-slate-700/50">${filteredData.length ? (sum / filteredData.length).toFixed(1) : 0}</td>` + dHtml;
+                tr.innerHTML = `<td class="p-3 font-medium font-sans">${cat}</td><td class="p-3 text-center font-bold text-amber-500 border-r border-slate-700/50">${filteredData.length ? (sum / filteredData.length).toFixed(1) : 0}</td>` + dHtml;
                 b.appendChild(tr);
             });
         }
@@ -916,7 +1039,7 @@
             let html = '';
             filtered.forEach(inc => {
                 const fD = d => d ? d.split('-').reverse().join('/') : '--';
-                html += `<tr class="hover:bg-slate-500/10 transition border-b border-slate-700/30 font-num"><td class="p-2.5 font-medium">${fD(inc.date)}</td><td class="p-2.5 text-slate-400">${fD(inc.resolvedDate)}</td><td class="p-2.5 text-center font-bold text-rose-500">${inc.totalHours || 0}h</td><td class="p-2.5 font-sans">${inc.content}</td><td class="p-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-500/15 border border-slate-700/50 text-[10px] font-sans">${inc.unit}</span></td><td class="p-2.5 text-center space-x-1"><button onclick="requestPasswordAndAction('edit_inc_${inc.id}')" class="px-2 py-0.5 rounded text-[11px]"><i class="fa-solid fa-pen"></i></button><button onclick="requestPasswordAndAction('del_inc_${inc.id}')" class="px-2 py-0.5 rounded text-[11px]"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                html += `<tr class="hover:bg-slate-500/10 transition border-b border-slate-700/30 font-num"><td class="p-3 font-medium">${fD(inc.date)}</td><td class="p-3 text-slate-400">${fD(inc.resolvedDate)}</td><td class="p-3 text-center font-bold text-rose-500">${inc.totalHours || 0}h</td><td class="p-3 font-sans">${inc.content}</td><td class="p-3"><span class="px-2 py-0.5 rounded-md bg-slate-500/15 border border-slate-700/50 text-[10px] font-sans">${inc.unit}</span></td><td class="p-3 text-center space-x-1"><button onclick="requestPasswordAndAction('edit_inc_${inc.id}')" class="px-2 py-0.5 rounded text-[11px]"><i class="fa-solid fa-pen"></i></button><button onclick="requestPasswordAndAction('del_inc_${inc.id}')" class="px-2 py-0.5 rounded text-[11px]"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
             tbody.innerHTML = html;
         }
