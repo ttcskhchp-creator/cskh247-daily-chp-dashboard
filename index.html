@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Hiệu Suất CSKH247 - Cảng Hải Phòng</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,6 +12,7 @@
             theme: { extend: { colors: { brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }, slate: { 850: '#0c1322', 900: '#080d19', 950: '#040711' } } } }
         }
     </script>
+    <!-- FontAwesome & Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -72,24 +74,25 @@
 
                 <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-start xl:justify-end">
                     
+                    <!-- THÊM KHỐI CHẠY BOT QUÉT HÀNG LOẠT -->
                     <div class="flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg px-2 py-1 mr-2">
-                        <span class="text-[11px] text-indigo-400 font-bold hidden sm:inline"><i class="fa-solid fa-robot"></i> Cào Bot:</span>
-                        <input type="date" id="botRunDateInput" class="bg-transparent text-xs text-indigo-200 focus:outline-none font-num" title="Chọn ngày cào dữ liệu">
-                        <button onclick="triggerLocalBot()" class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold shadow transition active:scale-95">Khởi chạy</button>
+                        <span class="text-[11px] text-indigo-400 font-bold hidden lg:inline"><i class="fa-solid fa-robot"></i> Bot:</span>
+                        <input type="date" id="botStartDate" class="bg-transparent text-xs text-indigo-200 focus:outline-none font-num" title="Từ ngày">
+                        <span class="text-indigo-400 text-[10px]">-</span>
+                        <input type="date" id="botEndDate" class="bg-transparent text-xs text-indigo-200 focus:outline-none font-num" title="Đến ngày">
+                        <button onclick="triggerLocalBot()" class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold shadow transition active:scale-95">Lấy Lệnh</button>
                     </div>
 
                     <button onclick="requestPasswordAndAction('alert')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
                         <i class="fa-solid fa-sliders text-[11px]"></i> Cảnh báo
                     </button>
 
-                    <!-- NÚT GỌI TẢI DỮ LIỆU NẶNG TRÊN STORAGE BUCKET -->
                     <button id="downloadRawBtn" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 text-xs font-semibold transition flex items-center gap-1.5 active:scale-95">
                         <i class="fa-solid fa-cloud-arrow-down text-[11px]"></i> Tải File Gốc
                     </button>
 
-                    <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImportWithAuth(event)">
-                    <button onclick="requestPasswordAndAction('import')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95">
-                        <i class="fa-solid fa-file-excel text-[11px]"></i> Nạp Khảo Sát
+                    <button onclick="requestPasswordAndAction('survey')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95">
+                        <i class="fa-solid fa-square-poll-vertical text-[11px]"></i> Nhập Khảo Sát
                     </button>
                     
                     <div class="flex items-center gap-1 bg-slate-800/80 border border-slate-700/80 rounded-lg p-0.5">
@@ -99,8 +102,8 @@
                         </button>
                     </div>
 
-                    <button onclick="requestPasswordAndAction('export')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition flex items-center gap-1.5 active:scale-95">
-                        <i class="fa-solid fa-file-export text-[11px]"></i> Xuất
+                    <button onclick="requestPasswordAndAction('export')" class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium transition flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-file-excel text-[11px]"></i> Xuất Excel
                     </button>
                 </div>
             </div>
@@ -224,7 +227,7 @@
                     <div id="kpiTalkTime" class="text-2xl sm:text-3xl font-extrabold text-white mt-2 font-num">--s</div>
                 </div>
                 <div class="flex justify-between items-center mt-3 text-[11px] pt-2 border-t border-slate-800/80">
-                    <span class="text-slate-400">TG Chờ</span>
+                    <span class="text-slate-400">TG Chờ TB</span>
                     <span id="kpiWaitTime" class="text-purple-500 font-semibold font-num">--s</span>
                 </div>
             </div>
@@ -264,7 +267,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
                         <h2 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-indigo-500"></i> Hiệu Suất Theo Đơn Vị Cảng</h2>
-                        <p class="text-xs text-slate-400">Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
+                        <p class="text-xs text-slate-400">Số cuộc gọi vào Cảng Tân Vũ & Cảng Hoàng Diệu Chùa Vẽ</p>
                     </div>
                     <div class="bg-slate-900 border border-slate-800 rounded-lg p-0.5 flex gap-1">
                         <button onclick="setUnitChartType('bar')" id="btn-unit-bar" class="px-2.5 py-1 rounded bg-blue-600 text-white text-xs font-medium transition active:scale-95">Cột</button>
@@ -358,12 +361,46 @@
         <p class="text-[11px] text-slate-500 mt-0.5">Website: <a href="https://haiphongport.com.vn" target="_blank" class="text-blue-500 hover:underline">haiphongport.com.vn</a> • OPERATIONS & CUSTOMER SERVICE CENTER © 2026</p>
     </footer>
 
-    <!-- Các Modal (Giữ nguyên cấu trúc HTML) -->
+    <!-- Modal Xác Thực Mật Khẩu -->
     <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-xs rounded-2xl border border-rose-500/40 shadow-2xl p-5 space-y-4">
             <div class="text-center space-y-1"><div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto text-lg"><i class="fa-solid fa-lock"></i></div><h3 class="text-sm font-bold">Xác Thực Bảo Mật</h3><p class="text-xs text-slate-400">Vui lòng nhập mã PIN quản trị viên</p></div>
             <input type="password" id="securePasswordInput" placeholder="••••" maxlength="8" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center text-white tracking-[6px] font-num focus:outline-none focus:border-blue-500 transition">
             <div class="flex gap-2"><button onclick="closePasswordModal()" class="w-1/2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button><button onclick="verifyPasswordAndExecute()" class="w-1/2 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition active:scale-95">Xác nhận</button></div>
+        </div>
+    </div>
+
+    <!-- Modal Cập Nhật Khảo Sát Tự Trực Tiếp -->
+    <div id="surveyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-blue-400">
+                    <i class="fa-solid fa-star"></i> Nhập Số Liệu Khảo Sát
+                </h3>
+                <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+            </div>
+            <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-4 space-y-4 text-xs">
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Chọn Ngày Áp Dụng *</label>
+                    <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                    </select>
+                    <p class="text-[9px] text-amber-500 mt-1">* Hệ thống chỉ cho phép nạp số liệu khảo sát vào các ngày đã được Bot cào dữ liệu trước đó.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Số Lượt Khảo Sát Web</label>
+                        <input type="number" id="surWebCount" placeholder="VD: 15" min="0" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Điểm Đánh Giá Web</label>
+                        <input type="text" id="surWebScore" placeholder="VD: 45/50" class="w-full bg-slate-900 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-num">
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeSurveyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition active:scale-95">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition active:scale-95">Lưu Khảo Sát</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -377,7 +414,6 @@
             <div class="p-4 space-y-3 max-h-[72vh] overflow-y-auto text-xs">
                 <p class="text-slate-400 text-xs">Thiết lập điều kiện & giá trị để kích hoạt cảnh báo tự động:</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <!-- Fields array map -->
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">1. TB CRM / Ngày</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_crm_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_crm_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" id="cfg_crm_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">2. Tỷ Lệ Phản Hồi Zalo (%)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloRate_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloRate_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="lt"><</option><option value="gt">></option></select><input type="number" id="cfg_zaloRate_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
                     <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1"><div class="font-bold">3. TG Phản Hồi Zalo (Phút)</div><div class="grid grid-cols-2 gap-1.5 font-num"><div><span class="text-[10px] text-amber-500">Vàng</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloTime_y_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_y_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div><div><span class="text-[10px] text-rose-500">Đỏ</span><div class="flex gap-1 mt-0.5"><select id="cfg_zaloTime_r_cond" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs"><option value="gt">></option><option value="lt"><</option></select><input type="number" step="0.1" id="cfg_zaloTime_r_val" placeholder="Trống" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs"></div></div></div></div>
@@ -418,7 +454,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC TOÀN DIỆN -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const SUPABASE_URL = "https://mcbdazrdhdrinnpuxdys.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4CWN9Ny-tu5oSEhlSuzJ_w__mP8oRhm";
@@ -472,20 +508,30 @@
         window.addEventListener('DOMContentLoaded', async () => {
             initTheme(); initCharts();
             
-            // Thiết lập giá trị mặc định cho Nút khởi chạy Bot (lùi 1 ngày)
             const yest = new Date(); yest.setDate(yest.getDate() - 1);
-            document.getElementById('botRunDateInput').value = yest.toISOString().split('T')[0];
+            const yestStr = yest.toISOString().split('T')[0];
+            document.getElementById('botStartDate').value = yestStr;
+            document.getElementById('botEndDate').value = yestStr;
             
             await loadDataFromSupabase();
         });
 
         function triggerLocalBot() {
-            const dateVal = document.getElementById('botRunDateInput').value;
-            if(!dateVal) return alert("Vui lòng chọn ngày muốn cào dữ liệu!");
+            const startVal = document.getElementById('botStartDate').value;
+            const endVal = document.getElementById('botEndDate').value;
             
-            const cmd = `node index.js ${dateVal}`;
+            if(!startVal) return alert("Vui lòng chọn Từ ngày để cào dữ liệu!");
+            
+            let cmd = `node index.js ${startVal}`;
+            if (endVal && endVal !== startVal) {
+                if (new Date(endVal) < new Date(startVal)) {
+                    return alert("Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu!");
+                }
+                cmd += ` ${endVal}`;
+            }
+            
             navigator.clipboard.writeText(cmd).then(() => {
-                alert(`📌 Hệ thống đã copy lệnh khởi động:\n👉 ${cmd}\n\nDo giới hạn bảo mật trình duyệt, anh hãy mở CMD (Terminal) và nhấn Ctrl+V để Bot tự động chạy dữ liệu ngày này nhé!`);
+                alert(`📌 Hệ thống đã copy lệnh khởi động:\n👉 ${cmd}\n\nDo giới hạn bảo mật trình duyệt, anh hãy mở CMD (Terminal) và nhấn Ctrl+V để Bot tự động chạy quét khoảng ngày này nhé!`);
             });
         }
 
@@ -502,7 +548,7 @@
             if (document.getElementById('securePasswordInput').value !== CORRECT_PIN) return alert("Mật khẩu sai!");
             const act = pendingAction; closePasswordModal();
             if (act === 'alert') openAlertSetupModal();
-            else if (act === 'import') document.getElementById('excelFileInput').click();
+            else if (act === 'survey') openSurveyModal();
             else if (act === 'delete') deleteSelectedDateConfirmed();
             else if (act === 'export') exportToExcel();
             else if (act === 'add_incident') openIncidentModal();
@@ -521,6 +567,67 @@
                 area.style.maxHeight = '1200px';
                 document.getElementById('toggleTopText').innerText = 'Thu gọn';
                 document.getElementById('toggleTopIcon').className = 'fa-solid fa-chevron-up text-[9px]';
+            }
+        }
+
+        // ==========================================
+        // CƠ CHẾ POPUP KHẢO SÁT MỚI 
+        // ==========================================
+        function openSurveyModal() {
+            const select = document.getElementById('surveyDateSelect');
+            select.innerHTML = '';
+            
+            const sortedDb = [...database].sort((a,b) => toYMDString(b.date).localeCompare(toYMDString(a.date)));
+            
+            sortedDb.forEach(item => { 
+                const opt = document.createElement('option'); 
+                opt.value = item.date; opt.innerText = item.date; select.appendChild(opt); 
+            });
+
+            if (sortedDb.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = ""; opt.innerText = "Chưa có dữ liệu cào từ Bot"; select.appendChild(opt);
+                select.disabled = true;
+            } else {
+                select.disabled = false;
+                updateSurveyFields();
+                select.onchange = updateSurveyFields;
+            }
+            document.getElementById('surveyModal').classList.remove('hidden');
+        }
+
+        function updateSurveyFields() {
+            const date = document.getElementById('surveyDateSelect').value;
+            const record = database.find(r => r.date === date);
+            if (record && record.surveys) {
+                document.getElementById('surWebCount').value = record.surveys.webCount || '';
+                document.getElementById('surWebScore').value = record.surveys.webScore || '';
+            } else {
+                document.getElementById('surWebCount').value = '';
+                document.getElementById('surWebScore').value = '';
+            }
+        }
+
+        function closeSurveyModal() { document.getElementById('surveyModal').classList.add('hidden'); }
+
+        async function handleSurveySubmit(e) {
+            e.preventDefault();
+            const date = document.getElementById('surveyDateSelect').value;
+            if (!date) return alert("Vui lòng chọn ngày hợp lệ!");
+
+            const count = parseInt(document.getElementById('surWebCount').value) || 0;
+            const score = document.getElementById('surWebScore').value.trim() || "0/50";
+
+            const idx = database.findIndex(r => r.date === date);
+            if (idx >= 0) {
+                if (!database[idx].surveys) database[idx].surveys = {};
+                database[idx].surveys.webCount = count;
+                database[idx].surveys.webScore = score;
+                
+                closeSurveyModal();
+                await saveReportsToSupabase();
+                updateDashboard();
+                alert(`✅ Đã cập nhật dữ liệu khảo sát cho ngày ${date} thành công!`);
             }
         }
 
@@ -607,7 +714,7 @@
                         date: r.report_date.split('-').reverse().join('/'),
                         kpi: r.kpi_metrics || {}, categories: r.categories_data || {},
                         units: r.units_data || {}, zaloDetails: r.zalo_details || {}, surveys: r.survey_data || {},
-                        bucketPath: r.bucket_path || null // NHẬN LINK LƯU TRỮ NẶNG TỪ DB
+                        bucketPath: r.bucket_path || null 
                     }));
                 }
                 sortDatabase();
@@ -623,6 +730,25 @@
                 method: "POST",
                 headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" },
                 body: JSON.stringify({ id: 1, alert_rules: alertThresholds, incidents: incidentsList, updated_at: new Date().toISOString() })
+            });
+        }
+        
+        async function saveReportsToSupabase() {
+            const payload = database.map(r => ({
+                report_date: toYMDString(r.date),
+                kpi_metrics: r.kpi,
+                categories_data: r.categories,
+                units_data: r.units,
+                zalo_details: r.zaloDetails,
+                survey_data: r.surveys,
+                bucket_path: r.bucketPath,
+                updated_at: new Date().toISOString()
+            }));
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/cskh_reports`, {
+                method: "POST",
+                headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" },
+                body: JSON.stringify(payload)
             });
         }
 
@@ -678,7 +804,6 @@
             }
             const latest = filteredData[filteredData.length - 1];
 
-            // NÚT TẢI FILE STORAGE NẾU CÓ DỮ LIỆU BUCKET
             if (latest.bucketPath) {
                 const btn = document.getElementById('downloadRawBtn');
                 btn.classList.remove('hidden');
@@ -711,9 +836,10 @@
 
             document.getElementById('kpiTalkTime').innerText = `${Number(latest.kpi?.talkTime || 0).toFixed(1)}s`;
             document.getElementById('kpiWaitTime').innerText = `${Number(latest.kpi?.waitTime || 0).toFixed(1)}s`;
+            
             document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
-            document.getElementById('zaloNewFollowers').innerText = `+${latest.zaloDetails?.newFollowers || 0}`;
-            document.getElementById('zaloUnfollow').innerText = `${latest.zaloDetails?.unfollowers || 0} người`;
+            document.getElementById('zaloNewFollowers').innerText = `+${(latest.zaloDetails?.newFollowers || 0).toLocaleString('vi-VN')}`;
+            document.getElementById('zaloUnfollow').innerText = `${(latest.zaloDetails?.unfollowers || 0).toLocaleString('vi-VN')} người`;
             document.getElementById('zaloReplyRate').innerText = `${latest.zaloDetails?.replyRate || 0}%`;
 
             evaluateAlerts(latest); renderMatrixTable(); renderIncidentTable(); updateCharts();
@@ -797,63 +923,59 @@
 
         function filterTable() { const q = document.getElementById('tableSearch').value.toLowerCase(), rows = document.getElementById('matrixTableBody').getElementsByTagName('tr'); for (let i = 0; i < rows.length; i++) rows[i].style.display = rows[i].innerText.toLowerCase().includes(q) ? '' : 'none'; }
 
-        async function handleExcelImportWithAuth(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const safeFileName = `CSKH_${Date.now()}_${file.name}`;
-            
-            // 1. Gửi File Nặng lên Storage Bucket
+        // ==========================================
+        // CƠ CHẾ XUẤT EXCEL CHUẨN XÁC
+        // ==========================================
+        function exportToExcel() {
+            if (!database || database.length === 0) {
+                alert("Không có dữ liệu để xuất!");
+                return;
+            }
             try {
-                await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${safeFileName}`, {
-                    method: "POST", headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": file.type || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }, body: file
-                });
-            } catch (err) { console.log("Lỗi upload Bucket"); }
+                const flatData = database.map(row => {
+                    let flatRow = {
+                        "Ngày Báo Cáo": row.date,
+                        "Yêu cầu CRM": row.kpi?.crm || 0,
+                        "Lượt tin nhắn Zalo": row.kpi?.zaloMsg || 0,
+                        "Tỷ lệ phản hồi Zalo (%)": row.kpi?.zaloRate || 0,
+                        "TG phản hồi Zalo (Phút)": row.kpi?.zaloTime || 0,
+                        "Cuộc gọi đến": row.kpi?.calls || 0,
+                        "Số cuộc lỡ": row.kpi?.callsMissed || 0,
+                        "Tỷ lệ nhấc máy (%)": row.kpi?.callsRate || 0,
+                        "TG thoại TB (Giây)": row.kpi?.talkTime || 0,
+                        "TG chờ TB (Giây)": row.kpi?.waitTime || 0,
+                        "Tổng Người quan tâm Zalo": row.zaloDetails?.totalFollowers || 0,
+                        "Người Quan tâm mới": row.zaloDetails?.newFollowers || 0,
+                        "Người Bỏ quan tâm": row.zaloDetails?.unfollowers || 0,
+                        "CSAT Zalo (%)": (row.zaloDetails?.csat || 0) * 100,
+                        "Lượt KS Web": row.surveys?.webCount || 0,
+                        "Điểm KS Web": row.surveys?.webScore || "0/50"
+                    };
 
-            // 2. Chỉ đọc dữ liệu để bóc tách chỉ số nhẹ lên Database
-            const reader = new FileReader();
-            reader.onload = async function(ev) {
-                try {
-                    const workbook = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
-                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-                    
-                    let dateStr = ""; let kpi = { crm:0, zaloMsg:0, zaloRate:0, zaloTime:0, calls:0, callsMissed:0, callsRate:0, talkTime:0, waitTime:0 };
-                    let cats = {}, units = { calls:{}, crm:{} }, zDetails = { totalFollowers:0, newFollowers:0, unfollowers:0, replyRate:0, csat:0 }, surveys = { webCount:0, webScore:"0/50" };
-                    let cSect = "", sSect = "";
-
-                    const pN = v => { let n = parseFloat(String(v).replace('%','').replace(',','.')); return isNaN(n) ? 0 : n; };
-
-                    for (let r of rows) {
-                        if (!r.length) continue;
-                        let c0 = String(r[0]||"").trim(), c1 = r[1];
-                        if (c0.includes("1. Khối KPI")) { cSect = "kpi"; continue; } if (c0.includes("2. Khối Phân loại")) { cSect = "categories"; continue; }
-                        if (c0.includes("3. Khối So sánh")) { cSect = "units"; sSect = ""; continue; } if (c0.includes("4. Khối Chỉ số")) { cSect = "zalo"; continue; }
-                        if (c0.includes("5. LƯỢT KHẢO SÁT")) { cSect = "surveys"; continue; }
-                        
-                        if ((c0 === "Ngày" || c0 === "Vấn đề phản ánh") && c1 && !dateStr) dateStr = typeof c1 === 'number' ? excelSerialToDate(c1) : String(c1).trim();
-                        if (cSect === "kpi") { if (c0.includes("CRM")) kpi.crm = pN(c1); else if (c0.includes("Zalo")) kpi.zaloMsg = pN(c1); } 
-                        else if (cSect === "categories" && c0 && c0 !== "Vấn đề phản ánh") cats[c0] = pN(c1);
-                        else if (cSect === "surveys") { if (c0 === "WebSite" || c0 === "Số lượt") surveys.webCount = pN(c1); else if (c0 === "Điểm đánh giá") surveys.webScore = String(c1||"0/50").trim(); }
+                    if (row.categories) {
+                        for (const [key, value] of Object.entries(row.categories)) { flatRow[`[Vấn Đề] ${key}`] = value; }
                     }
-                    if (!dateStr) dateStr = new Date().toLocaleDateString('en-GB');
+                    if (row.units && row.units.calls) {
+                        for (const [key, value] of Object.entries(row.units.calls)) { flatRow[`[Cuộc Gọi] ${key}`] = value; }
+                    }
+                    if (row.units && row.units.crm) {
+                        for (const [key, value] of Object.entries(row.units.crm)) { flatRow[`[CRM] ${key}`] = value; }
+                    }
+                    return flatRow;
+                });
 
-                    // Gọi Upsert trực tiếp vào bảng quan hệ
-                    const pgDate = toYMDString(dateStr);
-                    await fetch(`${SUPABASE_URL}/rest/v1/cskh_reports`, {
-                        method: "POST",
-                        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" },
-                        body: JSON.stringify({
-                            report_date: pgDate, kpi_metrics: kpi, categories_data: cats, units_data: units,
-                            zalo_details: zDetails, survey_data: surveys, bucket_path: safeFileName, updated_at: new Date().toISOString()
-                        })
-                    });
-
-                    await loadDataFromSupabase(); applyDateFilter();
-                    alert(`Nạp file ngày ${dateStr} thành công! Dữ liệu gốc đã lưu tại Storage.`);
-                } catch (err) { alert("Lỗi đọc Excel!"); }
-            };
-            reader.readAsArrayBuffer(file); e.target.value = '';
+                const worksheet = XLSX.utils.json_to_sheet(flatData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Lich_Su_Bao_Cao");
+                
+                const dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
+                XLSX.writeFile(workbook, `Bao_Cao_CSKH_Cang_HP_${dateStr}.xlsx`);
+                
+            } catch (error) {
+                console.error("Lỗi xuất Excel:", error);
+                alert("Đã xảy ra lỗi khi xuất file Excel. Vui lòng tải lại trang.");
+            }
         }
-        function excelSerialToDate(serial) { return new Date(Math.floor(serial - 25569) * 86400 * 1000).toLocaleDateString('en-GB'); }
-        function exportToExcel() { if (!database.length) return; XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(database), "THNGAY"), "Bao_Cao.xlsx"); }
     </script>
 </body>
 </html>
