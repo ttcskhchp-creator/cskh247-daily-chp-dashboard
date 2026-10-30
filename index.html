@@ -455,8 +455,8 @@
                         <li>Ấn tổ hợp phím <strong>Windows + R</strong>, gõ <code>cmd</code> rồi bấm Enter để mở cửa sổ dòng lệnh màu đen.</li>
                         <li>Điều hướng vào thư mục con Bot. Cần đảm bảo con trỏ nhấp nháy của anh đang ở đúng dòng: <code>C:\bot_baocao></code> (hoặc D:\bot_baocao nếu để ở ổ D - trên CDM gõ lệnh "D:"). (Nếu CMD đang ở ổ khác ví dụ c:\users\admin> hoặc D:\ , hãy gõ <code>cd C:\bot_baocao hoặc cd D:\bot_baocao </code> và Enter để di chuyển tới).</li>
                         <li>Gõ lệnh sau và bấm Enter để khởi tạo file cấu hình quản lý thư viện:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npm init -y</code></li>
-                        <li>Gõ tiếp lệnh sau và bấm Enter để tải 2 thư viện bắt buộc. Bước này cần kết nối mạng, anh đợi một lúc cho tiến trình tải chạy đến 100%:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npm install puppeteer @supabase/supabase-js</code><br><span class="text-xs text-slate-400">(Nhận biết cài đặt thành công: Sau khi máy tải xong, trong thư mục bot_baocao sẽ xuất hiện thêm 1 thư mục vàng tên là node_modules).</span></li>
-                        <li>Gõ lệnh sau và bấm Enter để tải trình duyệt Chrome ẩn (rất quan trọng cho máy mới cài lần đầu):<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npx puppeteer browsers install chrome</code></li>
+                        <li>Gõ tiếp lệnh sau và bấm Enter để tải các thư viện bắt buộc:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npm install puppeteer @supabase/supabase-js keypress</code></li>
+                        <li>Gõ lệnh sau và bấm Enter để tải trình duyệt Chrome ẩn:<br><code class="bg-slate-800 px-2 py-1 rounded text-emerald-400 mt-1 block w-max">npx puppeteer browsers install chrome</code></li>
                     </ul>
                 </div>
 
@@ -957,8 +957,12 @@
             let csatVals = filteredData.map(c => Number(c.zaloDetails?.csat || 0)).filter(v => v > 0);
             document.getElementById('kpiCsatZalo').innerText = `CSAT: ${Math.round(csatVals.length ? (csatVals.reduce((a,b)=>a+b,0)/csatVals.length)*100 : 0)}%`;
 
-            document.getElementById('kpiTalkTime').innerText = `${Number(latest.kpi?.talkTime || 0).toFixed(1)}s`;
-            document.getElementById('kpiWaitTime').innerText = `${Number(latest.kpi?.waitTime || 0).toFixed(1)}s`;
+            // YÊU CẦU: Thời gian chờ cuộc gọi và thời gian thoại trung bình lấy trung bình các ngày nạp vào theo khoảng thời gian lọc
+            let avgTalkTime = filteredData.reduce((a, c) => a + Number(c.kpi?.talkTime || 0), 0) / filteredData.length;
+            let avgWaitTime = filteredData.reduce((a, c) => a + Number(c.kpi?.waitTime || 0), 0) / filteredData.length;
+
+            document.getElementById('kpiTalkTime').innerText = `${avgTalkTime.toFixed(1)}s`;
+            document.getElementById('kpiWaitTime').innerText = `${avgWaitTime.toFixed(1)}s`;
             
             document.getElementById('zaloTotalFollowers').innerText = (latest.zaloDetails?.totalFollowers || 0).toLocaleString('vi-VN');
             document.getElementById('zaloNewFollowers').innerText = `+${(latest.zaloDetails?.newFollowers || 0).toLocaleString('vi-VN')}`;
@@ -1004,12 +1008,33 @@
             unitChartInstance.config.type = isLine ? 'line' : 'bar'; unitChartInstance.data.labels = dates; unitChartInstance.data.datasets = unitDatasets; unitChartInstance.update();
             updatePieChart();
         }
+
+        // YÊU CẦU: Khắc phục biểu đồ tròn Top Vấn Đề (Tổng hợp toàn bộ các ngày trong khoảng lọc)
         function updatePieChart() {
             if (!filteredData || !filteredData.length) return;
-            const cats = filteredData[filteredData.length - 1]?.categories || {};
-            let sorted = Object.keys(cats).map(k => ({ name: k, count: cats[k] })).sort((a,b) => b.count - a.count);
+            
+            let aggregatedCats = {};
+            filteredData.forEach(item => {
+                if (item.categories) {
+                    for (const [key, val] of Object.entries(item.categories)) {
+                        aggregatedCats[key] = (aggregatedCats[key] || 0) + Number(val || 0);
+                    }
+                }
+            });
+
+            const limitVal = document.getElementById('pieLimitSelect').value;
+            let sorted = Object.keys(aggregatedCats).map(k => ({ name: k, count: aggregatedCats[k] })).sort((a,b) => b.count - a.count);
+            
+            if (limitVal !== 'all') {
+                const limit = parseInt(limitVal) || 5;
+                sorted = sorted.slice(0, limit);
+            }
+
             categoryChartInstance.data.labels = sorted.map(i => i.name);
-            categoryChartInstance.data.datasets = [{ data: sorted.map(i => i.count), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b'] }];
+            categoryChartInstance.data.datasets = [{ 
+                data: sorted.map(i => i.count), 
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#64748b', '#e11d48', '#0284c7'] 
+            }];
             categoryChartInstance.update();
         }
 
