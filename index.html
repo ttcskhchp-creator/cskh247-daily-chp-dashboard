@@ -862,7 +862,8 @@
             }
             document.getElementById('surveyModal').classList.remove('hidden');
         }
-
+        // đóng cửa sổ khảo sát
+        function closeSurveyModal() { document.getElementById('surveyModal').classList.add('hidden'); }
         // Tự động load tất cả Khảo sát của Ngày đang chọn
         function loadSurveysForDate() {
             const date = document.getElementById('surveyDateSelect').value;
