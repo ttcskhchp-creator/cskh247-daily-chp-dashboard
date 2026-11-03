@@ -576,25 +576,34 @@
         </div>
     </div>
 
-    <!-- Modal Cập Nhật Khảo Sát ĐÁNH GIÁ CHI TIẾT & NPS -->
+    <!-- Modal Cập Nhật Khảo Sát ĐÁNH GIÁ CHI TIẾT & NPS (Hỗ trợ Sửa/Xóa) -->
     <div id="surveyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
         <div class="glass-panel w-full max-w-2xl rounded-3xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
             <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
                 <h3 class="text-lg font-bold flex items-center gap-2.5 text-blue-400">
-                    <i class="fa-solid fa-star"></i> Nhập Phiếu Khảo Sát Khách Hàng
+                    <i class="fa-solid fa-star"></i> Quản Lý Phiếu Khảo Sát
                 </h3>
                 <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-white text-xl transition">✕</button>
             </div>
             <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto custom-scrollbar">
-                <div class="grid grid-cols-2 gap-4">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Ngày Ghi Nhận *</label>
-                        <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:border-blue-500 font-num"></select>
+                        <select id="surveyDateSelect" onchange="loadSurveysForDate()" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-blue-500 font-num"></select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Tên KH / Doanh Nghiệp *</label>
-                        <input type="text" id="survClient" required placeholder="VD: Công ty CP Cảng..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:border-blue-500">
+                        <label class="block text-[11px] font-bold text-amber-500 uppercase mb-1.5">Chọn Bản Ghi Để Sửa/Xóa</label>
+                        <select id="surveyRecordSelect" onchange="loadSurveyDetails()" class="w-full bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2 text-amber-400 font-bold focus:border-amber-500 font-num">
+                            <option value="new">-- ➕ THÊM KHẢO SÁT MỚI --</option>
+                        </select>
+                        <input type="hidden" id="survEditId" value="new">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Tên KH / Doanh Nghiệp *</label>
+                    <input type="text" id="survClient" required placeholder="VD: Công ty CP Cảng..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:border-blue-500">
                 </div>
                 
                 <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
@@ -619,9 +628,12 @@
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                    <button type="button" onclick="closeSurveyModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">Hủy</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg transition border border-blue-500">Lưu Phiếu KS</button>
+                <div class="pt-4 border-t border-slate-800 flex justify-between items-center gap-3">
+                    <button type="button" id="btnDeleteSurvey" onclick="deleteSurveyRecord()" class="hidden px-5 py-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white font-bold transition border border-rose-500/50"><i class="fa-solid fa-trash-can mr-2"></i> Xóa Bản Ghi Này</button>
+                    <div class="flex gap-3 ml-auto">
+                        <button type="button" onclick="closeSurveyModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">Hủy</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg transition border border-blue-500">Lưu Thông Tin</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -835,7 +847,6 @@
             select.innerHTML = '';
             
             const sortedDb = [...database].sort((a,b) => toYMDString(b.date).localeCompare(toYMDString(a.date)));
-            
             sortedDb.forEach(item => { 
                 const opt = document.createElement('option'); 
                 opt.value = item.date; opt.innerText = item.date; select.appendChild(opt); 
@@ -847,24 +858,73 @@
                 select.disabled = true;
             } else {
                 select.disabled = false;
-                updateSurveyFields();
-                select.onchange = updateSurveyFields;
+                loadSurveysForDate(); // Tự động load danh sách cho ngày đầu tiên
             }
             document.getElementById('surveyModal').classList.remove('hidden');
         }
 
-        function updateSurveyFields() {
+        // Tự động load tất cả Khảo sát của Ngày đang chọn
+        function loadSurveysForDate() {
+            const date = document.getElementById('surveyDateSelect').value;
+            const recordSelect = document.getElementById('surveyRecordSelect');
+            recordSelect.innerHTML = '<option value="new">-- ➕ THÊM KHẢO SÁT MỚI --</option>';
+            
+            const record = database.find(r => r.date === date);
+            if (record && record.surveys && record.surveys.list && record.surveys.list.length > 0) {
+                record.surveys.list.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.innerText = `✏️ Sửa: ${s.client} (NPS: ${s.nps})`;
+                    recordSelect.appendChild(opt);
+                });
+            }
+            loadSurveyDetails(); // Xóa trắng form để sẵn sàng Thêm Mới
         }
 
-        function closeSurveyModal() { document.getElementById('surveyModal').classList.add('hidden'); }
+        // Load dữ liệu lên form khi chọn một bản ghi cũ
+        function loadSurveyDetails() {
+            const date = document.getElementById('surveyDateSelect').value;
+            const recordId = document.getElementById('surveyRecordSelect').value;
+            document.getElementById('survEditId').value = recordId;
+            
+            const btnDelete = document.getElementById('btnDeleteSurvey');
+            
+            if (recordId === 'new') {
+                // Đặt lại form trống
+                document.getElementById('survClient').value = ''; document.getElementById('survPhone').value = '';
+                document.getElementById('survSafety').value = ''; document.getElementById('survPrice').value = '';
+                document.getElementById('survQuality').value = ''; document.getElementById('survAttitude').value = '';
+                document.getElementById('survNPS').value = ''; document.getElementById('survFeedback').value = '';
+                if(btnDelete) btnDelete.classList.add('hidden');
+            } else {
+                // Lấy thông tin bản ghi cũ đắp lên form
+                const record = database.find(r => r.date === date);
+                const survey = record.surveys.list.find(s => String(s.id) === String(recordId));
+                if (survey) {
+                    document.getElementById('survClient').value = survey.client || '';
+                    document.getElementById('survPhone').value = survey.phone || '';
+                    document.getElementById('survSafety').value = survey.safety || '';
+                    document.getElementById('survPrice').value = survey.price || '';
+                    document.getElementById('survQuality').value = survey.quality || '';
+                    document.getElementById('survAttitude').value = survey.attitude || '';
+                    document.getElementById('survNPS').value = survey.nps || '';
+                    document.getElementById('survFeedback').value = survey.feedback || '';
+                    if(btnDelete) btnDelete.classList.remove('hidden');
+                }
+            }
+        }
 
+        // Lưu thông tin (Thêm mới hoặc Ghi đè cập nhật)
+        // Lưu thông tin (Thêm mới hoặc Ghi đè cập nhật) và Tự động Reset Form
         async function handleSurveySubmit(e) {
             e.preventDefault();
             const date = document.getElementById('surveyDateSelect').value;
             if (!date) return alert("Vui lòng chọn ngày hợp lệ!");
 
-            const newSurvey = {
-                id: Date.now(),
+            const editId = document.getElementById('survEditId').value;
+            
+            const surveyData = {
+                id: editId === 'new' ? Date.now() : Number(editId),
                 client: document.getElementById('survClient').value,
                 phone: document.getElementById('survPhone').value,
                 safety: Number(document.getElementById('survSafety').value),
@@ -879,17 +939,74 @@
             if (idx >= 0) {
                 if (!database[idx].surveys) database[idx].surveys = { list: [] };
                 if (!database[idx].surveys.list) database[idx].surveys.list = [];
-                database[idx].surveys.list.push(newSurvey);
                 
-                // Đồng bộ ngược ra dashboard đếm số lượt (để backward compatibility)
+                if (editId === 'new') {
+                    database[idx].surveys.list.push(surveyData); // Thêm mới
+                } else {
+                    // Sửa bản ghi cũ
+                    const sIdx = database[idx].surveys.list.findIndex(s => String(s.id) === String(editId));
+                    if (sIdx >= 0) database[idx].surveys.list[sIdx] = surveyData;
+                }
+                
+                // Đồng bộ ngược ra dashboard tính trung bình để Backup
                 database[idx].surveys.webCount = database[idx].surveys.list.length;
                 let tScore = database[idx].surveys.list.reduce((a, b) => a + ((b.safety + b.price + b.quality + b.attitude) / 4), 0);
-                database[idx].surveys.webScore = `${(tScore / database[idx].surveys.list.length * 5).toFixed(1)}/50`;
+                database[idx].surveys.webScore = database[idx].surveys.list.length > 0 ? `${(tScore / database[idx].surveys.list.length * 5).toFixed(1)}/50` : "0/50";
+
+                await saveReportsToSupabase();
+                updateDashboard();
+                
+                // Hiển thị thông báo hoàn tất
+                alert(`✅ Đã cập nhật phiếu khảo sát thành công! Bạn có thể tiếp tục nhập.`);
+                
+                // ===== PHẦN MỚI: RESET FORM =====
+                // Đặt lại dropdown về trạng thái Thêm Mới
+                document.getElementById('surveyRecordSelect').value = 'new';
+                document.getElementById('survEditId').value = 'new';
+                
+                // Xóa trắng các ô dữ liệu
+                document.getElementById('survClient').value = '';
+                document.getElementById('survPhone').value = '';
+                document.getElementById('survSafety').value = '';
+                document.getElementById('survPrice').value = '';
+                document.getElementById('survQuality').value = '';
+                document.getElementById('survAttitude').value = '';
+                document.getElementById('survNPS').value = '';
+                document.getElementById('survFeedback').value = '';
+                
+                // Ẩn nút Xóa (vì đang ở trạng thái form trống)
+                const btnDelete = document.getElementById('btnDeleteSurvey');
+                if (btnDelete) btnDelete.classList.add('hidden');
+                
+                // Cập nhật lại danh sách trên thanh Dropdown Chọn Bản Ghi
+                loadSurveysForDate();
+                // ================================
+                
+                // Bỏ gọi closeSurveyModal() để giữ form mở
+            }
+        }
+
+        // Xóa hoàn toàn 1 bản ghi
+        async function deleteSurveyRecord() {
+            const date = document.getElementById('surveyDateSelect').value;
+            const editId = document.getElementById('survEditId').value;
+            
+            if (editId === 'new') return;
+            if (!confirm("⚠️ Bạn có chắc chắn muốn xóa vĩnh viễn bản ghi khảo sát này không?")) return;
+
+            const idx = database.findIndex(r => r.date === date);
+            if (idx >= 0 && database[idx].surveys && database[idx].surveys.list) {
+                // Lọc bỏ bản ghi bị xóa
+                database[idx].surveys.list = database[idx].surveys.list.filter(s => String(s.id) !== String(editId));
+                
+                database[idx].surveys.webCount = database[idx].surveys.list.length;
+                let tScore = database[idx].surveys.list.reduce((a, b) => a + ((b.safety + b.price + b.quality + b.attitude) / 4), 0);
+                database[idx].surveys.webScore = database[idx].surveys.list.length > 0 ? `${(tScore / database[idx].surveys.list.length * 5).toFixed(1)}/50` : "0/50";
 
                 closeSurveyModal();
                 await saveReportsToSupabase();
                 updateDashboard();
-                alert(`✅ Đã lưu phiếu khảo sát chi tiết cho ngày ${date}!`);
+                alert("🗑️ Đã xóa bản ghi khảo sát thành công!");
             }
         }
         
