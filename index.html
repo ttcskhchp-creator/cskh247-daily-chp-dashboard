@@ -561,35 +561,52 @@
         </div>
     </div>
 
-    <!-- Modal Cập Nhật Khảo Sát -->
+    <!-- Modal Cập Nhật Khảo Sát ĐÁNH GIÁ CHI TIẾT & NPS -->
     <div id="surveyModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
-        <div class="glass-panel w-full max-w-md rounded-3xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
-            <div class="bg-slate-900 px-6 py-5 border-b border-slate-800 flex justify-between items-center">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
                 <h3 class="text-lg font-bold flex items-center gap-2.5 text-blue-400">
-                    <i class="fa-solid fa-star"></i> Nhập Số Liệu Khảo Sát
+                    <i class="fa-solid fa-star"></i> Nhập Phiếu Khảo Sát Khách Hàng
                 </h3>
                 <button onclick="closeSurveyModal()" class="text-slate-400 hover:text-white text-xl transition">✕</button>
             </div>
-            <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-6 space-y-6 text-sm">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Chọn Ngày Áp Dụng *</label>
-                    <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
-                    </select>
-                    <p class="text-[10px] text-amber-500 mt-2 font-medium bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">* Hệ thống chỉ cho phép nạp số liệu khảo sát vào các ngày đã được Bot cào dữ liệu trước đó.</p>
-                </div>
-                <div class="grid grid-cols-2 gap-5">
+            <form id="surveyForm" onsubmit="handleSurveySubmit(event)" class="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Số Lượt KS Web</label>
-                        <input type="number" id="surWebCount" placeholder="VD: 15" min="0" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Ngày Ghi Nhận *</label>
+                        <select id="surveyDateSelect" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:border-blue-500 font-num"></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Điểm KS Web</label>
-                        <input type="text" id="surWebScore" placeholder="VD: 45/50" class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500 font-num shadow-inner">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Tên KH / Doanh Nghiệp *</label>
+                        <input type="text" id="survClient" required placeholder="VD: Công ty CP Cảng..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-200 focus:border-blue-500">
                     </div>
                 </div>
+                
+                <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                    <p class="text-[11px] font-bold text-amber-400 uppercase mb-3 text-center tracking-wider">Đánh giá chất lượng dịch vụ (Thang điểm 0 - 10)</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-num">
+                        <div><label class="block text-[10px] text-slate-400 mb-1">An Toàn HH</label><input type="number" id="survSafety" min="0" max="10" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-slate-200 focus:border-blue-500"></div>
+                        <div><label class="block text-[10px] text-slate-400 mb-1">Giá Thành</label><input type="number" id="survPrice" min="0" max="10" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-slate-200 focus:border-blue-500"></div>
+                        <div><label class="block text-[10px] text-slate-400 mb-1">Chất Lượng DV</label><input type="number" id="survQuality" min="0" max="10" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-slate-200 focus:border-blue-500"></div>
+                        <div><label class="block text-[10px] text-slate-400 mb-1">Thái Độ Phục Vụ</label><input type="number" id="survAttitude" min="0" max="10" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-slate-200 focus:border-blue-500"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-1 bg-blue-900/20 p-3 rounded-xl border border-blue-500/30">
+                        <label class="block text-[11px] font-bold text-blue-400 uppercase mb-2 text-center">Giới thiệu Dịch vụ (NPS) *</label>
+                        <input type="number" id="survNPS" min="0" max="10" required placeholder="0-10" class="w-full bg-slate-900 border border-blue-500/50 rounded-xl px-3 py-3 text-center text-xl text-blue-400 font-black focus:border-blue-400">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">SĐT & Nội Dung Góp Ý</label>
+                        <div class="flex gap-2 mb-2"><input type="text" id="survPhone" placeholder="SĐT Liên hệ..." class="w-1/2 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 font-num text-xs focus:border-blue-500"></div>
+                        <textarea id="survFeedback" rows="2" placeholder="Nhập ý kiến góp ý của khách hàng..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-200 text-xs focus:border-blue-500 resize-none"></textarea>
+                    </div>
+                </div>
+
                 <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                    <button type="button" onclick="closeSurveyModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition active:scale-95 shadow border border-slate-700">Hủy</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg transition active:scale-95 border border-blue-500">Lưu Khảo Sát</button>
+                    <button type="button" onclick="closeSurveyModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">Hủy</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg transition border border-blue-500">Lưu Phiếu KS</button>
                 </div>
             </form>
         </div>
@@ -822,15 +839,6 @@
         }
 
         function updateSurveyFields() {
-            const date = document.getElementById('surveyDateSelect').value;
-            const record = database.find(r => r.date === date);
-            if (record && record.surveys) {
-                document.getElementById('surWebCount').value = record.surveys.webCount || '';
-                document.getElementById('surWebScore').value = record.surveys.webScore || '';
-            } else {
-                document.getElementById('surWebCount').value = '';
-                document.getElementById('surWebScore').value = '';
-            }
         }
 
         function closeSurveyModal() { document.getElementById('surveyModal').classList.add('hidden'); }
@@ -840,22 +848,36 @@
             const date = document.getElementById('surveyDateSelect').value;
             if (!date) return alert("Vui lòng chọn ngày hợp lệ!");
 
-            const count = parseInt(document.getElementById('surWebCount').value) || 0;
-            const score = document.getElementById('surWebScore').value.trim() || "0/50";
+            const newSurvey = {
+                id: Date.now(),
+                client: document.getElementById('survClient').value,
+                phone: document.getElementById('survPhone').value,
+                safety: Number(document.getElementById('survSafety').value),
+                price: Number(document.getElementById('survPrice').value),
+                quality: Number(document.getElementById('survQuality').value),
+                attitude: Number(document.getElementById('survAttitude').value),
+                nps: Number(document.getElementById('survNPS').value),
+                feedback: document.getElementById('survFeedback').value
+            };
 
             const idx = database.findIndex(r => r.date === date);
             if (idx >= 0) {
-                if (!database[idx].surveys) database[idx].surveys = {};
-                database[idx].surveys.webCount = count;
-                database[idx].surveys.webScore = score;
+                if (!database[idx].surveys) database[idx].surveys = { list: [] };
+                if (!database[idx].surveys.list) database[idx].surveys.list = [];
+                database[idx].surveys.list.push(newSurvey);
                 
+                // Đồng bộ ngược ra dashboard đếm số lượt (để backward compatibility)
+                database[idx].surveys.webCount = database[idx].surveys.list.length;
+                let tScore = database[idx].surveys.list.reduce((a, b) => a + ((b.safety + b.price + b.quality + b.attitude) / 4), 0);
+                database[idx].surveys.webScore = `${(tScore / database[idx].surveys.list.length * 5).toFixed(1)}/50`;
+
                 closeSurveyModal();
                 await saveReportsToSupabase();
                 updateDashboard();
-                alert(`✅ Đã cập nhật dữ liệu khảo sát cho ngày ${date} thành công!`);
+                alert(`✅ Đã lưu phiếu khảo sát chi tiết cho ngày ${date}!`);
             }
         }
-
+        
         function openAlertSetupModal() {
             const fields = ['crm', 'zaloRate', 'zaloTime', 'callRate', 'missed', 'talkTime', 'waitTime', 'unfollow'];
             fields.forEach(f => {
@@ -1351,29 +1373,27 @@
         generateWordReport();
     }
 
-    function generateWordReport() {
+   function generateWordReport() {
             if (!filteredData || filteredData.length === 0) return;
             
-            // 1. Lấy dữ liệu Input nhân sự & ngày tháng
             const hrStatus = document.getElementById('hrStatusInput').value.replace(/\n/g, '<br>');
             const recommendation = document.getElementById('recommendationInput').value.replace(/\n/g, '<br>');
             const reporter = document.getElementById('reporterName').value;
             const startDateStr = document.getElementById('filterStartDate').value;
             const endDateStr = document.getElementById('filterEndDate').value;
             
-            // Format ngày hiển thị
             const fDate = (dStr) => dStr ? dStr.split('-').reverse().join('/') : '--';
             const startDate = startDateStr ? fDate(startDateStr) : filteredData[0].date;
             const endDate = endDateStr ? fDate(endDateStr) : filteredData[filteredData.length - 1].date;
-            
             const today = new Date();
             const reportDateStr = `ngày ${String(today.getDate()).padStart(2,'0')} tháng ${String(today.getMonth() + 1).padStart(2,'0')} năm ${today.getFullYear()}`;
 
-            // 2. TÍNH TOÁN KỲ NÀY (CURRENT PERIOD)
+            // 1. TÍNH TOÁN KỲ NÀY (CURRENT PERIOD)
             const days = filteredData.length;
             let totalCrm = 0, totalCalls = 0, totalMissed = 0, totalZalo = 0, totalZaloNew = 0, totalZaloUnfollow = 0;
-            let totalWebSurvey = 0, sumWebScore = 0, countWebScore = 0, sumCsat = 0, countCsat = 0;
             let aggregatedCats = {};
+            
+            let allSurveys = [];
             
             filteredData.forEach(c => {
                 totalCrm += Number(c.kpi?.crm || 0);
@@ -1382,27 +1402,30 @@
                 totalZalo += Number(c.kpi?.zaloMsg || 0);
                 totalZaloNew += Number(c.zaloDetails?.newFollowers || 0);
                 totalZaloUnfollow += Number(c.zaloDetails?.unfollowers || 0);
-                totalWebSurvey += Number(c.surveys?.webCount || 0);
-                
-                let score = parseFloat(String(c.surveys?.webScore || '0').split('/')[0]);
-                if(score > 0) { sumWebScore += score; countWebScore++; }
-                let csat = Number(c.zaloDetails?.csat || 0);
-                if(csat > 0) { sumCsat += csat; countCsat++; }
 
                 if (c.categories) {
                     for (const [key, val] of Object.entries(c.categories)) {
                         aggregatedCats[key] = (aggregatedCats[key] || 0) + Number(val || 0);
                     }
                 }
+                
+                // Thu thập khảo sát chi tiết
+                if (c.surveys?.list) {
+                    allSurveys.push(...c.surveys.list.map(s => ({...s, date: c.date})));
+                }
             });
+            
+            let avgZaloTime = filteredData.reduce((a, c) => a + Number(c.kpi?.zaloTime || 0), 0) / days;
+            let avgZaloReplyRate = filteredData.reduce((a, c) => a + Number(c.zaloDetails?.replyRate || 0), 0) / days;
 
-            // 3. TRUY XUẤT CSDL KỲ TRƯỚC (PRIOR PERIOD) ĐỂ TÍNH %
+            // 2. TRUY XUẤT CSDL KỲ TRƯỚC (PRIOR PERIOD)
             let priorCrm = 0, priorCalls = 0, priorZalo = 0, priorTotalZaloFol = 0;
+            let priorCats = {};
+            let priorSurveys = [];
+            
             if (startDateStr && endDateStr) {
-                // Lùi 1 tháng giữ nguyên ngày
                 const priorStart = new Date(startDateStr + 'T00:00:00'); priorStart.setMonth(priorStart.getMonth() - 1);
                 const priorEnd = new Date(endDateStr + 'T00:00:00'); priorEnd.setMonth(priorEnd.getMonth() - 1);
-                
                 const pStartStr = priorStart.toISOString().split('T')[0];
                 const pEndStr = priorEnd.toISOString().split('T')[0];
 
@@ -1415,11 +1438,14 @@
                     priorCrm += Number(c.kpi?.crm || 0);
                     priorCalls += Number(c.kpi?.calls || 0);
                     priorZalo += Number(c.kpi?.zaloMsg || 0);
+                    if (c.categories) {
+                        for (const [key, val] of Object.entries(c.categories)) priorCats[key] = (priorCats[key] || 0) + Number(val || 0);
+                    }
+                    if (c.surveys?.list) priorSurveys.push(...c.surveys.list);
                 });
                 if (priorData.length > 0) priorTotalZaloFol = priorData[priorData.length - 1].zaloDetails?.totalFollowers || 0;
             }
 
-            // Hàm tính % Tăng/Giảm
             const getTrend = (curr, prev) => {
                 if (prev === 0) return curr > 0 ? "tăng 100%" : "bằng 100%";
                 const diff = curr - prev;
@@ -1435,24 +1461,31 @@
             const currZaloFol = filteredData[filteredData.length - 1]?.zaloDetails?.totalFollowers || 0;
             const folTrend = getTrend(currZaloFol, priorTotalZaloFol);
 
-            // 4. XỬ LÝ DANH MỤC TOP 5 & PHÂN TÍCH TỪ KHÓA (Mô phỏng 10 cụm từ)
+            // 3. TÍNH TOÁN BẢNG CHI TIẾT & TOP 5 (CÓ CỘNG CÙNG KỲ)
             let sortedCats = Object.keys(aggregatedCats).map(k => ({ name: k, count: aggregatedCats[k] })).sort((a,b) => b.count - a.count);
-            
             let top1 = sortedCats[0] || {name: "Không có", count: 0};
             let top2 = sortedCats[1] || {name: "Không có", count: 0};
             let pctTop1 = totalCrm > 0 ? ((top1.count / totalCrm) * 100).toFixed(1) : 0;
             let pctTop2 = totalCrm > 0 ? ((top2.count / totalCrm) * 100).toFixed(1) : 0;
             let gapMultiplier = top2.count > 0 ? (top1.count / top2.count).toFixed(1) : 0;
 
-            let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: center; border: 1pt solid black; margin-bottom: 20px;">
-                <tr style="background-color: #f2f2f2; font-weight: bold;"><td style="padding: 5px;">STT</td><td style="padding: 5px;">DANH MỤC</td><td style="padding: 5px;">SỐ LƯỢNG</td><td style="padding: 5px;">TỶ LỆ</td></tr>`;
+            let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: center; border: 1pt solid black; margin-bottom: 20px; font-size: 11pt;">
+                <tr style="background-color: #f2f2f2; font-weight: bold;">
+                    <td style="padding: 5px;">STT</td><td style="padding: 5px;">DANH MỤC</td><td style="padding: 5px;">KỲ NÀY</td>
+                    <td style="padding: 5px;">CÙNG KỲ</td><td style="padding: 5px;">TĂNG/GIẢM</td><td style="padding: 5px;">BẰNG %</td>
+                </tr>`;
+            
             sortedCats.forEach((cat, index) => {
-                let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
-                tableHTML += `<tr><td style="padding: 5px;">${index + 1}</td><td style="text-align: left; padding: 5px;">${cat.name}</td><td style="padding: 5px;">${cat.count}</td><td style="padding: 5px;">${pct}%</td></tr>`;
+                let curr = cat.count; let prev = priorCats[cat.name] || 0;
+                let diff = curr - prev; let diffText = diff > 0 ? `+${diff}` : diff;
+                let pct = prev > 0 ? ((curr / prev) * 100).toFixed(1) + "%" : (curr > 0 ? ">100%" : "0%");
+                tableHTML += `<tr><td style="padding: 5px;">${index + 1}</td><td style="text-align: left; padding: 5px;">${cat.name}</td>
+                    <td style="padding: 5px;">${curr}</td><td style="padding: 5px;">${prev}</td>
+                    <td style="padding: 5px; color: ${diff > 0 ? 'green' : (diff < 0 ? 'red' : 'black')}">${diffText}</td><td style="padding: 5px;">${pct}</td></tr>`;
             });
-            tableHTML += `<tr style="font-weight: bold;"><td style="padding: 5px;"></td><td style="padding: 5px;">TỔNG CỘNG</td><td style="padding: 5px;">${totalCrm}</td><td style="padding: 5px;">100%</td></tr></table>`;
+            tableHTML += `<tr style="font-weight: bold;"><td colspan="2">TỔNG CỘNG</td><td>${totalCrm}</td><td>${priorCrm}</td>
+                <td>${totalCrm - priorCrm > 0 ? '+' : ''}${totalCrm - priorCrm}</td><td>${priorCrm > 0 ? ((totalCrm/priorCrm)*100).toFixed(1) : 100}%</td></tr></table>`;
 
-            // Data cụm từ (Ánh xạ từ khóa NLP)
             const phrasesDB = {
                 "Duyệt lệnh Eport": "lỗi duyệt lệnh, không nhận được mã, duyệt lệnh chậm, treo hệ thống eport, huỷ lệnh, sửa thông tin, in phơi eport, thanh toán lỗi, check mã giao nhận, lệnh chưa đồng bộ",
                 "Thao tác sử dụng Eport/Smartgate": "quên mật khẩu, đăng nhập lỗi, app văng, cách tạo tài khoản, đổi mật khẩu, không tải được file đính kèm, quét QR lỗi, đăng ký xe, khai báo tài xế, xác thực tài khoản",
@@ -1465,26 +1498,47 @@
             let top5HTML = "";
             sortedCats.slice(0, 5).forEach((cat, index) => {
                 let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
-                let phrases = phrasesDB[cat.name] || defaultPhrases;
                 top5HTML += `<p style="margin: 6px 0;"><b>${String.fromCharCode(97 + index)}. Nhóm ${index + 1}: ${cat.name}</b> (Chiếm ${pct}% khối lượng)</p>
-                             <p style="margin: 4px 0 12px 0;"><i>- Các câu hỏi/yêu cầu thực tế thường gặp (Top 10 cụm từ trích xuất): ${phrases}.</i></p>`;
+                             <p style="margin: 4px 0 12px 0;"><i>- Các câu hỏi/yêu cầu thực tế thường gặp (Top 10 cụm từ trích xuất): ${phrasesDB[cat.name] || defaultPhrases}.</i></p>`;
             });
 
-            // 5. Trích xuất biểu đồ thành ảnh
+            // 4. XỬ LÝ KHẢO SÁT & TÍNH TOÁN NPS (Net Promoter Score)
+            const calcNPS = (surveysArr) => {
+                if(!surveysArr || surveysArr.length === 0) return {nps: 0, s:0, p:0, q:0, a:0, count: 0};
+                let promo = 0, detra = 0; let tS = 0, tP = 0, tQ = 0, tA = 0;
+                surveysArr.forEach(s => {
+                    if (s.nps >= 9) promo++; else if (s.nps <= 6) detra++; // 9-10 ủng hộ, 0-6 phê bình
+                    tS += s.safety; tP += s.price; tQ += s.quality; tA += s.attitude;
+                });
+                let len = surveysArr.length;
+                return {
+                    nps: ((promo - detra) / len) * 100,
+                    s: tS/len, p: tP/len, q: tQ/len, a: tA/len, count: len
+                };
+            };
+
+            let currNPS = calcNPS(allSurveys);
+            let prevNPS = calcNPS(priorSurveys);
+            let npsDiff = (currNPS.nps - prevNPS.nps).toFixed(1);
+            let npsTrendTxt = npsDiff > 0 ? `tăng ${npsDiff} điểm %` : (npsDiff < 0 ? `giảm ${Math.abs(npsDiff)} điểm %` : `không đổi`);
+
+            let feedbackListHTML = "";
+            allSurveys.filter(s => s.feedback && s.feedback.trim() !== "").forEach((s, idx) => {
+                feedbackListHTML += `<p style="margin-left: 40px; font-style: italic; margin-bottom: 5px;">+ Ngày ${s.date} - Khách/Công ty: <b>${s.client}</b> (SĐT: ${s.phone || 'N/A'}) <br>=> Góp ý: "${s.feedback}"</p>`;
+            });
+            if(!feedbackListHTML) feedbackListHTML = `<p style="margin-left: 40px; font-style: italic;">(Không có góp ý văn bản nào trong kỳ)</p>`;
+
+            // Lấy ảnh biểu đồ
             const trendImg = document.getElementById('trendChart').toDataURL('image/png');
             const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
 
-            // 6. XÂY DỰNG FILE WORD (Đã Fix cứng Format Bảng chống xô lệch)
+            // 5. XÂY DỰNG FILE WORD HOÀN CHỈNH
             const htmlContent = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>Báo Cáo CSKH</title>
-                <style>
-                    body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
-                    p { margin: 6px 0; }
-                </style>
+                <style> body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; } p { margin: 6px 0; } </style>
                 </head>
                 <body>
-                    <!-- FIX LỖI HEADER: Dùng border-collapse và thẻ p margin=0 -->
                     <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 25px;">
                         <tr>
                             <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
@@ -1506,7 +1560,7 @@
                     <h3 style="margin-bottom: 10px;">I. HIỆN TRẠNG VẬN HÀNH TẠI TRUNG TÂM</h3>
                     
                     <p><b>1. Các vấn đề tiếp nhận</b></p>
-                    <p style="text-indent: 20px;">Trung tâm đã tiếp nhận và xử lý tổng cộng <b>${totalCrm}</b> yêu cầu của khách hàng được ghi nhận trên CRM, <b>${crmTrend}</b> so với cùng kỳ tháng trước (số liệu cùng kỳ: ${priorCrm}). Trong đó, nhóm yêu cầu nhiều nhất là <b>"${top1.name}"</b> chiếm tới ${top1.count} yêu cầu (tương đương ${pctTop1}% tổng khối lượng), gấp ${gapMultiplier} lần nhóm đứng thứ hai là "${top2.name}" (với ${top2.count} yêu cầu – tương đương ${pctTop2}%).</p>
+                    <p style="text-indent: 20px;">Trung tâm đã tiếp nhận và xử lý tổng cộng <b>${totalCrm}</b> yêu cầu, <b>${crmTrend}</b> so với cùng kỳ tháng trước. Nhóm yêu cầu nhiều nhất là <b>"${top1.name}"</b> chiếm ${top1.count} yêu cầu (${pctTop1}% tổng khối lượng), gấp ${gapMultiplier} lần nhóm thứ hai là "${top2.name}".</p>
                     <p style="text-indent: 20px; margin-bottom: 15px;">Bình quân tiếp nhận trong các ngày lọc: <b>${(totalCrm/days).toFixed(1)} yêu cầu/ngày</b>.</p>
                     
                     ${tableHTML}
@@ -1524,21 +1578,33 @@
                     
                     <br>
                     <p><b>2. Vận hành Tổng đài 1800.5555.22</b></p>
-                    <p style="margin-left: 20px;">- Số cuộc gọi tiếp nhận: <b>${totalCalls}</b> cuộc (Trung bình ${(totalCalls/days).toFixed(1)} cuộc/ngày), <b>${callsTrend}</b> so với cùng kỳ (số liệu cùng kỳ: ${priorCalls}).</p>
+                    <p style="margin-left: 20px;">- Số cuộc gọi tiếp nhận: <b>${totalCalls}</b> cuộc (Trung bình ${(totalCalls/days).toFixed(1)} cuộc/ngày), <b>${callsTrend}</b> so với cùng kỳ.</p>
                     <p style="margin-left: 20px;">- Cuộc gọi bỏ lỡ: <b>${totalMissed}</b> cuộc.</p>
                     <p style="margin-left: 20px;">- Tỷ lệ tiếp nhận chung: <b>${totalCalls > 0 ? (((totalCalls-totalMissed)/totalCalls)*100).toFixed(1) : 0}%</b></p>
                     
                     <br>
                     <p><b>3. Vận hành Kênh ZALO OA</b></p>
-                    <p style="margin-left: 20px;">- Tổng số người quan tâm hiện tại: <b>${currZaloFol}</b> người (<b>${folTrend}</b> so với cùng kỳ - số liệu kỳ trước: ${priorTotalZaloFol}).</p>
+                    <p style="margin-left: 20px;">- Tổng số người quan tâm hiện tại: <b>${currZaloFol}</b> người (<b>${folTrend}</b> so với cùng kỳ).</p>
                     <p style="margin-left: 20px;">- Số người quan tâm mới trong kỳ: <b>${totalZaloNew}</b> người.</p>
                     <p style="margin-left: 20px;">- Số người bỏ quan tâm: <b>${totalZaloUnfollow}</b> người.</p>
-                    <p style="margin-left: 20px;">- Tổng số tin nhắn tiếp nhận: <b>${totalZalo}</b> tin nhắn, <b>${zaloTrend}</b> so với cùng kỳ (kỳ trước: ${priorZalo}).</p>
+                    <p style="margin-left: 20px;">- Tổng số tin nhắn tiếp nhận: <b>${totalZalo}</b> tin nhắn (<b>${zaloTrend}</b>).</p>
+                    <p style="margin-left: 20px;">- Thời gian phản hồi trung bình: <b>${avgZaloTime.toFixed(1)} phút</b>.</p>
+                    <p style="margin-left: 20px;">- Tỷ lệ trả lời: <b>${avgZaloReplyRate.toFixed(1)}%</b>.</p>
                     
                     <br>
-                    <p><b>4. Đo lường chỉ số hài lòng khách hàng (CSAT/Web)</b></p>
-                    <p style="margin-left: 20px;">- Lượt đánh giá độc lập Website: <b>${totalWebSurvey}</b> lượt (Điểm TB: ${countWebScore > 0 ? (sumWebScore/countWebScore).toFixed(1) : 0}/50).</p>
-                    <p style="margin-left: 20px;">- Tỷ lệ hài lòng qua Zalo (CSAT): <b>${countCsat > 0 ? (sumCsat/countCsat * 100).toFixed(1) : 0}%</b>.</p>
+                    <p><b>4. Đo lường chỉ số hài lòng khách hàng (NPS & Khảo sát Chi tiết)</b></p>
+                    <p style="margin-left: 20px;">Trong kỳ báo cáo, ghi nhận tổng cộng <b>${currNPS.count}</b> lượt đánh giá khách hàng (so với cùng kỳ tháng trước là ${prevNPS.count} lượt).</p>
+                    <p style="margin-left: 20px;"><b>Chỉ số chi tiết thành phần (Trung bình/10):</b></p>
+                    <p style="margin-left: 40px;">+ An toàn hàng hóa: <b>${currNPS.s.toFixed(1)}/10</b></p>
+                    <p style="margin-left: 40px;">+ Giá thành dịch vụ: <b>${currNPS.p.toFixed(1)}/10</b></p>
+                    <p style="margin-left: 40px;">+ Chất lượng dịch vụ: <b>${currNPS.q.toFixed(1)}/10</b></p>
+                    <p style="margin-left: 40px;">+ Thái độ phục vụ: <b>${currNPS.a.toFixed(1)}/10</b></p>
+                    
+                    <p style="margin-left: 20px; margin-top: 10px;"><b>Chỉ số Khách hàng thiện cảm (NPS - Net Promoter Score):</b></p>
+                    <p style="margin-left: 40px;">Chỉ số NPS đạt: <b>${currNPS.nps.toFixed(1)}%</b> (<i>${npsTrendTxt} so với cùng kỳ tháng trước là ${prevNPS.nps.toFixed(1)}%</i>).</p>
+                    
+                    <p style="margin-left: 20px; margin-top: 10px;"><b>Chi tiết các Góp ý của khách hàng:</b></p>
+                    ${feedbackListHTML}
 
                     <br>
                     <p><b>5. Tình hình Nhân lực trực Tổng đài</b></p>
@@ -1563,16 +1629,11 @@
                 </html>
             `;
 
-            // Xuất file
             const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
+            const link = document.createElement('a'); link.href = url;
             link.download = `Bao_Cao_Hoat_Dong_CSKH_${startDate.replace(/\//g,'-')}.doc`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
         }
     </script>
 </body>
