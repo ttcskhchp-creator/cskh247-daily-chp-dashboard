@@ -1392,13 +1392,14 @@
         function renderMatrixTable() {
             const h = document.getElementById('matrixTableHeader'), b = document.getElementById('matrixTableBody');
             
-            // 1. Cập nhật Header: Thêm cột TỔNG cạnh cột TB/NGÀY
+            // 1. Cập nhật Header: Cố định cột 1 (sticky left-0) & Đổ màu cột 2, 3
             let hHtml = `
-                <th class="p-4 font-bold min-w-[300px] uppercase tracking-wide">NHÓM VẤN ĐỀ</th>
-                <th class="p-4 font-bold text-center text-emerald-500 min-w-[100px] border-l border-slate-700/50 bg-slate-900">TỔNG</th>
-                <th class="p-4 font-bold text-center text-amber-500 min-w-[100px] border-r border-slate-700/50 bg-slate-900">TB/NGÀY</th>
+                <th class="p-4 font-bold min-w-[300px] max-w-[300px] uppercase tracking-wide sticky left-0 z-20 bg-slate-100 dark:bg-slate-900 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.5)]">NHÓM VẤN ĐỀ</th>
+                <th class="p-4 font-bold text-center text-emerald-600 dark:text-emerald-500 min-w-[100px] border-l border-slate-300 dark:border-slate-700/50 bg-emerald-50 dark:bg-emerald-900/20">TỔNG</th>
+                <th class="p-4 font-bold text-center text-amber-600 dark:text-amber-500 min-w-[100px] border-r border-slate-300 dark:border-slate-700/50 bg-amber-50 dark:bg-amber-900/20">TB/NGÀY</th>
             `;
-            filteredData.forEach(i => hHtml += `<th class="p-4 font-bold text-center min-w-[120px]">${i.date}</th>`);
+            // Cột ngày tháng ở Header cần set background trong suốt hoặc màu nền của header
+            filteredData.forEach(i => hHtml += `<th class="p-4 font-bold text-center min-w-[120px] bg-slate-100 dark:bg-slate-900/95">${i.date}</th>`);
             h.innerHTML = hHtml; 
             b.innerHTML = '';
 
@@ -1407,7 +1408,6 @@
             let cats = new Set(); 
             filteredData.forEach(d => { if (d.categories) Object.keys(d.categories).forEach(k => cats.add(k)); });
             
-            // Khởi tạo biến lưu trữ để tính Tổng dòng cuối
             let grandTotal = 0;
             let dailyTotals = new Array(filteredData.length).fill(0);
 
@@ -1419,18 +1419,19 @@
                 filteredData.forEach((item, index) => { 
                     const val = item.categories?.[cat] || 0; 
                     sum += val; 
-                    dailyTotals[index] += val; // Cộng dồn theo từng ngày (từng cột)
-                    dHtml += `<td class="p-4 text-center font-medium text-slate-300">${val}</td>`; 
+                    dailyTotals[index] += val; 
+                    dHtml += `<td class="p-4 text-center font-medium text-slate-700 dark:text-slate-300">${val}</td>`; 
                 });
                 
-                grandTotal += sum; // Cộng dồn vào Tổng cộng cuối
+                grandTotal += sum; 
 
                 const tr = document.createElement('tr'); 
-                tr.className = 'hover:bg-slate-500/15 transition border-b border-slate-700/40';
+                // Thêm class 'group' để xử lý hiệu ứng hover cho cột bị fix cứng (sticky)
+                tr.className = 'group transition border-b border-slate-200 dark:border-slate-700/40 hover:bg-slate-50 dark:hover:bg-slate-800/40';
                 tr.innerHTML = `
-                    <td class="p-4 font-medium font-sans text-slate-200">${cat}</td>
-                    <td class="p-4 text-center font-bold text-emerald-400 border-l border-slate-700/50 text-[13px] bg-slate-800/20">${sum}</td>
-                    <td class="p-4 text-center font-bold text-amber-500 border-r border-slate-700/50 text-[13px] bg-slate-800/20">${filteredData.length ? (sum / filteredData.length).toFixed(1) : 0}</td>
+                    <td class="p-4 font-medium font-sans text-slate-800 dark:text-slate-200 sticky left-0 z-10 bg-white dark:bg-[#0a0f1d] group-hover:bg-slate-50 dark:group-hover:bg-[#111827] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.5)] transition-colors">${cat}</td>
+                    <td class="p-4 text-center font-bold text-emerald-600 dark:text-emerald-400 border-l border-slate-300 dark:border-slate-700/50 text-[13px] bg-emerald-50 dark:bg-emerald-900/20">${sum}</td>
+                    <td class="p-4 text-center font-bold text-amber-600 dark:text-amber-500 border-r border-slate-300 dark:border-slate-700/50 text-[13px] bg-amber-50 dark:bg-amber-900/20">${filteredData.length ? (sum / filteredData.length).toFixed(1) : 0}</td>
                     ${dHtml}
                 `;
                 b.appendChild(tr);
@@ -1438,17 +1439,17 @@
 
             // 3. Tạo Dòng TỔNG CỘNG dưới cùng
             const trTotal = document.createElement('tr');
-            trTotal.className = 'bg-slate-800/90 transition border-t-2 border-slate-600 font-bold uppercase tracking-wide';
+            trTotal.className = 'transition border-t-2 border-slate-400 dark:border-slate-600 font-bold uppercase tracking-wide';
             
             let footerHtml = `
-                <td class="p-4 text-white text-right pr-6">TỔNG CỘNG:</td>
-                <td class="p-4 text-center text-emerald-400 border-l border-slate-700/50 text-[15px] bg-emerald-900/20">${grandTotal}</td>
-                <td class="p-4 text-center text-amber-400 border-r border-slate-700/50 text-[15px] bg-amber-900/20">${filteredData.length ? (grandTotal / filteredData.length).toFixed(1) : 0}</td>
+                <td class="p-4 text-slate-800 dark:text-white text-right pr-6 sticky left-0 z-10 bg-slate-200 dark:bg-slate-800 shadow-[4px_0_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.5)]">TỔNG CỘNG:</td>
+                <td class="p-4 text-center text-emerald-700 dark:text-emerald-400 border-l border-slate-400 dark:border-slate-700/50 text-[15px] bg-emerald-100 dark:bg-emerald-900/40">${grandTotal}</td>
+                <td class="p-4 text-center text-amber-700 dark:text-amber-400 border-r border-slate-400 dark:border-slate-700/50 text-[15px] bg-amber-100 dark:bg-amber-900/40">${filteredData.length ? (grandTotal / filteredData.length).toFixed(1) : 0}</td>
             `;
             
-            // Đổ dữ liệu tổng của từng ngày ra dòng cuối
+            // Đổ dữ liệu tổng của từng ngày ra dòng cuối (Set màu nền cho đuôi bảng)
             dailyTotals.forEach(dailySum => {
-                footerHtml += `<td class="p-4 text-center text-white text-[14px]">${dailySum}</td>`;
+                footerHtml += `<td class="p-4 text-center text-slate-800 dark:text-white text-[14px] bg-slate-200 dark:bg-slate-800/90">${dailySum}</td>`;
             });
             
             trTotal.innerHTML = footerHtml;
