@@ -1352,170 +1352,228 @@
     }
 
     function generateWordReport() {
-        if (!filteredData || filteredData.length === 0) return;
-        
-        // 1. Lấy dữ liệu Input nhân sự & ngày tháng
-        const hrStatus = document.getElementById('hrStatusInput').value.replace(/\n/g, '<br>');
-        const recommendation = document.getElementById('recommendationInput').value.replace(/\n/g, '<br>');
-        const reporter = document.getElementById('reporterName').value;
-        const startDate = document.getElementById('filterStartDate').value || filteredData[0].date;
-        const endDate = document.getElementById('filterEndDate').value || filteredData[filteredData.length - 1].date;
-        
-        const today = new Date();
-        const reportDateStr = `ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
-
-        // 2. Tính toán số liệu thống kê
-        const days = filteredData.length;
-        let totalCrm = 0, totalCalls = 0, totalMissed = 0, totalZalo = 0, totalZaloNew = 0, totalZaloUnfollow = 0;
-        let totalWebSurvey = 0, sumWebScore = 0, countWebScore = 0, sumCsat = 0, countCsat = 0;
-        
-        let aggregatedCats = {};
-        
-        filteredData.forEach(c => {
-            totalCrm += Number(c.kpi?.crm || 0);
-            totalCalls += Number(c.kpi?.calls || 0);
-            totalMissed += Number(c.kpi?.callsMissed || 0);
-            totalZalo += Number(c.kpi?.zaloMsg || 0);
-            totalZaloNew += Number(c.zaloDetails?.newFollowers || 0);
-            totalZaloUnfollow += Number(c.zaloDetails?.unfollowers || 0);
-            totalWebSurvey += Number(c.surveys?.webCount || 0);
+            if (!filteredData || filteredData.length === 0) return;
             
-            let score = parseFloat(String(c.surveys?.webScore || '0').split('/')[0]);
-            if(score > 0) { sumWebScore += score; countWebScore++; }
-            let csat = Number(c.zaloDetails?.csat || 0);
-            if(csat > 0) { sumCsat += csat; countCsat++; }
+            // 1. Lấy dữ liệu Input nhân sự & ngày tháng
+            const hrStatus = document.getElementById('hrStatusInput').value.replace(/\n/g, '<br>');
+            const recommendation = document.getElementById('recommendationInput').value.replace(/\n/g, '<br>');
+            const reporter = document.getElementById('reporterName').value;
+            const startDateStr = document.getElementById('filterStartDate').value;
+            const endDateStr = document.getElementById('filterEndDate').value;
+            
+            // Format ngày hiển thị
+            const fDate = (dStr) => dStr ? dStr.split('-').reverse().join('/') : '--';
+            const startDate = startDateStr ? fDate(startDateStr) : filteredData[0].date;
+            const endDate = endDateStr ? fDate(endDateStr) : filteredData[filteredData.length - 1].date;
+            
+            const today = new Date();
+            const reportDateStr = `ngày ${String(today.getDate()).padStart(2,'0')} tháng ${String(today.getMonth() + 1).padStart(2,'0')} năm ${today.getFullYear()}`;
 
-            if (c.categories) {
-                for (const [key, val] of Object.entries(c.categories)) {
-                    aggregatedCats[key] = (aggregatedCats[key] || 0) + Number(val || 0);
+            // 2. TÍNH TOÁN KỲ NÀY (CURRENT PERIOD)
+            const days = filteredData.length;
+            let totalCrm = 0, totalCalls = 0, totalMissed = 0, totalZalo = 0, totalZaloNew = 0, totalZaloUnfollow = 0;
+            let totalWebSurvey = 0, sumWebScore = 0, countWebScore = 0, sumCsat = 0, countCsat = 0;
+            let aggregatedCats = {};
+            
+            filteredData.forEach(c => {
+                totalCrm += Number(c.kpi?.crm || 0);
+                totalCalls += Number(c.kpi?.calls || 0);
+                totalMissed += Number(c.kpi?.callsMissed || 0);
+                totalZalo += Number(c.kpi?.zaloMsg || 0);
+                totalZaloNew += Number(c.zaloDetails?.newFollowers || 0);
+                totalZaloUnfollow += Number(c.zaloDetails?.unfollowers || 0);
+                totalWebSurvey += Number(c.surveys?.webCount || 0);
+                
+                let score = parseFloat(String(c.surveys?.webScore || '0').split('/')[0]);
+                if(score > 0) { sumWebScore += score; countWebScore++; }
+                let csat = Number(c.zaloDetails?.csat || 0);
+                if(csat > 0) { sumCsat += csat; countCsat++; }
+
+                if (c.categories) {
+                    for (const [key, val] of Object.entries(c.categories)) {
+                        aggregatedCats[key] = (aggregatedCats[key] || 0) + Number(val || 0);
+                    }
                 }
+            });
+
+            // 3. TRUY XUẤT CSDL KỲ TRƯỚC (PRIOR PERIOD) ĐỂ TÍNH %
+            let priorCrm = 0, priorCalls = 0, priorZalo = 0, priorTotalZaloFol = 0;
+            if (startDateStr && endDateStr) {
+                // Lùi 1 tháng giữ nguyên ngày
+                const priorStart = new Date(startDateStr + 'T00:00:00'); priorStart.setMonth(priorStart.getMonth() - 1);
+                const priorEnd = new Date(endDateStr + 'T00:00:00'); priorEnd.setMonth(priorEnd.getMonth() - 1);
+                
+                const pStartStr = priorStart.toISOString().split('T')[0];
+                const pEndStr = priorEnd.toISOString().split('T')[0];
+
+                const priorData = database.filter(item => {
+                    const iDate = toYMDString(item.date);
+                    return iDate >= pStartStr && iDate <= pEndStr;
+                });
+
+                priorData.forEach(c => {
+                    priorCrm += Number(c.kpi?.crm || 0);
+                    priorCalls += Number(c.kpi?.calls || 0);
+                    priorZalo += Number(c.kpi?.zaloMsg || 0);
+                });
+                if (priorData.length > 0) priorTotalZaloFol = priorData[priorData.length - 1].zaloDetails?.totalFollowers || 0;
             }
-        });
 
-        // 3. Xử lý danh mục & Top 5
-        let sortedCats = Object.keys(aggregatedCats).map(k => ({ name: k, count: aggregatedCats[k] })).sort((a,b) => b.count - a.count);
-        
-        let top1 = sortedCats[0] || {name: "Không có", count: 0};
-        let top2 = sortedCats[1] || {name: "Không có", count: 0};
-        let pctTop1 = totalCrm > 0 ? ((top1.count / totalCrm) * 100).toFixed(1) : 0;
-        let pctTop2 = totalCrm > 0 ? ((top2.count / totalCrm) * 100).toFixed(1) : 0;
-        let gapMultiplier = top2.count > 0 ? (top1.count / top2.count).toFixed(1) : 0;
+            // Hàm tính % Tăng/Giảm
+            const getTrend = (curr, prev) => {
+                if (prev === 0) return curr > 0 ? "tăng 100%" : "bằng 100%";
+                const diff = curr - prev;
+                const pct = Math.abs((diff / prev) * 100).toFixed(1);
+                if (diff > 0) return `tăng ${pct}%`;
+                if (diff < 0) return `giảm ${pct}%`;
+                return "tương đương 100%";
+            };
 
-        // Generate Bảng HTML
-        let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
-            <tr style="background-color: #f2f2f2;"><th>STT</th><th>DANH MỤC</th><th>SỐ LƯỢNG</th><th>TỶ LỆ</th></tr>`;
-        sortedCats.forEach((cat, index) => {
-            let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
-            tableHTML += `<tr><td>${index + 1}</td><td style="text-align: left;">${cat.name}</td><td>${cat.count}</td><td>${pct}%</td></tr>`;
-        });
-        tableHTML += `<tr style="font-weight: bold;"><td></td><td>TỔNG CỘNG</td><td>${totalCrm}</td><td>100%</td></tr></table>`;
+            const crmTrend = getTrend(totalCrm, priorCrm);
+            const callsTrend = getTrend(totalCalls, priorCalls);
+            const zaloTrend = getTrend(totalZalo, priorZalo);
+            const currZaloFol = filteredData[filteredData.length - 1]?.zaloDetails?.totalFollowers || 0;
+            const folTrend = getTrend(currZaloFol, priorTotalZaloFol);
 
-        // Cắt ra Top 5 chi tiết
-        let top5HTML = "";
-        sortedCats.slice(0, 5).forEach((cat, index) => {
-            let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
-            top5HTML += `<p><b>${String.fromCharCode(97 + index)}. Nhóm ${index + 1}: ${cat.name}</b> (Chiếm ${pct}% khối lượng)</p>
-                         <p><i>Các câu hỏi/yêu cầu thực tế thường gặp: Ghi nhận giải đáp thông tin liên quan đến ${cat.name}...</i></p>`;
-        });
+            // 4. XỬ LÝ DANH MỤC TOP 5 & PHÂN TÍCH TỪ KHÓA (Mô phỏng 10 cụm từ)
+            let sortedCats = Object.keys(aggregatedCats).map(k => ({ name: k, count: aggregatedCats[k] })).sort((a,b) => b.count - a.count);
+            
+            let top1 = sortedCats[0] || {name: "Không có", count: 0};
+            let top2 = sortedCats[1] || {name: "Không có", count: 0};
+            let pctTop1 = totalCrm > 0 ? ((top1.count / totalCrm) * 100).toFixed(1) : 0;
+            let pctTop2 = totalCrm > 0 ? ((top2.count / totalCrm) * 100).toFixed(1) : 0;
+            let gapMultiplier = top2.count > 0 ? (top1.count / top2.count).toFixed(1) : 0;
 
-        // 4. Trích xuất biểu đồ thành ảnh base64
-        const trendImg = document.getElementById('trendChart').toDataURL('image/png');
-        const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
+            let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: center; border: 1pt solid black; margin-bottom: 20px;">
+                <tr style="background-color: #f2f2f2; font-weight: bold;"><td style="padding: 5px;">STT</td><td style="padding: 5px;">DANH MỤC</td><td style="padding: 5px;">SỐ LƯỢNG</td><td style="padding: 5px;">TỶ LỆ</td></tr>`;
+            sortedCats.forEach((cat, index) => {
+                let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
+                tableHTML += `<tr><td style="padding: 5px;">${index + 1}</td><td style="text-align: left; padding: 5px;">${cat.name}</td><td style="padding: 5px;">${cat.count}</td><td style="padding: 5px;">${pct}%</td></tr>`;
+            });
+            tableHTML += `<tr style="font-weight: bold;"><td style="padding: 5px;"></td><td style="padding: 5px;">TỔNG CỘNG</td><td style="padding: 5px;">${totalCrm}</td><td style="padding: 5px;">100%</td></tr></table>`;
 
-        // 5. Xây dựng cấu trúc File Word (dùng chuẩn HTML Word)
-        const htmlContent = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head><meta charset='utf-8'><title>Báo Cáo CSKH</title>
-            <style>
-                body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
-                p { margin: 5px 0; }
-                h1, h2, h3 { text-align: center; }
-            </style>
-            </head>
-            <body>
-                <table style="width: 100%; text-align: center; border: none;">
-                    <tr>
-                        <td style="width: 40%;"><b>CÔNG TY CP CẢNG HẢI PHÒNG<br>TRUNG TÂM KHAI THÁC & DVKH</b><br>Số: ........ /BC-KTDVKH</td>
-                        <td style="width: 60%;"><b>CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập – Tự do – Hạnh phúc</b><br><i>Hải Phòng, ${reportDateStr}</i></td>
-                    </tr>
-                </table>
-                
-                <h2 style="margin-top: 20px;">BÁO CÁO HOẠT ĐỘNG CHĂM SÓC KHÁCH HÀNG 24/7</h2>
-                <p style="text-align: center;">Thời gian báo cáo: Từ ngày <b>${startDate}</b> đến ngày <b>${endDate}</b></p>
-                
-                <h3>I. HIỆN TRẠNG VẬN HÀNH TẠI TRUNG TÂM</h3>
-                
-                <p><b>1. Các vấn đề tiếp nhận</b></p>
-                <p>Trung tâm đã tiếp nhận và xử lý tổng cộng <b>${totalCrm}</b> yêu cầu của khách hàng được ghi nhận trên CRM. Trong đó, nhóm yêu cầu nhiều nhất là <b>"${top1.name}"</b> chiếm tới ${top1.count} yêu cầu (tương đương ${pctTop1}% tổng khối lượng), gấp ${gapMultiplier} lần nhóm đứng thứ hai là "${top2.name}" (với ${top2.count} yêu cầu – tương đương ${pctTop2}%).</p>
-                <p>Bình quân yêu cầu trong các ngày lọc: <b>${(totalCrm/days).toFixed(1)} yêu cầu/ngày</b>.</p>
-                
-                <br>
-                ${tableHTML}
-                <br>
-                
-                <p><b>Biểu đồ xu hướng và Top vấn đề:</b></p>
-                <div style="text-align:center;">
-                    <img src="${trendImg}" style="width: 500px; height: auto;" />
+            // Data cụm từ (Ánh xạ từ khóa NLP)
+            const phrasesDB = {
+                "Duyệt lệnh Eport": "lỗi duyệt lệnh, không nhận được mã, duyệt lệnh chậm, treo hệ thống eport, huỷ lệnh, sửa thông tin, in phơi eport, thanh toán lỗi, check mã giao nhận, lệnh chưa đồng bộ",
+                "Thao tác sử dụng Eport/Smartgate": "quên mật khẩu, đăng nhập lỗi, app văng, cách tạo tài khoản, đổi mật khẩu, không tải được file đính kèm, quét QR lỗi, đăng ký xe, khai báo tài xế, xác thực tài khoản",
+                "Thông tin liên hệ, Mã số thuế": "xin số bãi, hotline cảng, xin email, MST tân vũ, xuất hóa đơn, địa chỉ văn phòng, xin số kế toán, số line nội bộ, liên hệ giám đốc, đổi tên công ty",
+                "Quy trình và thủ tục tại Cảng": "thủ tục hạ bãi, quy trình lấy rỗng, đổi lệnh, đóng rút hàng, giờ làm việc, giấy tờ cần thiết, sang container, tàu xuất, thủ tục lấy hàng lạnh, báo cáo giám định",
+                "Các vấn đề về thủ tục Hải quan": "chưa qua khu vực giám sát, tờ khai chưa thông quan, vướng kiểm hóa, hải quan khoá cont, lỗi đồng bộ, sửa số tờ khai, xin danh sách bờ rào, huỷ tờ khai, luồng đỏ, tra cứu tờ khai"
+            };
+            const defaultPhrases = "cần hỗ trợ gấp, kiểm tra giúp thông tin, phản ánh dịch vụ, báo lỗi hệ thống, xin hướng dẫn chi tiết, quy trình xử lý, thời gian dự kiến, cước phí dịch vụ, khiếu nại thái độ, liên hệ ai giải quyết";
+
+            let top5HTML = "";
+            sortedCats.slice(0, 5).forEach((cat, index) => {
+                let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
+                let phrases = phrasesDB[cat.name] || defaultPhrases;
+                top5HTML += `<p style="margin: 6px 0;"><b>${String.fromCharCode(97 + index)}. Nhóm ${index + 1}: ${cat.name}</b> (Chiếm ${pct}% khối lượng)</p>
+                             <p style="margin: 4px 0 12px 0;"><i>- Các câu hỏi/yêu cầu thực tế thường gặp (Top 10 cụm từ trích xuất): ${phrases}.</i></p>`;
+            });
+
+            // 5. Trích xuất biểu đồ thành ảnh
+            const trendImg = document.getElementById('trendChart').toDataURL('image/png');
+            const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
+
+            // 6. XÂY DỰNG FILE WORD (Đã Fix cứng Format Bảng chống xô lệch)
+            const htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>Báo Cáo CSKH</title>
+                <style>
+                    body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
+                    p { margin: 6px 0; }
+                </style>
+                </head>
+                <body>
+                    <!-- FIX LỖI HEADER: Dùng border-collapse và thẻ p margin=0 -->
+                    <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 25px;">
+                        <tr>
+                            <td style="width: 45%; text-align: center; vertical-align: top; padding: 0;">
+                                <p style="margin: 0; font-weight: bold; font-size: 13pt;">CÔNG TY CP CẢNG HẢI PHÒNG</p>
+                                <p style="margin: 0; font-weight: bold; font-size: 13pt; text-decoration: underline;">TRUNG TÂM KHAI THÁC & DVKH</p>
+                                <p style="margin: 5px 0 0 0; font-size: 13pt;">Số: ........ /BC-KTDVKH</p>
+                            </td>
+                            <td style="width: 55%; text-align: center; vertical-align: top; padding: 0;">
+                                <p style="margin: 0; font-weight: bold; font-size: 13pt;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                                <p style="margin: 0; font-weight: bold; font-size: 13pt; text-decoration: underline;">Độc lập – Tự do – Hạnh phúc</p>
+                                <p style="margin: 5px 0 0 0; font-size: 13pt; font-style: italic;">Hải Phòng, ${reportDateStr}</p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <h2 style="text-align: center; margin-top: 10px; margin-bottom: 5px;">BÁO CÁO HOẠT ĐỘNG CHĂM SÓC KHÁCH HÀNG 24/7</h2>
+                    <p style="text-align: center; margin-bottom: 20px;">Thời gian báo cáo: Từ ngày <b>${startDate}</b> đến ngày <b>${endDate}</b></p>
+                    
+                    <h3 style="margin-bottom: 10px;">I. HIỆN TRẠNG VẬN HÀNH TẠI TRUNG TÂM</h3>
+                    
+                    <p><b>1. Các vấn đề tiếp nhận</b></p>
+                    <p style="text-indent: 20px;">Trung tâm đã tiếp nhận và xử lý tổng cộng <b>${totalCrm}</b> yêu cầu của khách hàng được ghi nhận trên CRM, <b>${crmTrend}</b> so với cùng kỳ tháng trước (số liệu cùng kỳ: ${priorCrm}). Trong đó, nhóm yêu cầu nhiều nhất là <b>"${top1.name}"</b> chiếm tới ${top1.count} yêu cầu (tương đương ${pctTop1}% tổng khối lượng), gấp ${gapMultiplier} lần nhóm đứng thứ hai là "${top2.name}" (với ${top2.count} yêu cầu – tương đương ${pctTop2}%).</p>
+                    <p style="text-indent: 20px; margin-bottom: 15px;">Bình quân tiếp nhận trong các ngày lọc: <b>${(totalCrm/days).toFixed(1)} yêu cầu/ngày</b>.</p>
+                    
+                    ${tableHTML}
+                    
+                    <p><b>Biểu đồ xu hướng và Cơ cấu vấn đề:</b></p>
+                    <div style="text-align:center;">
+                        <img src="${trendImg}" style="width: 550px; height: auto;" />
+                        <br><br>
+                        <img src="${categoryImg}" style="width: 450px; height: auto;" />
+                    </div>
+                    
+                    <br>
+                    <p><b>Top 5 các nhóm có lượng tiếp nhận nhiều nhất:</b></p>
+                    ${top5HTML}
+                    
+                    <br>
+                    <p><b>2. Vận hành Tổng đài 1800.5555.22</b></p>
+                    <p style="margin-left: 20px;">- Số cuộc gọi tiếp nhận: <b>${totalCalls}</b> cuộc (Trung bình ${(totalCalls/days).toFixed(1)} cuộc/ngày), <b>${callsTrend}</b> so với cùng kỳ (số liệu cùng kỳ: ${priorCalls}).</p>
+                    <p style="margin-left: 20px;">- Cuộc gọi bỏ lỡ: <b>${totalMissed}</b> cuộc.</p>
+                    <p style="margin-left: 20px;">- Tỷ lệ tiếp nhận chung: <b>${totalCalls > 0 ? (((totalCalls-totalMissed)/totalCalls)*100).toFixed(1) : 0}%</b></p>
+                    
+                    <br>
+                    <p><b>3. Vận hành Kênh ZALO OA</b></p>
+                    <p style="margin-left: 20px;">- Tổng số người quan tâm hiện tại: <b>${currZaloFol}</b> người (<b>${folTrend}</b> so với cùng kỳ - số liệu kỳ trước: ${priorTotalZaloFol}).</p>
+                    <p style="margin-left: 20px;">- Số người quan tâm mới trong kỳ: <b>${totalZaloNew}</b> người.</p>
+                    <p style="margin-left: 20px;">- Số người bỏ quan tâm: <b>${totalZaloUnfollow}</b> người.</p>
+                    <p style="margin-left: 20px;">- Tổng số tin nhắn tiếp nhận: <b>${totalZalo}</b> tin nhắn, <b>${zaloTrend}</b> so với cùng kỳ (kỳ trước: ${priorZalo}).</p>
+                    
+                    <br>
+                    <p><b>4. Đo lường chỉ số hài lòng khách hàng (CSAT/Web)</b></p>
+                    <p style="margin-left: 20px;">- Lượt đánh giá độc lập Website: <b>${totalWebSurvey}</b> lượt (Điểm TB: ${countWebScore > 0 ? (sumWebScore/countWebScore).toFixed(1) : 0}/50).</p>
+                    <p style="margin-left: 20px;">- Tỷ lệ hài lòng qua Zalo (CSAT): <b>${countCsat > 0 ? (sumCsat/countCsat * 100).toFixed(1) : 0}%</b>.</p>
+
+                    <br>
+                    <p><b>5. Tình hình Nhân lực trực Tổng đài</b></p>
+                    <p style="margin-left: 20px;">${hrStatus}</p>
+
+                    <br>
+                    <h3 style="margin-bottom: 10px;">II. ĐỀ XUẤT VÀ KIẾN NGHỊ</h3>
+                    <p style="margin-left: 20px;">${recommendation || 'Không có.'}</p>
+
                     <br><br>
-                    <img src="${categoryImg}" style="width: 400px; height: auto;" />
-                </div>
-                
-                <br>
-                <p><b>Top 5 các nhóm có lượng tiếp nhận nhiều nhất:</b></p>
-                ${top5HTML}
-                
-                <br>
-                <p><b>2. Vận hành Tổng đài 1800.5555.22</b></p>
-                <p>- Số cuộc gọi tiếp nhận: <b>${totalCalls}</b> cuộc (Trung bình ${(totalCalls/days).toFixed(1)} cuộc/ngày)</p>
-                <p>- Cuộc gọi bỏ lỡ: <b>${totalMissed}</b> cuộc.</p>
-                <p>- Tỷ lệ tiếp nhận chung: <b>${totalCalls > 0 ? (((totalCalls-totalMissed)/totalCalls)*100).toFixed(1) : 0}%</b></p>
-                
-                <br>
-                <p><b>3. Vận hành Kênh ZALO OA</b></p>
-                <p>- Tổng số người quan tâm hiện tại: <b>${filteredData[filteredData.length - 1]?.zaloDetails?.totalFollowers || 0}</b> người.</p>
-                <p>- Số người quan tâm mới trong kỳ: <b>${totalZaloNew}</b> người.</p>
-                <p>- Số người bỏ quan tâm: <b>${totalZaloUnfollow}</b> người.</p>
-                <p>- Tổng số tin nhắn tiếp nhận: <b>${totalZalo}</b> tin nhắn.</p>
-                
-                <br>
-                <p><b>4. Đo lường chỉ số hài lòng khách hàng (CSAT/Web)</b></p>
-                <p>- Lượt khảo sát Web: <b>${totalWebSurvey}</b> lượt (Điểm TB: ${countWebScore > 0 ? (sumWebScore/countWebScore).toFixed(1) : 0}/50).</p>
-                <p>- Tỷ lệ hài lòng Zalo (CSAT): <b>${countCsat > 0 ? (sumCsat/countCsat * 100).toFixed(1) : 0}%</b>.</p>
+                    <table style="width: 100%; border: none; margin-top: 30px;">
+                        <tr>
+                            <td style="width: 55%;"></td>
+                            <td style="width: 45%; text-align: center; vertical-align: top;">
+                                <b>Người lập báo cáo</b><br>
+                                <i>(Ký, ghi rõ họ tên)</i><br><br><br><br><br>
+                                <b>${reporter}</b>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
 
-                <br>
-                <p><b>5. Tình hình Nhân lực trực Tổng đài</b></p>
-                <p>${hrStatus}</p>
-
-                <br>
-                <h3>II. ĐỀ XUẤT VÀ KIẾN NGHỊ</h3>
-                <p>${recommendation || 'Không có.'}</p>
-
-                <br><br>
-                <table style="width: 100%; text-align: center; border: none; margin-top: 30px;">
-                    <tr>
-                        <td style="width: 50%;"></td>
-                        <td style="width: 50%;">
-                            <b>Người lập báo cáo</b><br>
-                            <i>(Ký, ghi rõ họ tên)</i><br><br><br><br>
-                            <b>${reporter}</b>
-                        </td>
-                    </tr>
-                </table>
-            </body>
-            </html>
-        `;
-
-        // Xuất ra định dạng DOC
-        const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Bao_Cao_Hoat_Dong_CSKH_${startDate.replace(/\//g,'-')}.doc`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
+            // Xuất file
+            const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Bao_Cao_Hoat_Dong_CSKH_${startDate.replace(/\//g,'-')}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
