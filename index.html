@@ -1787,15 +1787,18 @@
             });
             if(!feedbackListHTML) feedbackListHTML = `<p style="margin-left: 40px; font-style: italic;">(Không có góp ý văn bản nào trong kỳ)</p>`;
 
-            // Lấy ảnh biểu đồ
+           // Lấy ảnh biểu đồ
             const trendImg = document.getElementById('trendChart').toDataURL('image/png');
             const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
 
-            // 5. XÂY DỰNG FILE WORD HOÀN CHỈNH
+            // 5. XÂY DỰNG FILE WORD HOÀN CHỈNH (Căn chỉnh lại bố cục Ảnh và Bảng)
             const htmlContent = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>Báo Cáo CSKH</title>
-                <style> body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; } p { margin: 6px 0; } </style>
+                <style> 
+                    body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; } 
+                    p { margin: 6px 0; } 
+                </style>
                 </head>
                 <body>
                     <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 25px;">
@@ -1824,12 +1827,21 @@
                     
                     ${tableHTML}
                     
-                    <p><b>Biểu đồ xu hướng và Cơ cấu vấn đề:</b></p>
-                    <div style="text-align:center;">
-                        <img src="${trendImg}" style="width: 550px; height: auto;" />
-                        <br><br>
-                        <img src="${categoryImg}" style="width: 450px; height: auto;" />
-                    </div>
+                    <p style="page-break-before: always;"><b>Biểu đồ xu hướng và Cơ cấu vấn đề:</b></p>
+                    
+                    <!-- BỌC ẢNH VÀO TABLE ĐỂ KHÓA LAYOUT, TRÁNH TRÀN LỀ -->
+                    <table style="width: 100%; border-collapse: collapse; border: none;">
+                        <tr>
+                            <td style="text-align: center; padding-bottom: 15px;">
+                                <img src="${trendImg}" style="width: 95%; max-width: 650px; height: auto;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">
+                                <img src="${categoryImg}" style="width: 75%; max-width: 500px; height: auto;" />
+                            </td>
+                        </tr>
+                    </table>
                     
                     <br>
                     <p><b>Top 5 các nhóm có lượng tiếp nhận nhiều nhất:</b></p>
