@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Thêm thư viện chụp màn hình -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
         
@@ -158,6 +160,16 @@
                 <i class="fa-solid fa-file-excel text-xl text-center w-6 text-emerald-500"></i>
                 <span class="btn-text font-semibold text-xs tracking-wide">Xuất Báo Cáo Excel</span>
             </button>
+
+            <button onclick="requestPasswordAndAction('export_word')" class="flex items-center gap-4 px-3 py-3 w-full text-left rounded-xl text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 transition border border-transparent hover:border-blue-500/20">
+            <i class="fa-solid fa-file-word text-xl text-center w-6 text-blue-500"></i>
+            <span class="btn-text font-semibold text-xs tracking-wide">Xuất Báo Cáo Word</span>
+        </button>
+
+        <button onclick="takeScreenshot()" class="flex items-center gap-4 px-3 py-3 w-full text-left rounded-xl text-slate-300 hover:bg-purple-600/20 hover:text-purple-400 transition border border-transparent hover:border-purple-500/20">
+            <i class="fa-solid fa-camera text-xl text-center w-6 text-purple-500"></i>
+            <span class="btn-text font-semibold text-xs tracking-wide">Chụp Màn Hình</span>
+        </button>
             
             <button id="downloadRawBtn" class="hidden flex items-center gap-4 px-3 py-3 w-full text-left rounded-xl text-emerald-400 hover:bg-emerald-600/20 transition border border-transparent hover:border-emerald-500/20">
                 <i class="fa-solid fa-cloud-arrow-down text-xl text-center w-6"></i>
@@ -635,6 +647,35 @@
 
 
     <!-- ========================================== -->
+    <!-- Modal Nhập Thông Tin Báo Cáo Word (Nhân lực & Kế hoạch) -->
+<div id="wordExportModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="glass-panel w-full max-w-lg rounded-3xl border border-blue-500/30 shadow-2xl overflow-hidden flex flex-col">
+        <div class="bg-slate-900 px-6 py-5 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="text-lg font-bold flex items-center gap-2.5 text-blue-400">
+                <i class="fa-solid fa-file-word"></i> Bổ sung dữ liệu xuất Word
+            </h3>
+            <button onclick="closeWordExportModal()" class="text-slate-400 hover:text-white text-xl transition">✕</button>
+        </div>
+        <form id="wordExportForm" onsubmit="handleWordExportSubmit(event)" class="p-6 space-y-5 text-sm">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Tình hình nhân lực *</label>
+                <textarea id="hrStatusInput" rows="3" required placeholder="VD: Tổng số 15 nhân sự. Có 1 NV nghỉ ốm, 14 NV đi làm bình thường. Đảm bảo ca trực..." class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl p-4 text-slate-200 focus:outline-none focus:border-blue-500 resize-none shadow-inner"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Đề xuất / Kiến nghị</label>
+                <textarea id="recommendationInput" rows="3" placeholder="Nhập các đề xuất nếu có..." class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl p-4 text-slate-200 focus:outline-none focus:border-blue-500 resize-none shadow-inner"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wide">Người lập báo cáo *</label>
+                <input type="text" id="reporterName" required placeholder="Họ và tên..." class="w-full bg-slate-900 border border-slate-700 text-sm rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500 shadow-inner">
+            </div>
+            <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                <button type="button" onclick="closeWordExportModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition active:scale-95 shadow border border-slate-700">Hủy</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg transition active:scale-95 border border-blue-500">Tạo & Tải Báo Cáo</button>
+            </div>
+        </form>
+    </div>
+</div>
     <!-- JAVASCRIPT LOGIC -->
     <!-- ========================================== -->
     <script>
@@ -734,6 +775,7 @@
             else if (act === 'survey') openSurveyModal();
             else if (act === 'delete') deleteDateRangeConfirmed();
             else if (act === 'export') exportToExcel();
+            else if (act === 'export_word') openWordExportModal();
             else if (act === 'add_incident') openIncidentModal();
             else if (act && act.startsWith('del_inc_')) deleteIncident(act.replace('del_inc_', ''));
             else if (act && act.startsWith('edit_inc_')) openIncidentModal(act.replace('edit_inc_', ''));
@@ -1272,6 +1314,208 @@
                 alert("Đã xảy ra lỗi khi xuất file Excel. Vui lòng tải lại trang.");
             }
         }
+    // ==========================================
+    // CƠ CHẾ CHỤP MÀN HÌNH DASHBOARD
+    // ==========================================
+    function takeScreenshot() {
+        const btnText = document.getElementById('statusBannerText');
+        const originalText = btnText.innerText;
+        btnText.innerText = "Đang xử lý ảnh chụp màn hình...";
+        
+        html2canvas(document.querySelector(".main-content"), { 
+            scale: 2, // Tăng độ nét
+            useCORS: true,
+            backgroundColor: "#040711" 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            const dateStr = new Date().toISOString().slice(0,10);
+            link.download = `Dashboard_CSKH_${dateStr}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            btnText.innerText = originalText;
+        });
+    }
+
+    // ==========================================
+    // CƠ CHẾ XUẤT BÁO CÁO WORD THEO MẪU
+    // ==========================================
+    function openWordExportModal() {
+        if (!filteredData || filteredData.length === 0) return alert("Không có dữ liệu để xuất báo cáo!");
+        document.getElementById('wordExportModal').classList.remove('hidden');
+    }
+    function closeWordExportModal() { document.getElementById('wordExportModal').classList.add('hidden'); }
+
+    function handleWordExportSubmit(e) {
+        e.preventDefault();
+        closeWordExportModal();
+        generateWordReport();
+    }
+
+    function generateWordReport() {
+        if (!filteredData || filteredData.length === 0) return;
+        
+        // 1. Lấy dữ liệu Input nhân sự & ngày tháng
+        const hrStatus = document.getElementById('hrStatusInput').value.replace(/\n/g, '<br>');
+        const recommendation = document.getElementById('recommendationInput').value.replace(/\n/g, '<br>');
+        const reporter = document.getElementById('reporterName').value;
+        const startDate = document.getElementById('filterStartDate').value || filteredData[0].date;
+        const endDate = document.getElementById('filterEndDate').value || filteredData[filteredData.length - 1].date;
+        
+        const today = new Date();
+        const reportDateStr = `ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
+
+        // 2. Tính toán số liệu thống kê
+        const days = filteredData.length;
+        let totalCrm = 0, totalCalls = 0, totalMissed = 0, totalZalo = 0, totalZaloNew = 0, totalZaloUnfollow = 0;
+        let totalWebSurvey = 0, sumWebScore = 0, countWebScore = 0, sumCsat = 0, countCsat = 0;
+        
+        let aggregatedCats = {};
+        
+        filteredData.forEach(c => {
+            totalCrm += Number(c.kpi?.crm || 0);
+            totalCalls += Number(c.kpi?.calls || 0);
+            totalMissed += Number(c.kpi?.callsMissed || 0);
+            totalZalo += Number(c.kpi?.zaloMsg || 0);
+            totalZaloNew += Number(c.zaloDetails?.newFollowers || 0);
+            totalZaloUnfollow += Number(c.zaloDetails?.unfollowers || 0);
+            totalWebSurvey += Number(c.surveys?.webCount || 0);
+            
+            let score = parseFloat(String(c.surveys?.webScore || '0').split('/')[0]);
+            if(score > 0) { sumWebScore += score; countWebScore++; }
+            let csat = Number(c.zaloDetails?.csat || 0);
+            if(csat > 0) { sumCsat += csat; countCsat++; }
+
+            if (c.categories) {
+                for (const [key, val] of Object.entries(c.categories)) {
+                    aggregatedCats[key] = (aggregatedCats[key] || 0) + Number(val || 0);
+                }
+            }
+        });
+
+        // 3. Xử lý danh mục & Top 5
+        let sortedCats = Object.keys(aggregatedCats).map(k => ({ name: k, count: aggregatedCats[k] })).sort((a,b) => b.count - a.count);
+        
+        let top1 = sortedCats[0] || {name: "Không có", count: 0};
+        let top2 = sortedCats[1] || {name: "Không có", count: 0};
+        let pctTop1 = totalCrm > 0 ? ((top1.count / totalCrm) * 100).toFixed(1) : 0;
+        let pctTop2 = totalCrm > 0 ? ((top2.count / totalCrm) * 100).toFixed(1) : 0;
+        let gapMultiplier = top2.count > 0 ? (top1.count / top2.count).toFixed(1) : 0;
+
+        // Generate Bảng HTML
+        let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+            <tr style="background-color: #f2f2f2;"><th>STT</th><th>DANH MỤC</th><th>SỐ LƯỢNG</th><th>TỶ LỆ</th></tr>`;
+        sortedCats.forEach((cat, index) => {
+            let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
+            tableHTML += `<tr><td>${index + 1}</td><td style="text-align: left;">${cat.name}</td><td>${cat.count}</td><td>${pct}%</td></tr>`;
+        });
+        tableHTML += `<tr style="font-weight: bold;"><td></td><td>TỔNG CỘNG</td><td>${totalCrm}</td><td>100%</td></tr></table>`;
+
+        // Cắt ra Top 5 chi tiết
+        let top5HTML = "";
+        sortedCats.slice(0, 5).forEach((cat, index) => {
+            let pct = totalCrm > 0 ? ((cat.count / totalCrm) * 100).toFixed(1) : 0;
+            top5HTML += `<p><b>${String.fromCharCode(97 + index)}. Nhóm ${index + 1}: ${cat.name}</b> (Chiếm ${pct}% khối lượng)</p>
+                         <p><i>Các câu hỏi/yêu cầu thực tế thường gặp: Ghi nhận giải đáp thông tin liên quan đến ${cat.name}...</i></p>`;
+        });
+
+        // 4. Trích xuất biểu đồ thành ảnh base64
+        const trendImg = document.getElementById('trendChart').toDataURL('image/png');
+        const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
+
+        // 5. Xây dựng cấu trúc File Word (dùng chuẩn HTML Word)
+        const htmlContent = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Báo Cáo CSKH</title>
+            <style>
+                body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
+                p { margin: 5px 0; }
+                h1, h2, h3 { text-align: center; }
+            </style>
+            </head>
+            <body>
+                <table style="width: 100%; text-align: center; border: none;">
+                    <tr>
+                        <td style="width: 40%;"><b>CÔNG TY CP CẢNG HẢI PHÒNG<br>TRUNG TÂM KHAI THÁC & DVKH</b><br>Số: ........ /BC-KTDVKH</td>
+                        <td style="width: 60%;"><b>CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập – Tự do – Hạnh phúc</b><br><i>Hải Phòng, ${reportDateStr}</i></td>
+                    </tr>
+                </table>
+                
+                <h2 style="margin-top: 20px;">BÁO CÁO HOẠT ĐỘNG CHĂM SÓC KHÁCH HÀNG 24/7</h2>
+                <p style="text-align: center;">Thời gian báo cáo: Từ ngày <b>${startDate}</b> đến ngày <b>${endDate}</b></p>
+                
+                <h3>I. HIỆN TRẠNG VẬN HÀNH TẠI TRUNG TÂM</h3>
+                
+                <p><b>1. Các vấn đề tiếp nhận</b></p>
+                <p>Trung tâm đã tiếp nhận và xử lý tổng cộng <b>${totalCrm}</b> yêu cầu của khách hàng được ghi nhận trên CRM. Trong đó, nhóm yêu cầu nhiều nhất là <b>"${top1.name}"</b> chiếm tới ${top1.count} yêu cầu (tương đương ${pctTop1}% tổng khối lượng), gấp ${gapMultiplier} lần nhóm đứng thứ hai là "${top2.name}" (với ${top2.count} yêu cầu – tương đương ${pctTop2}%).</p>
+                <p>Bình quân yêu cầu trong các ngày lọc: <b>${(totalCrm/days).toFixed(1)} yêu cầu/ngày</b>.</p>
+                
+                <br>
+                ${tableHTML}
+                <br>
+                
+                <p><b>Biểu đồ xu hướng và Top vấn đề:</b></p>
+                <div style="text-align:center;">
+                    <img src="${trendImg}" style="width: 500px; height: auto;" />
+                    <br><br>
+                    <img src="${categoryImg}" style="width: 400px; height: auto;" />
+                </div>
+                
+                <br>
+                <p><b>Top 5 các nhóm có lượng tiếp nhận nhiều nhất:</b></p>
+                ${top5HTML}
+                
+                <br>
+                <p><b>2. Vận hành Tổng đài 1800.5555.22</b></p>
+                <p>- Số cuộc gọi tiếp nhận: <b>${totalCalls}</b> cuộc (Trung bình ${(totalCalls/days).toFixed(1)} cuộc/ngày)</p>
+                <p>- Cuộc gọi bỏ lỡ: <b>${totalMissed}</b> cuộc.</p>
+                <p>- Tỷ lệ tiếp nhận chung: <b>${totalCalls > 0 ? (((totalCalls-totalMissed)/totalCalls)*100).toFixed(1) : 0}%</b></p>
+                
+                <br>
+                <p><b>3. Vận hành Kênh ZALO OA</b></p>
+                <p>- Tổng số người quan tâm hiện tại: <b>${filteredData[filteredData.length - 1]?.zaloDetails?.totalFollowers || 0}</b> người.</p>
+                <p>- Số người quan tâm mới trong kỳ: <b>${totalZaloNew}</b> người.</p>
+                <p>- Số người bỏ quan tâm: <b>${totalZaloUnfollow}</b> người.</p>
+                <p>- Tổng số tin nhắn tiếp nhận: <b>${totalZalo}</b> tin nhắn.</p>
+                
+                <br>
+                <p><b>4. Đo lường chỉ số hài lòng khách hàng (CSAT/Web)</b></p>
+                <p>- Lượt khảo sát Web: <b>${totalWebSurvey}</b> lượt (Điểm TB: ${countWebScore > 0 ? (sumWebScore/countWebScore).toFixed(1) : 0}/50).</p>
+                <p>- Tỷ lệ hài lòng Zalo (CSAT): <b>${countCsat > 0 ? (sumCsat/countCsat * 100).toFixed(1) : 0}%</b>.</p>
+
+                <br>
+                <p><b>5. Tình hình Nhân lực trực Tổng đài</b></p>
+                <p>${hrStatus}</p>
+
+                <br>
+                <h3>II. ĐỀ XUẤT VÀ KIẾN NGHỊ</h3>
+                <p>${recommendation || 'Không có.'}</p>
+
+                <br><br>
+                <table style="width: 100%; text-align: center; border: none; margin-top: 30px;">
+                    <tr>
+                        <td style="width: 50%;"></td>
+                        <td style="width: 50%;">
+                            <b>Người lập báo cáo</b><br>
+                            <i>(Ký, ghi rõ họ tên)</i><br><br><br><br>
+                            <b>${reporter}</b>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `;
+
+        // Xuất ra định dạng DOC
+        const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Bao_Cao_Hoat_Dong_CSKH_${startDate.replace(/\//g,'-')}.doc`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
     </script>
 </body>
 </html>
