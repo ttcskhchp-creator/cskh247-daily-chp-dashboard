@@ -1165,30 +1165,72 @@
             document.getElementById('kpiCallsMissed').innerText = `Lỡ: ${totalMissed.toLocaleString('vi-VN')}`;
             document.getElementById('kpiCallsAnswered').innerText = `Nhấc: ${aggregateAnswerRate.toFixed(1)}%`;
 
-            // 4. Survey & Đánh giá NPS chi tiết
+           // 4. Survey & Đánh giá NPS chi tiết (Có cơ chế Fallback lùi tháng)
             let allSurveys = [];
-            let oldTotalCount = 0; // Để tương thích với dữ liệu cũ chưa có list
-            
+            let oldTotalCount = 0; 
+
+            // Bước A: Cố gắng lấy dữ liệu khảo sát trong khoảng thời gian lọc (filteredData)
             filteredData.forEach(c => {
-                if (c.surveys?.list) {
+                if (c.surveys?.list && c.surveys.list.length > 0) {
                     allSurveys.push(...c.surveys.list);
                 } else if (c.surveys?.webCount) {
                     oldTotalCount += Number(c.surveys.webCount);
                 }
             });
+
+            // Bước B: LOGIC FALLBACK - Nếu khoảng lọc hiện tại KHÔNG CÓ khảo sát nào
+            let isFallback = false;
+            let fallbackMonthStr = "";
             
+            if (allSurveys.length === 0 && oldTotalCount === 0 && database.length > 0) {
+                let lastSurveyRecord = null;
+                // Quét ngược database (từ mới nhất -> cũ nhất) tìm ngày gần nhất có Khảo sát
+                for (let i = database.length - 1; i >= 0; i--) {
+                    if ((database[i].surveys?.list && database[i].surveys.list.length > 0) || Number(database[i].surveys?.webCount) > 0) {
+                        lastSurveyRecord = database[i];
+                        break;
+                    }
+                }
+                
+                if (lastSurveyRecord) {
+                    isFallback = true;
+                    let parts = lastSurveyRecord.date.split('/'); // DD/MM/YYYY
+                    fallbackMonthStr = `${parts[1]}/${parts[2]}`; // Lấy MM/YYYY
+                    
+                    // Gom toàn bộ dữ liệu của cái tháng cũ đó để tính trung bình
+                    database.forEach(c => {
+                        if (c.date.endsWith(fallbackMonthStr)) {
+                            if (c.surveys?.list && c.surveys.list.length > 0) {
+                                allSurveys.push(...c.surveys.list);
+                            } else if (c.surveys?.webCount) {
+                                oldTotalCount += Number(c.surveys.webCount);
+                            }
+                        }
+                    });
+                }
+            }
+
             let totalWebSurvey = allSurveys.length > 0 ? allSurveys.length : oldTotalCount;
+            
+            // Cập nhật UI Tiêu đề Thẻ: Nhắc nhở người dùng nếu đang xem số liệu lùi tháng
+            let cardHeader = document.getElementById('cardSurvey').querySelector('.flex.justify-between.items-center.text-slate-400 span:first-child');
+            if (isFallback) {
+                cardHeader.innerHTML = `<i class="fa-solid fa-star text-yellow-500 text-sm"></i> Khảo sát KH (T${fallbackMonthStr})`;
+                cardHeader.classList.add('text-amber-500'); // Đổi màu xíu để phân biệt
+            } else {
+                cardHeader.innerHTML = `<i class="fa-solid fa-star text-yellow-500 text-sm"></i> Khảo sát KH`;
+                cardHeader.classList.remove('text-amber-500');
+            }
+            
             document.getElementById('kpiSurveyValue').innerText = totalWebSurvey > 0 ? totalWebSurvey.toLocaleString('vi-VN') : '0';
             
-            // Xử lý 4 thành phần & NPS
+            // Xử lý 4 thành phần & NPS Web (Từ dữ liệu hiện tại HOẶC tháng cũ gần nhất)
             if (allSurveys.length > 0) {
                 let tS = 0, tP = 0, tQ = 0, tA = 0, promo = 0, detra = 0;
-                
                 allSurveys.forEach(s => {
                     tS += s.safety || 0; tP += s.price || 0; tQ += s.quality || 0; tA += s.attitude || 0;
-                    if (s.nps >= 9) promo++; else if (s.nps <= 6) detra++; // 9-10 ủng hộ, 0-6 phê bình
+                    if (s.nps >= 9) promo++; else if (s.nps <= 6) detra++;
                 });
-                
                 let len = allSurveys.length;
                 let npsWeb = ((promo - detra) / len) * 100;
                 
@@ -1199,7 +1241,7 @@
                 document.getElementById('kpiWebScore').innerText = `--%`;
             }
 
-            // Tính CSAT Zalo trung bình động
+            // Bước C: Tính CSAT Zalo (Tuyệt đối bám sát FilteredData, KHÔNG lùi tháng)
             let csatZaloSum = 0; let csatZaloCount = 0;
             filteredData.forEach(c => {
                 let val = Number(c.zaloDetails?.csat || 0);
