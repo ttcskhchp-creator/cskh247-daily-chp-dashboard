@@ -1788,7 +1788,63 @@
             });
             if(!feedbackListHTML) feedbackListHTML = `<p style="margin-left: 40px; font-style: italic;">(Không có góp ý văn bản nào trong kỳ)</p>`;
 
-           // Lấy ảnh biểu đồ
+           // ==========================================
+            // XỬ LÝ DỮ LIỆU SỰ CỐ VẬN HÀNH TRONG KỲ LỌC
+            // ==========================================
+            const sDateFilter = startDateStr || (filteredData.length > 0 ? toYMDString(filteredData[0].date) : '');
+            const eDateFilter = endDateStr || (filteredData.length > 0 ? toYMDString(filteredData[filteredData.length - 1].date) : '');
+
+            // Lọc các sự cố nằm trong khoảng thời gian đang chọn
+            const reportIncidents = incidentsList.filter(inc => {
+                const d = inc.date; // định dạng YYYY-MM-DD
+                if (!d) return false;
+                if (sDateFilter && d < sDateFilter) return false;
+                if (eDateFilter && d > eDateFilter) return false;
+                return true;
+            }).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+            let totalIncidentHours = reportIncidents.reduce((sum, item) => sum + (Number(item.totalHours) || 0), 0);
+
+            // Tạo nội dung bảng sự cố
+            let incidentHTML = "";
+            if (reportIncidents.length > 0) {
+                incidentHTML = `
+                    <p style="margin-left: 20px;">Trong kỳ báo cáo, ghi nhận tổng cộng <b>${reportIncidents.length}</b> vụ việc/sự cố kỹ thuật & vận hành làm gián đoạn với tổng thời gian ảnh hưởng là <b>${totalIncidentHours.toFixed(1)} giờ</b>:</p>
+                    <table border="1" style="border-collapse: collapse; width: 100%; text-align: center; border: 1pt solid black; margin: 10px 0 15px 0; font-size: 11pt;">
+                        <tr style="background-color: #f2f2f2; font-weight: bold;">
+                            <td style="padding: 6px; width: 6%;">STT</td>
+                            <td style="padding: 6px; width: 15%;">Ngày phát sinh</td>
+                            <td style="padding: 6px; width: 15%;">Ngày khắc phục</td>
+                            <td style="padding: 6px; width: 11%;">Tổng giờ</td>
+                            <td style="padding: 6px; width: 18%;">Đơn vị / Bộ phận</td>
+                            <td style="padding: 6px; text-align: left; width: 35%;">Nội dung sự cố & biện pháp khắc phục</td>
+                        </tr>`;
+                
+                reportIncidents.forEach((inc, idx) => {
+                    const fD = d => d ? d.split('-').reverse().join('/') : '--';
+                    incidentHTML += `
+                        <tr>
+                            <td style="padding: 5px;">${idx + 1}</td>
+                            <td style="padding: 5px;">${fD(inc.date)}</td>
+                            <td style="padding: 5px;">${fD(inc.resolvedDate)}</td>
+                            <td style="padding: 5px; font-weight: bold; color: #b91c1c;">${inc.totalHours || 0}h</td>
+                            <td style="padding: 5px; font-weight: 500;">${inc.unit || '--'}</td>
+                            <td style="padding: 5px; text-align: left;">${inc.content || '--'}</td>
+                        </tr>`;
+                });
+
+                incidentHTML += `
+                        <tr style="font-weight: bold; background-color: #fafafa;">
+                            <td colspan="3" style="padding: 5px; text-align: right;">TỔNG THỜI GIAN ẢNH HƯỞNG:</td>
+                            <td style="padding: 5px; color: #b91c1c;">${totalIncidentHours.toFixed(1)}h</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </table>`;
+            } else {
+                incidentHTML = `<p style="margin-left: 20px; font-style: italic;">Trong kỳ báo cáo, các hệ thống công nghệ thông tin và quy trình vận hành tại Trung tâm hoạt động ổn định, thông suốt; không phát sinh sự cố kỹ thuật hay gián đoạn dịch vụ.</p>`;
+            }
+       
+            // Lấy ảnh biểu đồ
             const trendImg = document.getElementById('trendChart').toDataURL('image/png');
             const categoryImg = document.getElementById('categoryChart').toDataURL('image/png');
 
@@ -1879,7 +1935,11 @@
                     ${feedbackListHTML}
 
                     <br>
-                    <p><b>5. Tình hình Nhân lực trực Tổng đài</b></p>
+                    <p><b>5. Nhật ký và tình hình xử lý sự cố vận hành</b></p>
+                    ${incidentHTML}
+
+                    <br>
+                    <p><b>6. Tình hình Nhân lực trực Tổng đài</b></p>
                     <p style="margin-left: 20px;">${hrStatus}</p>
 
                     <br>
