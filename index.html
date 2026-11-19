@@ -1630,9 +1630,36 @@
             });
             document.getElementById('kpiCsatZalo').innerText = csatZaloCount > 0 ? `${((csatZaloSum / csatZaloCount) * 100).toFixed(1)}%` : `--%`;
             
-            // 5. Thời gian thoại TB
-            let avgTalkTime = filteredData.reduce((a, c) => a + Number(c.kpi?.talkTime || 0), 0) / days;
-            let avgWaitTime = filteredData.reduce((a, c) => a + Number(c.kpi?.waitTime || 0), 0) / days;
+            // 5. Thời gian thoại TB & Thời gian chờ TB (Tính trung bình có trọng số theo số cuộc gọi)
+            let weightedTalkSum = 0;
+            let totalAcceptedForTalk = 0;
+            let weightedWaitSum = 0;
+            let totalCallsForWait = 0;
+
+            filteredData.forEach(c => {
+                const cCalls = Number(c.kpi?.calls || 0);
+                const cRate = Number(c.kpi?.callsRate || 0);
+                // Ưu tiên lấy callsAccepted nếu có, nếu bản ghi cũ chưa lưu thì suy ngược từ calls * callsRate
+                const cAccepted = c.kpi?.callsAccepted !== undefined
+                    ? Number(c.kpi.callsAccepted)
+                    : Math.round(cCalls * (cRate / 100));
+
+                const cTalk = Number(c.kpi?.talkTime || 0);
+                const cWait = Number(c.kpi?.waitTime || 0);
+
+                if (cAccepted > 0 && cTalk > 0) {
+                    weightedTalkSum += cTalk * cAccepted;
+                    totalAcceptedForTalk += cAccepted;
+                }
+                if (cCalls > 0 && cWait > 0) {
+                    weightedWaitSum += cWait * cCalls;
+                    totalCallsForWait += cCalls;
+                }
+            });
+
+            let avgTalkTime = totalAcceptedForTalk > 0 ? (weightedTalkSum / totalAcceptedForTalk) : 0;
+            let avgWaitTime = totalCallsForWait > 0 ? (weightedWaitSum / totalCallsForWait) : 0;
+
             document.getElementById('kpiTalkTime').innerText = `${avgTalkTime.toFixed(1)}s`;
             document.getElementById('kpiWaitTime').innerText = `${avgWaitTime.toFixed(1)}s`;
             
