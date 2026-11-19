@@ -152,10 +152,22 @@
         .sidebar:hover .btn-text { opacity:1; transform:translateX(0); }
         .main-content { margin-left:72px; transition: margin-left .3s cubic-bezier(.4,0,.2,1); width:calc(100% - 72px); }
 
-        .sidebar-logo-container { height:48px; transition: all .3s cubic-bezier(.4,0,.2,1); }
-        .sidebar:hover .sidebar-logo-container { height:180px; }
-        .logo-box { transform:scale(.65); transition: all .3s cubic-bezier(.4,0,.2,1); background: var(--surface-solid) !important; border:1px solid var(--border); }
-        .sidebar:hover .logo-box { transform:scale(1); box-shadow:0 0 20px rgba(6,182,212,.35), inset 0 0 12px rgba(6,182,212,.20); border:2px solid rgba(6,182,212,.85); }
+      .sidebar-logo-container { height: 54px; transition: all .3s cubic-bezier(.4,0,.2,1); }
+        .sidebar:hover .sidebar-logo-container { height: 192px; }
+        .logo-box {
+            width: 78px; height: 68px; border-radius: 16px;
+            transform: scale(.62); transition: all .3s cubic-bezier(.4,0,.2,1);
+            background: #ffffff !important;
+            border: 1.5px solid rgba(var(--ac-rgb), .45);
+            box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .45);
+            padding: 4px 6px; overflow: hidden;
+        }
+        .sidebar:hover .logo-box {
+            transform: scale(1);
+            box-shadow: 0 0 22px rgba(var(--ac-rgb), .55), 0 4px 12px rgba(0, 0, 0, .25);
+            border: 2px solid var(--ac-500);
+        }
+        .logo-box img, .logo-box svg { width: 100%; height: 100%; object-fit: contain; display: block; }
         .badge-glow { box-shadow:0 0 12px rgba(234,179,8,.45); background:linear-gradient(90deg,#ca8a04,#fde047,#ca8a04); color:#451a03; }
 
         header {
@@ -307,9 +319,37 @@
         <div class="px-2 w-full flex flex-col items-center sidebar-logo-container mb-4">
             <p class="btn-text text-[9px] text-slate-400 tracking-[0.15em] uppercase mb-3 font-semibold">Operations & Customer Service</p>
             
-            <div class="logo-box w-16 h-16 rounded-[20px] bg-slate-950 flex items-center justify-center text-3xl text-cyan-400 relative mb-3">
-                <i class="fa-solid fa-ship relative z-10"></i>
-                <i class="fa-solid fa-boxes-stacked absolute text-[12px] text-rose-500 top-[18px] right-[14px] z-20 drop-shadow-md"></i>
+            <div class="logo-box flex items-center justify-center relative mb-3" title="Công ty CP Cảng Hải Phòng - Since 1874">
+                <img src="logo-chp.png" alt="Logo Cảng Hải Phòng" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <svg style="display:none;" viewBox="0 0 220 180" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Cảng Hải Phòng">
+                    <defs>
+                        <linearGradient id="chpOval" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#0ea5e9"/>
+                            <stop offset="45%" stop-color="#1d56a5"/>
+                            <stop offset="100%" stop-color="#082454"/>
+                        </linearGradient>
+                        <path id="sinceArc" d="M 48,46 A 78,48 0 0,1 172,46" />
+                    </defs>
+                    <text font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="16" fill="#1d56a5" letter-spacing="1.2">
+                        <textPath href="#sinceArc" startOffset="50%" text-anchor="middle">Since 1874</textPath>
+                    </text>
+                    <ellipse cx="110" cy="96" rx="84" ry="54" fill="url(#chpOval)" stroke="#0b3470" stroke-width="2"/>
+                    <ellipse cx="110" cy="96" rx="79" ry="49" fill="none" stroke="#ffffff" stroke-width="2.2"/>
+                    <path d="M68 53 V64 M90 53 V64" stroke="#ffffff" stroke-width="2.5"/>
+                    <rect x="73" y="54" width="12" height="7" rx="1.5" fill="#ffffff"/>
+                    <polygon points="62,67 79,59 96,67 96,79 79,86 62,79" fill="#ffffff" stroke="#082454" stroke-width="1.5"/>
+                    <circle cx="79" cy="73" r="6" fill="none" stroke="#082454" stroke-width="2.5"/>
+                    <polygon points="136,86 140,60 144,60 148,86" fill="#ffffff" stroke="#082454" stroke-width="1.2"/>
+                    <circle cx="142" cy="59" r="3" fill="#ffffff"/>
+                    <polygon points="136,59 112,54 112,64" fill="#ffffff"/>
+                    <polygon points="148,59 172,54 172,64" fill="#ffffff"/>
+                    <path d="M88,87 H72 C55,87 48,96 48,108 C48,120 56,128 72,128 H88 V115 H74 C69,115 66,112 66,108 C66,104 69,101 74,101 H88 Z" fill="#ffffff" stroke="#082454" stroke-width="1.5"/>
+                    <path d="M93,87 H110 V101 H118 V87 H135 V128 H118 V114 H110 V128 H93 Z" fill="#ffffff" stroke="#082454" stroke-width="1.5"/>
+                    <path d="M139,87 H167 C177,87 182,93 182,102 C182,111 176,117 166,117 H156 V128 H139 Z M156,99 V105 H163 C166,105 167,104 167,102 C167,100 166,99 163,99 Z" fill="#ffffff" stroke="#082454" stroke-width="1.5"/>
+                    <line x1="48" y1="134" x2="172" y2="134" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                    <text x="190" y="150" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#1d56a5">®</text>
+                    <text x="110" y="170" text-anchor="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="16.5" letter-spacing="0.8" fill="#1d56a5">PORT OF HAI PHONG</text>
+                </svg>
             </div>
             
             <h2 class="btn-text text-[15px] font-black text-white uppercase tracking-wider mb-2">Cảng Hải Phòng</h2>
