@@ -171,10 +171,22 @@
         .badge-glow { box-shadow:0 0 12px rgba(234,179,8,.45); background:linear-gradient(90deg,#ca8a04,#fde047,#ca8a04); color:#451a03; }
 
         header {
-            background-color: var(--chrome) !important; border-bottom: 1px solid var(--border) !important;
-            background-image: var(--art-wave); background-repeat: no-repeat; background-position: right 12% center; background-size: auto 150%;
+            overflow: hidden;
+            background-color: var(--chrome) !important;
+            border-bottom: 1px solid var(--border) !important;
             box-shadow: 0 1px 0 var(--border-soft);
         }
+        header::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+            background: var(--art-skyline) no-repeat right 16px bottom -4px / auto 115%;
+            opacity: 0.08;
+            -webkit-mask-image: linear-gradient(to left, #000 35%, transparent 90%);
+            mask-image: linear-gradient(to left, #000 35%, transparent 90%);
+        }
+        html:not(.dark) header::before { filter: hue-rotate(var(--art-hue)); }
+        html.dark header::before { filter: invert(1) hue-rotate(calc(180deg + var(--art-hue))); opacity: 0.10; }
+        header > * { position: relative; z-index: 1; }
+
         footer {
             position: relative; overflow: hidden;
             background-color: var(--chrome) !important; border-top: 1px solid var(--border) !important;
@@ -186,8 +198,7 @@
         html:not(.dark) footer::before { filter: hue-rotate(var(--art-hue)); }
         html.dark footer::before { filter: invert(1) hue-rotate(calc(180deg + var(--art-hue))); }
         footer > * { position: relative; }
-        html:not(.dark) header::before { content:none; }
-
+        
         /* ---- bộ chọn chủ đề ---- */
         .theme-switcher { display:flex; align-items:center; gap:.6rem; padding:.3rem .45rem .3rem .7rem; border-radius:9999px;
             background: var(--surface-2); border:1px solid var(--border); }
